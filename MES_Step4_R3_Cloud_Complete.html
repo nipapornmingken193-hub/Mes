@@ -652,6 +652,7 @@ select{appearance:auto}
 ☁️ Cloud Synced: <b id="cloudSyncCount" style="color:var(--accent2)">0</b><br>
 ⏳ Pending: <b id="pendingSyncCount" style="color:var(--yellow)">0</b>
 </div>
+<button onclick="clearLocalRecords()" style="margin-top:8px;width:100%;padding:8px;border:1px solid var(--red);background:rgba(239,68,68,.1);color:var(--red);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ ล้าง Local Records (ขึ้น Shift ใหม่)</button>
 </div>
 
 <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;margin-bottom:10px">
@@ -1325,11 +1326,11 @@ function cloudGET(url, callback, errback, _retry){
   }catch(e){ errback(e.message); }
 }
 
-function cloudPOST(url, payload, callback, errback){
+function cloudPOST(url, payload, callback, errback, _retry){
   try{
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
-    xhr.timeout = 20000;
+    xhr.timeout = 45000;
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
         if(xhr.status >= 200 && xhr.status < 400){
@@ -1338,8 +1339,14 @@ function cloudPOST(url, payload, callback, errback){
         }else{ errback('HTTP ' + xhr.status); }
       }
     };
-    xhr.ontimeout = function(){ errback('Timeout (20s) - ลองใหม่อีกครั้ง'); };
-    xhr.onerror = function(){ errback('Network error - ตรวจสอบ internet'); };
+    xhr.ontimeout = function(){
+      if(!_retry){ setTimeout(function(){ cloudPOST(url, payload, callback, errback, true); }, 3000); }
+      else{ errback('Timeout — Apps Script ไม่ตอบสนอง กรุณาลองอีกครั้ง'); }
+    };
+    xhr.onerror = function(){
+      if(!_retry){ setTimeout(function(){ cloudPOST(url, payload, callback, errback, true); }, 3000); }
+      else{ errback('Network error - ตรวจสอบ internet'); }
+    };
     xhr.send(JSON.stringify(payload));
   }catch(e){ errback(e.message); }
 }
@@ -1383,66 +1390,86 @@ function testCloudConnection(){
 
 function syncToCloud(){
   var url = localStorage.getItem('mes_apps_script_url');
-  if(!url){
-    alert('❌ กรุณา Save Config ก่อน (Tab ☁️ Cloud)');
-    return;
-  }
-  
+  if(!url){ alert('❌ กรุณา Save Config ก่อน (Tab ☁️ Cloud)'); return; }
+
   var recs = [];
   try{ recs = JSON.parse(localStorage.getItem('mes_r1') || '[]'); }catch(e){}
-  
-  if(recs.length === 0){
-    alert('📭 ไม่มีข้อมูลใน localStorage');
+  if(recs.length === 0){ alert('📭 ไม่มีข้อมูลใน localStorage'); return; }
+
+  // ส่งเฉพาะ record ที่ยังไม่ได้ sync (_synced !== true)
+  var pending = recs.filter(function(r){ return !r._synced; });
+  if(pending.length === 0){
+    alert('✅ ทุก record sync แล้ว (' + recs.length + ' รายการ)');
     return;
   }
-  
+
   var data = {
     machineID: machineID_cloud,
     timestamp: new Date().toISOString(),
-    recordCount: recs.length,
-    records: recs,
+    recordCount: pending.length,
+    records: pending,
     source: 'Step4_R2_Cloud_Manual'
   };
-  
+
   var t=document.getElementById('toast');
-  t.textContent='⏳ Syncing ' + recs.length + ' records...';
-  t.style.background='var(--yellow)';
-  t.style.color='#111';
+  t.textContent='⏳ Syncing ' + pending.length + '/' + recs.length + ' records...';
+  t.style.background='var(--yellow)'; t.style.color='#111';
   t.classList.add('show');
-  
+
   cloudPOST(url, data, function(result){
     if(result.status === 'success'){
-      cloudSyncCount = recs.length;
+      // Mark ว่า synced แล้ว — ป้องกัน duplicate เมื่อกด Backup ซ้ำ
+      var tsSet = {};
+      pending.forEach(function(r){ if(r.ts) tsSet[r.ts] = true; });
+      recs.forEach(function(r){ if(r.ts && tsSet[r.ts]) r._synced = true; });
+      localStorage.setItem('mes_r1', JSON.stringify(recs));
+
+      cloudSyncCount = recs.filter(function(r){ return r._synced; }).length;
       localStorage.setItem('mes_cloud_sync_count', cloudSyncCount.toString());
       localStorage.setItem('mes_last_sync', new Date().toISOString());
-      
-      t.textContent='✅ Synced ' + recs.length + ' records to Cloud!';
-      t.style.background='var(--green)';
-      t.style.color='#fff';
-      
+
+      t.textContent='✅ Synced ' + pending.length + ' records! (skipped: '+(result.message||'').match(/\d+/g)?.[1]||0+' dup)';
+      t.style.background='var(--green)'; t.style.color='#fff';
       document.getElementById('lastSyncTime').textContent = new Date().toLocaleTimeString('th-TH');
       updateCloudStats();
     }else{
       t.textContent='❌ Sync failed: ' + result.message;
-      t.style.background='var(--red)';
-      t.style.color='#fff';
+      t.style.background='var(--red)'; t.style.color='#fff';
     }
     setTimeout(function(){t.classList.remove('show');t.style.background='var(--green)';t.style.color='#fff';},3000);
   }, function(err){
     t.textContent='❌ Connection error: ' + err;
-    t.style.background='var(--red)';
-    t.style.color='#fff';
+    t.style.background='var(--red)'; t.style.color='#fff';
     setTimeout(function(){t.classList.remove('show');t.style.background='var(--green)';t.style.color='#fff';},3000);
   });
+}
+
+function clearLocalRecords(){
+  var recs = [];
+  try{ recs = JSON.parse(localStorage.getItem('mes_r1') || '[]'); }catch(e){}
+  var synced = recs.filter(function(r){ return r._synced; }).length;
+  var pending = recs.length - synced;
+  var msg = 'ล้าง Local Records ทั้งหมด?\n\n' +
+    '📊 รวม: ' + recs.length + ' รายการ\n' +
+    '✅ Synced แล้ว: ' + synced + ' รายการ\n' +
+    '⏳ ยังไม่ได้ Sync: ' + pending + ' รายการ';
+  if(pending > 0) msg += '\n\n⚠️ มี ' + pending + ' รายการที่ยังไม่ได้ Backup!\nแนะนำกด Backup Now ก่อน';
+  if(!confirm(msg)) return;
+  localStorage.removeItem('mes_r1');
+  localStorage.removeItem('mes_cloud_sync_count');
+  updateCloudStats();
+  var t=document.getElementById('toast');
+  t.textContent='🗑️ ล้าง Local Records แล้ว';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
 }
 
 function updateCloudStats(){
   var recs = [];
   try{ recs = JSON.parse(localStorage.getItem('mes_r1') || '[]'); }catch(e){}
-  var synced = parseInt(localStorage.getItem('mes_cloud_sync_count') || '0');
+  var synced = recs.filter(function(r){ return r._synced; }).length;
   var pending = recs.length - synced;
-  if(pending < 0) pending = 0;
-  
+
   var el1 = document.getElementById('localRecordCount');
   var el2 = document.getElementById('cloudSyncCount');
   var el3 = document.getElementById('pendingSyncCount');
