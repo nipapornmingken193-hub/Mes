@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MES Step 2 - WIP Raw Material Max-Min R2 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--amber:#d97706}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:12px 14px;border-bottom:2px solid var(--amber);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800;color:#fcd34d}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.flow-bar{background:var(--card);padding:8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px;position:sticky;top:54px;z-index:99}
+.flow-bar::-webkit-scrollbar{display:none}
+.flow-step{flex:0 0 auto;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--amber);color:#fff;border-color:var(--amber)}
+.flow-step.done{background:#10b98130;color:var(--green);border-color:#10b98140}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:96px;z-index:98}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:7px 11px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--amber);color:#fff;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#fcd34d;margin-bottom:10px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--amber)}
+input[type="number"]{text-align:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-m{background:var(--amber)}.btn-a{background:var(--accent)}.btn-g{background:var(--green)}.btn-r{background:var(--red)}.btn-d{background:var(--border)}
+.btn:active{transform:scale(.97)}
+.kpi{border-radius:var(--r);padding:12px;text-align:center}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:24px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.kpi-g{background:#10b98115;border:1px solid #10b98140}.kpi-r{background:#ef444415;border:1px solid #ef444440}.kpi-y{background:#f59e0b15;border:1px solid #f59e0b40}.kpi-m{background:#d9770615;border:1px solid #d9770640}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(217,119,6,.1)}
+.tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px}
+.tbl input{padding:5px 4px;font-size:12px;min-width:55px;text-align:center}
+.alert-banner{background:linear-gradient(135deg,#ef444420,#ef444410);border:2px solid var(--red);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.alert-banner.warn{background:linear-gradient(135deg,#f59e0b20,#f59e0b10);border-color:var(--yellow)}
+.alert-banner.ok{background:linear-gradient(135deg,#10b98120,#10b98110);border-color:var(--green)}
+.alert-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.tc{display:none}.tc.active{display:block}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.import-box{background:linear-gradient(135deg,#d9770610,#d9770605);border:2px dashed var(--amber);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer}
+.import-box:hover{background:rgba(217,119,6,.1)}
+.import-box.has-file{background:rgba(16,185,129,.1);border-color:var(--green)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge-ok{background:#10b98130;color:var(--green)}.badge-low{background:#f59e0b30;color:var(--yellow)}.badge-crit{background:var(--red);color:#fff}
+@media(max-width:400px){.g3{grid-template-columns:1fr 1fr}.card{padding:10px;margin:6px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ บันทึกสำเร็จ!</div>
+
+<div class="topbar">
+<div><div class="topbar-title">🏗️ MES Step 2 — WIP Raw Material R2 Cloud</div><div class="topbar-sub">Vandapac Co., Ltd. — ☁️ Google Sheets Sync</div></div>
+<div style="text-align:right"><div id="dd" style="font-weight:700;font-size:12px"></div><div style="font-size:10px;color:var(--amber)">Connected to Step 1</div></div>
+</div>
+
+<div class="flow-bar">
+<div class="flow-step done">0️⃣ Production Plan ✓</div>
+<div class="flow-step done">1️⃣ Raw Material In ✓</div>
+<div class="flow-step active">2️⃣ WIP Raw Material ◀ ตอนนี้</div>
+<div class="flow-step">3️⃣ Production Readiness</div>
+<div class="flow-step done">4️⃣ Production Record ✓</div>
+<div class="flow-step done">5️⃣ WIP Max-Min ✓</div>
+<div class="flow-step done">6️⃣ Route Distribution ✓</div>
+<div class="flow-step done">7️⃣ WIP & WHL Rollup ✓</div>
+</div>
+
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📥 Import จาก Step 1</button>
+<button class="nav-btn" onclick="showTab(2)">⚙️ Max-Min Setup</button>
+<button class="nav-btn" onclick="showTab(3)">📊 Stock Status</button>
+<button class="nav-btn" onclick="showTab(4)">⚠️ Alert</button>
+<button class="nav-btn" onclick="showTab(5)">📤 Export</button>
+<button class="nav-btn" onclick="showTab(6)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- TAB 1: IMPORT -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📥 Import สต็อกจาก Step 1</div>
+<div class="card-sub">รับยอดวัตถุดิบที่รับเข้า (แยกตามชนิด) จาก Step 1</div>
+<div id="bridgeStatus" class="alert-banner ok" style="display:none">
+<div class="alert-title">🔗 เชื่อมต่อ Step 1 อัตโนมัติ</div>
+<div style="font-size:12px" id="bridgeMsg">รอข้อมูล...</div>
+</div>
+<div class="import-box" id="importBox" onclick="importFromStep1()">
+<div style="font-size:32px;margin-bottom:8px">📦</div>
+<div style="font-weight:700;color:var(--amber)">แตะเพื่อ Import จาก Step 1</div>
+<div style="font-size:11px;color:var(--dim);margin-top:4px">ดึงสต็อกวัตถุดิบล่าสุด</div>
+</div>
+<div class="g2" style="margin-top:12px">
+<div class="kpi kpi-m"><div class="kpi-l">ชนิดวัตถุดิบ</div><div class="kpi-v" id="kpiTypes" style="color:#fcd34d">0</div><div class="kpi-t">types</div></div>
+<div class="kpi kpi-g"><div class="kpi-l">รวมสต็อก</div><div class="kpi-v" id="kpiTotal" style="color:var(--green);font-size:20px">0</div><div class="kpi-t">kg</div></div>
+</div>
+<div style="overflow-x:auto;margin-top:12px">
+<table class="tbl"><thead><tr><th>ชนิดวัตถุดิบ</th><th>สต็อก (kg)</th><th>Status</th></tr></thead>
+<tbody id="importTable"><tr><td colspan="3" style="text-align:center;color:var(--dim);padding:20px">แตะ Import ด้านบน</td></tr></tbody></table>
+</div>
+</div></div>
+
+<!-- TAB 2: MAX-MIN SETUP -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">⚙️ ตั้งค่า Max-Min วัตถุดิบ</div>
+<div class="card-sub">กำหนดจุดสั่งซื้อ (Min) และจุดเต็ม (Max) ของวัตถุดิบแต่ละชนิด</div>
+<div class="f"><label class="fl">เลือกชนิดวัตถุดิบ</label>
+<select id="mmType" onchange="loadMM()"><option value="">-- เลือกชนิด --</option></select>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">🔻 Min Stock (จุดสั่งซื้อ kg)</label><input type="number" id="mmMin" value="0" min="0"></div>
+<div class="f"><label class="fl">🔺 Max Stock (จุดเต็ม kg)</label><input type="number" id="mmMax" value="0" min="0"></div>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">📅 Lead Time (วัน)</label><input type="number" id="mmLead" value="0" min="0" step="0.5"></div>
+<div class="f"><label class="fl">🛡️ Safety Stock (kg)</label><input type="number" id="mmSafety" value="0" min="0"></div>
+</div>
+<button class="btn btn-m" onclick="saveMM()">💾 บันทึก Max-Min</button>
+<div style="margin-top:14px">
+<div style="font-weight:700;color:#fcd34d;font-size:13px;margin-bottom:8px">📋 Max-Min ที่ตั้งค่าแล้ว</div>
+<div style="overflow-x:auto">
+<table class="tbl"><thead><tr><th>ชนิด</th><th>Min</th><th>Max</th><th>Lead</th><th>ลบ</th></tr></thead>
+<tbody id="mmTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มี</td></tr></tbody></table>
+</div>
+</div>
+</div></div>
+
+<!-- TAB 3: STOCK STATUS -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📊 สถานะสต็อกวัตถุดิบ</div>
+<div class="card-sub">เปรียบเทียบสต็อกปัจจุบันกับ Max-Min</div>
+<div style="overflow-x:auto">
+<table class="tbl"><thead><tr><th>ชนิด</th><th>สต็อก</th><th>Min</th><th>Max</th><th>Status</th></tr></thead>
+<tbody id="statusTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">Import + ตั้ง Max-Min ก่อน</td></tr></tbody></table>
+</div>
+</div></div>
+
+<!-- TAB 4: ALERT -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">⚠️ Alert — วัตถุดิบต่ำกว่า Min</div>
+<div class="card-sub">รายการที่ต้องสั่งซื้อเพิ่ม</div>
+<div id="alertList"></div>
+</div></div>
+
+<!-- TAB 5: EXPORT -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title">📤 Export & Bridge to Step 3</div>
+<button class="btn btn-a" style="margin-bottom:8px" onclick="exportCSV()">📥 Export CSV</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="exportJSON()">📥 Export JSON</button>
+<button class="btn btn-m" onclick="bridgeToStep3()">🔗 ส่งความพร้อมวัตถุดิบไป Step 3</button>
+<div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px;font-size:12px;color:var(--dim);line-height:2">
+🧪 ชนิดวัตถุดิบ: <b id="sumTypes" style="color:#fcd34d">0</b><br>
+⚙️ ตั้ง Max-Min: <b id="sumMM" style="color:var(--green)">0</b><br>
+⚠️ ต่ำกว่า Min: <b id="sumAlert" style="color:var(--red)">0</b>
+</div>
+<button class="btn btn-r" style="margin-top:10px" onclick="clearStep2()">🗑️ Clear All</button>
+</div></div>
+
+<!-- TAB 6: CLOUD -->
+<div class="tc" id="tab6"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud — Backup to Google Sheets</div>
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px;color:#10b981;line-height:1.6">
+<b>☁️ Status:</b> <span id="cloudStatus2" style="font-weight:700">Not configured</span><br>
+<b>🔄 Last Backup:</b> <span id="lastBackup2" style="font-weight:700">Never</span>
+</div>
+<div class="f"><label class="fl">🔗 Apps Script URL (same as all steps)</label>
+<input type="text" id="appsScriptURL2" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"></div>
+<div class="g2" style="margin-bottom:10px">
+<button class="btn btn-m" onclick="testCloud2()" style="font-size:12px">🧪 Test</button>
+<button class="btn btn-g" onclick="saveCloud2()" style="font-size:12px">💾 Save</button>
+</div>
+<div id="cloudTest2Result" style="margin-bottom:10px"></div>
+<div style="background:var(--inp);border-radius:8px;padding:12px">
+<button class="btn btn-g" onclick="backupToCloud()">☁️ Backup WIP Material → Google Sheets</button>
+<div id="backupResult2" style="margin-top:8px"></div>
+</div>
+</div></div>
+
+<div class="bn">
+<button class="btn btn-d" id="btnPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button>
+<button class="btn btn-m" id="btnNext" onclick="nextTab()">ถัดไป ▶</button>
+</div>
+
+<script>
+var curTab=1;
+var stock={};   // {type: kg}
+var maxmin={};  // {type: {min, max, lead, safety}}
+
+function init(){
+  document.getElementById('dd').textContent=new Date().toLocaleDateString('th-TH');
+  loadAll();checkBridge();initCloud2();refreshAll();
+}
+function loadAll(){
+  try{stock=JSON.parse(localStorage.getItem('mes_step2_stock')||'{}');}catch(e){}
+  try{maxmin=JSON.parse(localStorage.getItem('mes_step2_maxmin')||'{}');}catch(e){}
+}
+function saveAll(){
+  localStorage.setItem('mes_step2_stock',JSON.stringify(stock));
+  localStorage.setItem('mes_step2_maxmin',JSON.stringify(maxmin));
+}
+
+function checkBridge(){
+  var b=null;try{b=JSON.parse(localStorage.getItem('mes_bridge_step1_to_2')||'null');}catch(e){}
+  if(b&&b.stock&&Object.keys(b.stock).length>0){
+    document.getElementById('bridgeStatus').style.display='block';
+    document.getElementById('bridgeMsg').textContent='พบสต็อก '+Object.keys(b.stock).length+' ชนิดจาก Step 1 — แตะ Import';
+  }
+}
+function importFromStep1(){
+  var b=null;try{b=JSON.parse(localStorage.getItem('mes_bridge_step1_to_2')||'null');}catch(e){}
+  if(!b||!b.stock||Object.keys(b.stock).length===0){toast('📭 ไม่พบข้อมูลจาก Step 1');return;}
+  stock=b.stock;saveAll();refreshAll();
+  document.getElementById('importBox').classList.add('has-file');
+  toast('✅ Import '+Object.keys(stock).length+' ชนิดจาก Step 1');
+}
+
+function loadMM(){
+  var t=document.getElementById('mmType').value;
+  if(t&&maxmin[t]){var m=maxmin[t];document.getElementById('mmMin').value=m.min;document.getElementById('mmMax').value=m.max;document.getElementById('mmLead').value=m.lead;document.getElementById('mmSafety').value=m.safety;}
+}
+function saveMM(){
+  var t=document.getElementById('mmType').value;
+  if(!t){toast('⚠️ เลือกชนิด');return;}
+  maxmin[t]={min:parseFloat(document.getElementById('mmMin').value||0),max:parseFloat(document.getElementById('mmMax').value||0),lead:parseFloat(document.getElementById('mmLead').value||0),safety:parseFloat(document.getElementById('mmSafety').value||0)};
+  saveAll();refreshAll();toast('✅ บันทึก Max-Min '+t);
+}
+function delMM(t){delete maxmin[t];saveAll();refreshAll();toast('🗑️ ลบ '+t);}
+
+function refreshAll(){
+  var typeOpts='<option value="">-- เลือกชนิด --</option>';
+  Object.keys(stock).forEach(function(t){typeOpts+='<option value="'+t+'">'+t+'</option>';});
+  var sel=document.getElementById('mmType');if(sel){var v=sel.value;sel.innerHTML=typeOpts;sel.value=v;}
+  
+  // Tab 1
+  var itHtml='';var total=0;
+  Object.keys(stock).forEach(function(t){total+=stock[t];itHtml+='<tr><td class="lbl">'+t+'</td><td style="text-align:center;color:var(--green);font-weight:700">'+stock[t].toFixed(1)+'</td><td style="text-align:center"><span class="badge badge-ok">รับแล้ว</span></td></tr>';});
+  if(itHtml)document.getElementById('importTable').innerHTML=itHtml;
+  document.getElementById('kpiTypes').textContent=Object.keys(stock).length;
+  document.getElementById('kpiTotal').textContent=total.toFixed(0);
+  
+  // Tab 2
+  var mmHtml='';
+  Object.keys(maxmin).forEach(function(t){var m=maxmin[t];mmHtml+='<tr><td class="lbl">'+t+'</td><td style="text-align:center">'+m.min+'</td><td style="text-align:center">'+m.max+'</td><td style="text-align:center">'+m.lead+'d</td><td style="text-align:center"><button onclick="delMM(\''+t+'\')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';});
+  if(mmHtml)document.getElementById('mmTable').innerHTML=mmHtml;
+  
+  // Tab 3 + alerts
+  var stHtml='';var alertHtml='';var alertCount=0;
+  Object.keys(stock).forEach(function(t){
+    var cur=stock[t];var m=maxmin[t];
+    var status,col,badge;
+    if(!m){status='ยังไม่ตั้ง';col='var(--dim)';badge='<span class="badge" style="background:var(--border);color:var(--dim)">ไม่ตั้ง</span>';}
+    else if(cur<m.min){status='ต่ำกว่า Min';col='var(--red)';badge='<span class="badge badge-crit">สั่งซื้อ!</span>';alertCount++;
+      alertHtml+='<div class="alert-banner" style="margin-bottom:8px"><div class="alert-title" style="font-size:13px">🔴 '+t+'</div><div style="font-size:12px">สต็อก '+cur.toFixed(1)+' kg ต่ำกว่า Min ('+m.min+' kg) → ต้องสั่งซื้อเพิ่ม ~'+(m.max-cur).toFixed(0)+' kg</div></div>';}
+    else if(cur>m.max){status='เกิน Max';col='var(--yellow)';badge='<span class="badge badge-low">เกิน</span>';}
+    else{status='ปกติ';col='var(--green)';badge='<span class="badge badge-ok">OK</span>';}
+    stHtml+='<tr><td class="lbl">'+t+'</td><td style="text-align:center;font-weight:700;color:'+col+'">'+cur.toFixed(1)+'</td><td style="text-align:center">'+(m?m.min:'-')+'</td><td style="text-align:center">'+(m?m.max:'-')+'</td><td style="text-align:center">'+badge+'</td></tr>';
+  });
+  if(stHtml)document.getElementById('statusTable').innerHTML=stHtml;
+  document.getElementById('alertList').innerHTML=alertHtml||'<div class="alert-banner ok"><div class="alert-title">✅ ไม่มี Alert</div><div style="font-size:12px">วัตถุดิบทุกชนิดอยู่ในระดับปกติ</div></div>';
+  
+  // Summary
+  document.getElementById('sumTypes').textContent=Object.keys(stock).length;
+  document.getElementById('sumMM').textContent=Object.keys(maxmin).length;
+  document.getElementById('sumAlert').textContent=alertCount;
+}
+
+function exportCSV(){
+  var csv='Type,Stock(kg),Min,Max,LeadTime,SafetyStock,Status\n';
+  Object.keys(stock).forEach(function(t){var m=maxmin[t]||{};var st=m.min&&stock[t]<m.min?'LOW':'OK';csv+=t+','+stock[t]+','+(m.min||'')+','+(m.max||'')+','+(m.lead||'')+','+(m.safety||'')+','+st+'\n';});
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MES_Step2_WIPRaw_'+new Date().toISOString().split('T')[0]+'.csv';a.click();toast('📥 Export CSV');
+}
+function exportJSON(){var blob=new Blob([JSON.stringify({stock:stock,maxmin:maxmin,exported:new Date().toISOString()},null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MES_Step2_backup.json';a.click();toast('📥 Export JSON');}
+function bridgeToStep3(){
+  var matReady={};
+  Object.keys(stock).forEach(function(t){var m=maxmin[t];matReady[t]={qty:stock[t],ok:m?stock[t]>=m.min:true};});
+  localStorage.setItem('mes_bridge_step2_to_3',JSON.stringify({material:matReady,timestamp:new Date().toISOString(),source:'Step2'}));
+  toast('🔗 ส่งความพร้อมวัตถุดิบไป Step 3');
+}
+function clearStep2(){if(!confirm('ล้างข้อมูล Step 2?'))return;localStorage.removeItem('mes_step2_stock');localStorage.removeItem('mes_step2_maxmin');stock={};maxmin={};refreshAll();toast('🗑️ ล้างแล้ว');}
+
+// CLOUD JSONP
+function cloudGET(url,cb,eb){var n='_jcb_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);var t=setTimeout(function(){if(window[n]){delete window[n];eb('Timeout - ลองใหม่');}},20000);window[n]=function(d){clearTimeout(t);delete window[n];cb(d);};var s=document.createElement('script');s.src=url+(url.indexOf('?')>-1?'&':'?')+'callback='+n;s.onerror=function(){clearTimeout(t);delete window[n];eb('Network error');};document.head.appendChild(s);setTimeout(function(){try{document.head.removeChild(s);}catch(e){}},25000);}
+function cloudPOST(url,p,cb,eb){var d=encodeURIComponent(JSON.stringify(p));if(d.length>7000){eb('Data too large. Use PC.');return;}cloudGET(url+'?action=postData&data='+d,cb,eb);}
+function initCloud2(){var url=localStorage.getItem('mes_apps_script_url');if(url){var e=document.getElementById('appsScriptURL2');if(e)e.value=url;}var lb=localStorage.getItem('mes_step2_last_backup');if(lb){var e2=document.getElementById('lastBackup2');if(e2)e2.textContent=new Date(lb).toLocaleString('th-TH');}}
+function saveCloud2(){var url=document.getElementById('appsScriptURL2').value.trim().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,'');if(!url){alert('กรุณาใส่ URL');return;}localStorage.setItem('mes_apps_script_url',url);document.getElementById('appsScriptURL2').value=url;toast('✅ Saved!');}
+function testCloud2(){var url=localStorage.getItem('mes_apps_script_url');if(!url){document.getElementById('cloudTest2Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}document.getElementById('cloudTest2Result').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';cloudGET(url+'?action=getRecent&limit=1',function(d){if(d.status==='success'){document.getElementById('cloudTest2Result').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';document.getElementById('cloudStatus2').textContent='✅ Connected';document.getElementById('cloudStatus2').style.color='#10b981';}else{document.getElementById('cloudTest2Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';}},function(e){document.getElementById('cloudTest2Result').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+function backupToCloud(){var url=localStorage.getItem('mes_apps_script_url');if(!url){alert('Save Cloud config first');return;}if(Object.keys(stock).length===0){alert('📭 ไม่มีข้อมูล');return;}document.getElementById('backupResult2').innerHTML='<div style="color:#f59e0b;font-size:12px;padding:8px">⏳ Backing up...</div>';var matwipData=Object.keys(stock).map(function(t){var m=maxmin[t]||{};return {type:t,stock:stock[t],min:m.min||0,max:m.max||0,lead:m.lead||0,safety:m.safety||0};});cloudPOST(url,{type:'MATWIP_DATA',machineID:'Step2',timestamp:new Date().toISOString(),matwipData:matwipData},function(result){if(result.status==='success'){document.getElementById('backupResult2').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Backed up '+(result.count||matwipData.length)+' records!</div>';localStorage.setItem('mes_step2_last_backup',new Date().toISOString());document.getElementById('lastBackup2').textContent=new Date().toLocaleString('th-TH');}else{document.getElementById('backupResult2').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+result.message+'</div>';}},function(e){document.getElementById('backupResult2').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+
+function showTab(n){curTab=n;document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});document.getElementById('tab'+n).classList.add('active');document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});document.getElementById('btnPrev').style.display=n>1?'block':'none';var nb=document.getElementById('btnNext');if(n<5){nb.textContent='ถัดไป ▶';nb.className='btn btn-m';nb.onclick=nextTab;}else if(n===5){nb.textContent='🔗 ส่งไป Step 3';nb.className='btn btn-g';nb.onclick=bridgeToStep3;}else{nb.textContent='☁️ Backup';nb.className='btn btn-g';nb.onclick=backupToCloud;}refreshAll();}
+function nextTab(){if(curTab<6)showTab(curTab+1);}
+function prevTab(){if(curTab>1)showTab(curTab-1);}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+init();
+</script>
+</body>
+</html>

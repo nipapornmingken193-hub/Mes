@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MES Step 0 - Production Plan R2 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--purple:#a855f7;--teal:#14b8a6;--indigo:#6366f1;--blue:#3b82f6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:12px 14px;border-bottom:2px solid var(--blue);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800;color:#93c5fd}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.flow-bar{background:var(--card);padding:8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px;position:sticky;top:54px;z-index:99}
+.flow-bar::-webkit-scrollbar{display:none}
+.flow-step{flex:0 0 auto;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.flow-step.done{background:#10b98130;color:var(--green);border-color:#10b98140}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:96px;z-index:98}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:7px 11px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--blue);color:#fff;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#93c5fd;margin-bottom:10px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--blue)}
+input[type="number"]{text-align:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-b{background:var(--blue)}.btn-i{background:var(--indigo)}.btn-t{background:var(--teal)}.btn-a{background:var(--accent)}.btn-g{background:var(--green)}.btn-r{background:var(--red)}.btn-y{background:var(--yellow);color:#111}.btn-d{background:var(--border)}
+.btn:active{transform:scale(.97)}
+.kpi{border-radius:var(--r);padding:12px;text-align:center}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:24px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.kpi-g{background:#10b98115;border:1px solid #10b98140}.kpi-r{background:#ef444415;border:1px solid #ef444440}.kpi-y{background:#f59e0b15;border:1px solid #f59e0b40}.kpi-b{background:#3b82f615;border:1px solid #3b82f640}.kpi-i{background:#6366f115;border:1px solid #6366f140}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(59,130,246,.1);position:sticky;top:0}
+.tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:rgba(59,130,246,.05)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px}
+.tbl .pn{font-size:11px;color:var(--dim)}
+.tbl input{padding:5px 4px;font-size:12px;min-width:60px;text-align:center}
+.status-ok{color:var(--green);font-weight:700}
+.status-low{color:var(--yellow);font-weight:700}
+.status-high{color:var(--red);font-weight:700}
+.alert-banner{background:linear-gradient(135deg,#ef444420,#ef444410);border:2px solid var(--red);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.alert-banner.warn{background:linear-gradient(135deg,#f59e0b20,#f59e0b10);border-color:var(--yellow)}
+.alert-banner.ok{background:linear-gradient(135deg,#10b98120,#10b98110);border-color:var(--green)}
+.alert-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.tc{display:none}.tc.active{display:block}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.import-box{background:linear-gradient(135deg,#3b82f610,#3b82f605);border:2px dashed var(--blue);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.import-box:hover{background:rgba(59,130,246,.1)}
+.import-box.has-file{background:rgba(16,185,129,.1);border-color:var(--green)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge-ok{background:#10b98130;color:var(--green)}
+.badge-low{background:#f59e0b30;color:var(--yellow)}
+.badge-crit{background:var(--red);color:#fff}
+.badge-plan{background:#3b82f630;color:#93c5fd}
+.seg{display:flex;gap:4px;margin-bottom:10px}
+.seg-btn{flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.seg-btn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+@media(max-width:400px){.g3,.g4{grid-template-columns:1fr 1fr}.card{padding:10px;margin:6px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ บันทึกสำเร็จ!</div>
+
+<div class="topbar">
+<div><div class="topbar-title">📋 MES Step 0 — Production Plan R2 Cloud</div><div class="topbar-sub">Vandapac Co., Ltd. — ☁️ Google Sheets Sync</div></div>
+<div style="text-align:right"><div id="dd" style="font-weight:700;font-size:12px"></div><div style="font-size:10px;color:var(--blue)">🔄 Closed Loop ← Step 7</div></div>
+</div>
+
+<!-- 8-Step Flow Map -->
+<div class="flow-bar">
+<div class="flow-step active">0️⃣ Production Plan ◀ ตอนนี้</div>
+<div class="flow-step">1️⃣ Raw Material In</div>
+<div class="flow-step">2️⃣ WIP Raw Material</div>
+<div class="flow-step">3️⃣ Production Readiness</div>
+<div class="flow-step done">4️⃣ Production Record ✓</div>
+<div class="flow-step done">5️⃣ WIP Max-Min ✓</div>
+<div class="flow-step done">6️⃣ Route Distribution ✓</div>
+<div class="flow-step done">7️⃣ WIP & WHL Rollup ✓</div>
+</div>
+
+<!-- Sub Navigation -->
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📥 รับจาก Step 7</button>
+<button class="nav-btn" onclick="showTab(2)">⚙️ Capacity Setup</button>
+<button class="nav-btn" onclick="showTab(3)">📅 วางแผนผลิต</button>
+<button class="nav-btn" onclick="showTab(4)">📊 Plan vs Capacity</button>
+<button class="nav-btn" onclick="showTab(5)">📤 Export</button>
+<button class="nav-btn" onclick="showTab(6)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- ==================== TAB 1: IMPORT FROM STEP 7 ==================== -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📥 รับ Next Plan จาก Step 7 (วงจรปิด)</div>
+<div class="card-sub">ดึงแผนผลิตที่คำนวณจาก Step 7 (Demand − Stock) มาเป็นฐานวางแผน</div>
+
+<div id="bridgeStatus" class="alert-banner ok" style="display:none">
+<div class="alert-title">🔗 เชื่อมต่อ Step 7 อัตโนมัติ</div>
+<div style="font-size:12px" id="bridgeMsg">รอข้อมูลจาก Step 7...</div>
+</div>
+
+<div class="import-box" id="importBox" onclick="importFromStep7()">
+<div style="font-size:32px;margin-bottom:8px">🔄</div>
+<div style="font-weight:700;color:var(--blue)">แตะเพื่อรับ Next Plan จาก Step 7</div>
+<div style="font-size:11px;color:var(--dim);margin-top:4px">วงจรปิด: Step 7 → Step 0</div>
+</div>
+
+<div class="g2" style="margin-top:12px">
+<div class="kpi kpi-b"><div class="kpi-l">Parts ต้องผลิต</div><div class="kpi-v" id="kpiParts" style="color:#93c5fd">0</div><div class="kpi-t">รายการ</div></div>
+<div class="kpi kpi-r"><div class="kpi-l">ยอดผลิตรวม</div><div class="kpi-v" id="kpiTotal" style="color:var(--red)">0</div><div class="kpi-t">pcs</div></div>
+</div>
+
+<div style="overflow-x:auto;margin-top:12px">
+<table class="tbl">
+<thead><tr><th>Part No</th><th>Part Name</th><th>ต้องผลิต</th><th>ปรับแก้</th></tr></thead>
+<tbody id="importTable"><tr><td colspan="4" style="text-align:center;color:var(--dim);padding:20px">แตะ Import ด้านบน หรือเพิ่ม manual</td></tr></tbody>
+</table>
+</div>
+
+<button class="btn btn-d" style="margin-top:10px" onclick="addManualPart()">➕ เพิ่ม Part เอง (Manual)</button>
+</div></div>
+
+<!-- ==================== TAB 2: CAPACITY SETUP ==================== -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">⚙️ ตั้งค่า Capacity (กำลังการผลิต)</div>
+<div class="card-sub">กำหนดข้อมูลเครื่องจักร + Mold เพื่อคำนวณกำลังผลิตอัตโนมัติ</div>
+
+<div class="f"><label class="fl">เลือก Part No</label>
+<select id="capPartSelect" onchange="loadCapData()"><option value="">-- เลือก Part --</option></select>
+</div>
+
+<div class="g2">
+<div class="f"><label class="fl">⚙️ Machine</label>
+<select id="capMachine">
+<option value="IJ01">IJ01 (110T)</option><option value="IJ02">IJ02 (420T)</option>
+<option value="IJ03">IJ03 (850T)</option><option value="IJ04">IJ04 (2500T)</option>
+<option value="IJ05">IJ05 (700T)</option><option value="BM01">BM01 (220K)</option>
+<option value="BM02">BM02</option><option value="BM03">BM03</option><option value="BM04">BM04</option>
+<option value="BM05">BM05</option><option value="BM06">BM06</option><option value="BM07">BM07</option>
+<option value="BM08">BM08</option><option value="BM09">BM09</option><option value="BM10">BM10</option>
+</select>
+</div>
+<div class="f"><label class="fl">🔢 Cavity (จำนวนช่อง mold)</label>
+<input type="number" id="capCavity" value="1" min="1">
+</div>
+</div>
+
+<div class="g2">
+<div class="f"><label class="fl">⏱️ Cycle Time (วินาที/shot)</label>
+<input type="number" id="capCycle" value="30" min="1" step="0.1" oninput="calcCapPreview()">
+</div>
+<div class="f"><label class="fl">📊 Efficiency % (OEE)</label>
+<input type="number" id="capEff" value="76" min="1" max="100" oninput="calcCapPreview()">
+</div>
+</div>
+
+<div class="g2">
+<div class="f"><label class="fl">🕐 ชม.ทำงาน/วัน</label>
+<input type="number" id="capHours" value="16" min="1" max="24" oninput="calcCapPreview()">
+</div>
+<div class="f"><label class="fl">📅 วันทำงาน/สัปดาห์</label>
+<input type="number" id="capDays" value="6" min="1" max="7" oninput="calcCapPreview()">
+</div>
+</div>
+
+<div class="alert-banner ok" style="margin:10px 0">
+<div style="font-size:12px;line-height:1.8">
+🧮 <b>Capacity ที่คำนวณได้:</b><br>
+⏱️ ต่อชั่วโมง: <b id="capPerHour" style="color:var(--green)">0</b> pcs/hr<br>
+📅 ต่อวัน: <b id="capPerDay" style="color:var(--accent2)">0</b> pcs/day<br>
+📆 ต่อสัปดาห์: <b id="capPerWeek" style="color:#93c5fd">0</b> pcs/week<br>
+🗓️ ต่อเดือน: <b id="capPerMonth" style="color:var(--purple)">0</b> pcs/month
+</div>
+</div>
+
+<button class="btn btn-b" onclick="saveCapacity()">💾 บันทึก Capacity</button>
+
+<div style="margin-top:14px">
+<div style="font-weight:700;color:#93c5fd;font-size:13px;margin-bottom:8px">📋 Capacity ที่ตั้งค่าแล้ว</div>
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part</th><th>Machine</th><th>Cav</th><th>Cycle</th><th>pcs/day</th></tr></thead>
+<tbody id="capTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มี</td></tr></tbody>
+</table>
+</div>
+</div>
+</div></div>
+
+<!-- ==================== TAB 3: PLAN ==================== -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📅 วางแผนผลิต (Daily / Weekly / Monthly)</div>
+<div class="card-sub">กระจายยอดผลิตตามช่วงเวลา</div>
+
+<div class="seg">
+<button class="seg-btn on" id="segDaily" onclick="setPlanMode('daily')">📆 Daily</button>
+<button class="seg-btn" id="segWeekly" onclick="setPlanMode('weekly')">📅 Weekly</button>
+<button class="seg-btn" id="segMonthly" onclick="setPlanMode('monthly')">🗓️ Monthly</button>
+</div>
+
+<div class="f"><label class="fl">เลือก Part No</label>
+<select id="planPartSelect" onchange="loadPlanPart()"><option value="">-- เลือก Part --</option></select>
+</div>
+
+<div class="g2">
+<div class="f"><label class="fl" id="planQtyLabel">ยอดผลิต/วัน (pcs)</label>
+<input type="number" id="planQty" value="0" min="0">
+</div>
+<div class="f"><label class="fl" id="planDateLabel">วันที่เริ่ม</label>
+<input type="date" id="planDate">
+</div>
+</div>
+
+<div id="capCheckBox" class="alert-banner ok" style="display:none;margin-bottom:10px">
+<div style="font-size:12px" id="capCheckMsg"></div>
+</div>
+
+<button class="btn btn-b" onclick="savePlan()">💾 บันทึกแผน</button>
+
+<div style="margin-top:14px">
+<div style="font-weight:700;color:#93c5fd;font-size:13px;margin-bottom:8px">📋 แผนที่บันทึกแล้ว (<span id="planModeLabel">Daily</span>)</div>
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part</th><th>ยอดแผน</th><th>วันที่</th><th>ลบ</th></tr></thead>
+<tbody id="planTable"><tr><td colspan="4" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีแผน</td></tr></tbody>
+</table>
+</div>
+</div>
+</div></div>
+
+<!-- ==================== TAB 4: PLAN VS CAPACITY ==================== -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">📊 Plan vs Capacity (เช็คความเป็นไปได้)</div>
+<div class="card-sub">เปรียบเทียบแผนผลิตกับกำลังการผลิตจริง</div>
+
+<button class="btn btn-b" style="margin-bottom:10px" onclick="analyzePlanVsCap()">🔍 วิเคราะห์ Plan vs Capacity</button>
+
+<div class="g3" style="margin-bottom:12px">
+<div class="kpi kpi-g"><div class="kpi-l">ทำได้ทัน</div><div class="kpi-v" id="kpiFeasible" style="color:var(--green);font-size:20px">0</div><div class="kpi-t">parts</div></div>
+<div class="kpi kpi-y"><div class="kpi-l">เสี่ยง</div><div class="kpi-v" id="kpiRisk" style="color:var(--yellow);font-size:20px">0</div><div class="kpi-t">parts</div></div>
+<div class="kpi kpi-r"><div class="kpi-l">เกิน Capacity</div><div class="kpi-v" id="kpiOver" style="color:var(--red);font-size:20px">0</div><div class="kpi-t">parts</div></div>
+</div>
+
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part</th><th>แผน</th><th>Capacity</th><th>%</th><th>Status</th></tr></thead>
+<tbody id="analysisTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">แตะวิเคราะห์ด้านบน</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- ==================== TAB 5: EXPORT ==================== -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title">📤 Export & Bridge to Step 4</div>
+<div class="card-sub">ส่งแผนผลิต + ส่งต่อไป Step 4 (เริ่มผลิตตามแผน)</div>
+
+<button class="btn btn-a" style="margin-bottom:8px" onclick="exportCSV()">📥 Export Plan (CSV)</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="exportJSON()">📥 Export JSON (Backup)</button>
+<button class="btn btn-b" onclick="bridgeToStep4()">🔗 ส่งแผนไป Step 4</button>
+
+<div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px">
+<div style="font-weight:700;color:#93c5fd;font-size:13px;margin-bottom:8px">📊 สรุป Step 0</div>
+<div style="font-size:12px;color:var(--dim);line-height:2">
+📥 รับจาก Step 7: <b id="sumImport" style="color:#93c5fd">0</b> parts<br>
+⚙️ Capacity ตั้งค่า: <b id="sumCap" style="color:var(--green)">0</b> parts<br>
+📅 แผน Daily: <b id="sumDaily" style="color:var(--accent2)">0</b> | Weekly: <b id="sumWeekly" style="color:var(--accent2)">0</b> | Monthly: <b id="sumMonthly" style="color:var(--accent2)">0</b><br>
+📊 ยอดแผนรวม: <b id="sumPlanTotal" style="color:var(--red)">0</b> pcs
+</div>
+</div>
+
+<button class="btn btn-r" style="margin-top:10px" onclick="clearStep0()">🗑️ Clear All Step 0 Data</button>
+</div></div>
+
+<!-- ==================== TAB 6: CLOUD ==================== -->
+<div class="tc" id="tab6"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud — Backup to Google Sheets</div>
+<div class="card-sub">บันทึกแผนผลิตไป Google Sheets</div>
+
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="font-size:12px;color:#10b981;line-height:1.6">
+<b>☁️ Cloud Status:</b> <span id="cloudStatus0" style="font-weight:700">Not configured</span><br>
+<b>🔄 Last Backup:</b> <span id="lastBackup0" style="font-weight:700">Never</span>
+</div>
+</div>
+
+<div class="f"><label class="fl">🔗 Apps Script URL (same as Step 4-7)</label>
+<input type="text" id="appsScriptURL0" placeholder="https://script.google.com/macros/s/..." style="font-size:12px">
+</div>
+
+<div class="g2" style="margin-bottom:10px">
+<button class="btn btn-b" onclick="testCloud0()" style="font-size:12px">🧪 Test</button>
+<button class="btn btn-g" onclick="saveCloud0()" style="font-size:12px">💾 Save</button>
+</div>
+
+<div id="cloudTest0Result" style="margin-bottom:10px"></div>
+
+<div style="background:var(--inp);border-radius:8px;padding:12px">
+<div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:8px">📤 Backup Production Plan</div>
+<button class="btn btn-g" onclick="backupPlanToCloud()">☁️ Backup Plan → Google Sheets</button>
+<div id="planBackupResult" style="margin-top:8px"></div>
+</div>
+</div></div>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<div class="bn">
+<button class="btn btn-d" id="btnPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button>
+<button class="btn btn-b" id="btnNext" onclick="nextTab()">ถัดไป ▶</button>
+</div>
+
+<script>
+// ==================== STATE ====================
+var curTab = 1;
+var parts = [];        // [{partNo, partName, needQty}]
+var capacity = {};     // {partNo: {machine, cavity, cycle, eff, hours, days, perHour, perDay, perWeek, perMonth}}
+var plans = {daily:{}, weekly:{}, monthly:{}};  // {mode: {partNo: {qty, date}}}
+var planMode = 'daily';
+var analysis = [];
+
+function init(){
+  var d = new Date();
+  document.getElementById('dd').textContent = d.toLocaleDateString('th-TH');
+  document.getElementById('planDate').value = d.toISOString().split('T')[0];
+  loadAll();
+  checkBridge();
+  initCloud0();
+  calcCapPreview();
+  refreshAll();
+}
+
+// ==================== LOAD/SAVE ====================
+function loadAll(){
+  try{ parts = JSON.parse(localStorage.getItem('mes_step0_parts')||'[]'); }catch(e){}
+  try{ capacity = JSON.parse(localStorage.getItem('mes_step0_capacity')||'{}'); }catch(e){}
+  try{ plans = JSON.parse(localStorage.getItem('mes_step0_plans')||'{"daily":{},"weekly":{},"monthly":{}}'); }catch(e){}
+}
+function saveAll(){
+  localStorage.setItem('mes_step0_parts', JSON.stringify(parts));
+  localStorage.setItem('mes_step0_capacity', JSON.stringify(capacity));
+  localStorage.setItem('mes_step0_plans', JSON.stringify(plans));
+}
+
+// ==================== BRIDGE FROM STEP 7 ====================
+function checkBridge(){
+  var b7=null;
+  try{ b7=JSON.parse(localStorage.getItem('mes_bridge_step7_to_0')||'null'); }catch(e){}
+  if(b7&&b7.nextPlan&&b7.nextPlan.length>0){
+    document.getElementById('bridgeStatus').style.display='block';
+    document.getElementById('bridgeMsg').textContent='พบ Next Plan '+b7.nextPlan.length+' parts จาก Step 7 — แตะ Import เพื่อรับเข้า';
+  }
+}
+
+function importFromStep7(){
+  var b7=null;
+  try{ b7=JSON.parse(localStorage.getItem('mes_bridge_step7_to_0')||'null'); }catch(e){}
+  if(!b7||!b7.nextPlan||b7.nextPlan.length===0){
+    toast('📭 ไม่พบ Next Plan จาก Step 7 — กรุณาทำ Step 7 ก่อน');
+    return;
+  }
+  parts = b7.nextPlan.map(function(p){
+    return {partNo:p.partNo, partName:p.partName||'', needQty:parseInt(p.plan||0)};
+  }).filter(function(p){return p.partNo;});
+  saveAll();
+  refreshAll();
+  document.getElementById('importBox').classList.add('has-file');
+  toast('✅ รับ Next Plan สำเร็จ '+parts.length+' parts จาก Step 7');
+}
+
+function addManualPart(){
+  var pn = prompt('ใส่ Part No:');
+  if(!pn) return;
+  var qty = parseInt(prompt('ยอดต้องผลิต (pcs):')||0);
+  parts.push({partNo:pn, partName:'', needQty:qty});
+  saveAll();refreshAll();
+  toast('➕ เพิ่ม '+pn);
+}
+
+// ==================== CAPACITY ====================
+function calcCapPreview(){
+  var cavity=parseInt(document.getElementById('capCavity').value||1);
+  var cycle=parseFloat(document.getElementById('capCycle').value||30);
+  var eff=parseFloat(document.getElementById('capEff').value||76)/100;
+  var hours=parseInt(document.getElementById('capHours').value||16);
+  var days=parseInt(document.getElementById('capDays').value||6);
+  
+  var shotsPerHour = 3600/cycle;
+  var perHour = Math.floor(shotsPerHour * cavity * eff);
+  var perDay = perHour * hours;
+  var perWeek = perDay * days;
+  var perMonth = perDay * days * 4;
+  
+  document.getElementById('capPerHour').textContent = perHour.toLocaleString();
+  document.getElementById('capPerDay').textContent = perDay.toLocaleString();
+  document.getElementById('capPerWeek').textContent = perWeek.toLocaleString();
+  document.getElementById('capPerMonth').textContent = perMonth.toLocaleString();
+  
+  return {perHour:perHour, perDay:perDay, perWeek:perWeek, perMonth:perMonth};
+}
+
+function loadCapData(){
+  var part=document.getElementById('capPartSelect').value;
+  if(part&&capacity[part]){
+    var c=capacity[part];
+    document.getElementById('capMachine').value=c.machine;
+    document.getElementById('capCavity').value=c.cavity;
+    document.getElementById('capCycle').value=c.cycle;
+    document.getElementById('capEff').value=c.eff;
+    document.getElementById('capHours').value=c.hours;
+    document.getElementById('capDays').value=c.days;
+    calcCapPreview();
+  }
+}
+
+function saveCapacity(){
+  var part=document.getElementById('capPartSelect').value;
+  if(!part){toast('⚠️ เลือก Part');return;}
+  var cap=calcCapPreview();
+  capacity[part]={
+    machine:document.getElementById('capMachine').value,
+    cavity:parseInt(document.getElementById('capCavity').value),
+    cycle:parseFloat(document.getElementById('capCycle').value),
+    eff:parseFloat(document.getElementById('capEff').value),
+    hours:parseInt(document.getElementById('capHours').value),
+    days:parseInt(document.getElementById('capDays').value),
+    perHour:cap.perHour, perDay:cap.perDay, perWeek:cap.perWeek, perMonth:cap.perMonth
+  };
+  saveAll();refreshAll();
+  toast('✅ บันทึก Capacity '+part);
+}
+
+// ==================== PLAN ====================
+function setPlanMode(mode){
+  planMode=mode;
+  document.getElementById('segDaily').classList.toggle('on',mode==='daily');
+  document.getElementById('segWeekly').classList.toggle('on',mode==='weekly');
+  document.getElementById('segMonthly').classList.toggle('on',mode==='monthly');
+  var labels={daily:['ยอดผลิต/วัน (pcs)','วันที่','Daily'],weekly:['ยอดผลิต/สัปดาห์ (pcs)','สัปดาห์เริ่ม','Weekly'],monthly:['ยอดผลิต/เดือน (pcs)','เดือน','Monthly']};
+  document.getElementById('planQtyLabel').textContent=labels[mode][0];
+  document.getElementById('planDateLabel').textContent=labels[mode][1];
+  document.getElementById('planModeLabel').textContent=labels[mode][2];
+  refreshAll();
+}
+
+function loadPlanPart(){
+  var part=document.getElementById('planPartSelect').value;
+  var box=document.getElementById('capCheckBox');
+  if(part&&capacity[part]){
+    box.style.display='block';
+    var c=capacity[part];
+    var capVal=planMode==='daily'?c.perDay:planMode==='weekly'?c.perWeek:c.perMonth;
+    document.getElementById('capCheckMsg').innerHTML='⚙️ Capacity '+planMode+' ของ '+part+' = <b>'+capVal.toLocaleString()+' pcs</b>';
+  }else{
+    box.style.display='none';
+  }
+}
+
+function savePlan(){
+  var part=document.getElementById('planPartSelect').value;
+  var qty=parseInt(document.getElementById('planQty').value||0);
+  var date=document.getElementById('planDate').value;
+  if(!part){toast('⚠️ เลือก Part');return;}
+  if(qty<=0){toast('⚠️ ใส่ยอดผลิต');return;}
+  plans[planMode][part]={qty:qty, date:date};
+  saveAll();refreshAll();
+  toast('✅ บันทึกแผน '+planMode+' '+part);
+  document.getElementById('planQty').value='';
+}
+
+function delPlan(part){
+  delete plans[planMode][part];
+  saveAll();refreshAll();
+  toast('🗑️ ลบแผน '+part);
+}
+
+// ==================== ANALYSIS ====================
+function analyzePlanVsCap(){
+  analysis=[];
+  var modePlans=plans[planMode];
+  Object.keys(modePlans).forEach(function(part){
+    var planQty=modePlans[part].qty;
+    var cap=capacity[part];
+    var capVal=cap?(planMode==='daily'?cap.perDay:planMode==='weekly'?cap.perWeek:cap.perMonth):0;
+    var pct=capVal>0?Math.round((planQty/capVal)*100):999;
+    var status=pct<=85?'ทำได้':pct<=100?'เสี่ยง':'เกิน';
+    analysis.push({partNo:part, plan:planQty, cap:capVal, pct:pct, status:status});
+  });
+  saveAll();refreshAll();
+  toast('🔍 วิเคราะห์ '+analysis.length+' parts');
+}
+
+// ==================== REFRESH ====================
+function refreshAll(){
+  var partOpts='<option value="">-- เลือก Part --</option>';
+  parts.forEach(function(p){partOpts+='<option value="'+p.partNo+'">'+p.partNo+(p.partName?' — '+p.partName:'')+'</option>';});
+  ['capPartSelect','planPartSelect'].forEach(function(id){var el=document.getElementById(id);if(el){var v=el.value;el.innerHTML=partOpts;el.value=v;}});
+  
+  // Tab 1
+  document.getElementById('kpiParts').textContent=parts.length;
+  var total=parts.reduce(function(s,p){return s+p.needQty;},0);
+  document.getElementById('kpiTotal').textContent=total.toLocaleString();
+  var itHtml='';
+  parts.forEach(function(p,i){
+    itHtml+='<tr><td class="lbl">'+p.partNo+'</td><td class="pn">'+p.partName+'</td><td style="text-align:center;color:var(--red);font-weight:700">'+p.needQty+'</td><td style="text-align:center"><input type="number" value="'+p.needQty+'" onchange="adjustPart('+i+',this.value)" style="width:70px"></td></tr>';
+  });
+  if(itHtml)document.getElementById('importTable').innerHTML=itHtml;
+  
+  // Tab 2: Cap table
+  var ctHtml='';
+  Object.keys(capacity).forEach(function(part){
+    var c=capacity[part];
+    ctHtml+='<tr><td class="lbl">'+part+'</td><td style="text-align:center;font-size:11px">'+c.machine+'</td><td style="text-align:center">'+c.cavity+'</td><td style="text-align:center">'+c.cycle+'s</td><td style="text-align:center;color:var(--green);font-weight:700">'+c.perDay.toLocaleString()+'</td></tr>';
+  });
+  if(ctHtml)document.getElementById('capTable').innerHTML=ctHtml;
+  
+  // Tab 3: Plan table
+  var ptHtml='';
+  var modePlans=plans[planMode];
+  Object.keys(modePlans).forEach(function(part){
+    var pl=modePlans[part];
+    ptHtml+='<tr><td class="lbl">'+part+'</td><td style="text-align:center;color:var(--accent2);font-weight:700">'+pl.qty.toLocaleString()+'</td><td style="text-align:center;font-size:11px">'+(pl.date||'-')+'</td><td style="text-align:center"><button onclick="delPlan(\''+part+'\')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  if(ptHtml)document.getElementById('planTable').innerHTML=ptHtml;
+  else document.getElementById('planTable').innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีแผน '+planMode+'</td></tr>';
+  
+  // Tab 4: Analysis
+  var feas=0,risk=0,over=0;
+  var atHtml='';
+  analysis.forEach(function(a){
+    if(a.status==='ทำได้')feas++;else if(a.status==='เสี่ยง')risk++;else over++;
+    var col=a.status==='ทำได้'?'var(--green)':a.status==='เสี่ยง'?'var(--yellow)':'var(--red)';
+    var bdg=a.status==='ทำได้'?'badge-ok':a.status==='เสี่ยง'?'badge-low':'badge-crit';
+    atHtml+='<tr><td class="lbl">'+a.partNo+'</td><td style="text-align:center">'+a.plan.toLocaleString()+'</td><td style="text-align:center">'+a.cap.toLocaleString()+'</td><td style="text-align:center;font-weight:700;color:'+col+'">'+a.pct+'%</td><td style="text-align:center"><span class="badge '+bdg+'">'+a.status+'</span></td></tr>';
+  });
+  if(atHtml)document.getElementById('analysisTable').innerHTML=atHtml;
+  document.getElementById('kpiFeasible').textContent=feas;
+  document.getElementById('kpiRisk').textContent=risk;
+  document.getElementById('kpiOver').textContent=over;
+  
+  // Tab 5: Summary
+  document.getElementById('sumImport').textContent=parts.length;
+  document.getElementById('sumCap').textContent=Object.keys(capacity).length;
+  document.getElementById('sumDaily').textContent=Object.keys(plans.daily).length;
+  document.getElementById('sumWeekly').textContent=Object.keys(plans.weekly).length;
+  document.getElementById('sumMonthly').textContent=Object.keys(plans.monthly).length;
+  var planTot=0;
+  Object.keys(plans).forEach(function(m){Object.keys(plans[m]).forEach(function(p){planTot+=plans[m][p].qty;});});
+  document.getElementById('sumPlanTotal').textContent=planTot.toLocaleString();
+}
+
+function adjustPart(i,val){
+  parts[i].needQty=parseInt(val||0);
+  saveAll();
+  var total=parts.reduce(function(s,p){return s+p.needQty;},0);
+  document.getElementById('kpiTotal').textContent=total.toLocaleString();
+}
+
+// ==================== EXPORT ====================
+function exportCSV(){
+  var csv='Mode,PartNo,PartName,PlanQty,Date,Capacity\n';
+  Object.keys(plans).forEach(function(mode){
+    Object.keys(plans[mode]).forEach(function(part){
+      var pl=plans[mode][part];
+      var cap=capacity[part]?(mode==='daily'?capacity[part].perDay:mode==='weekly'?capacity[part].perWeek:capacity[part].perMonth):0;
+      csv+=mode+','+part+',,'+pl.qty+','+(pl.date||'')+','+cap+'\n';
+    });
+  });
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='MES_Step0_Plan_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  toast('📥 Export CSV สำเร็จ');
+}
+function exportJSON(){
+  var data={parts:parts,capacity:capacity,plans:plans,exported:new Date().toISOString()};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='MES_Step0_backup.json';a.click();
+  toast('📥 Export JSON สำเร็จ');
+}
+function bridgeToStep4(){
+  var dailyPlan=plans.daily;
+  if(Object.keys(dailyPlan).length===0){toast('⚠️ ใส่แผน Daily ก่อน');return;}
+  var planList=Object.keys(dailyPlan).map(function(part){
+    var p=parts.find(function(x){return x.partNo===part;});
+    return {partNo:part, partName:p?p.partName:'', planQty:dailyPlan[part].qty, date:dailyPlan[part].date, machine:capacity[part]?capacity[part].machine:''};
+  });
+  var bridge={dailyPlan:planList, timestamp:new Date().toISOString(), source:'Step0'};
+  localStorage.setItem('mes_bridge_step0_to_4', JSON.stringify(bridge));
+  toast('🔗 ส่งแผน Daily ไป Step 4 แล้ว ('+planList.length+' parts)');
+}
+function clearStep0(){
+  if(!confirm('ล้างข้อมูล Step 0 ทั้งหมด?')) return;
+  ['mes_step0_parts','mes_step0_capacity','mes_step0_plans'].forEach(function(k){localStorage.removeItem(k);});
+  parts=[];capacity={};plans={daily:{},weekly:{},monthly:{}};analysis=[];
+  refreshAll();
+  toast('🗑️ ล้างข้อมูลแล้ว');
+}
+
+// ==================== CLOUD (JSONP) ====================
+function cloudGET(url, callback, errback){
+  var cbName='_jcb_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+  var timeoutId=setTimeout(function(){if(window[cbName]){delete window[cbName];errback('Timeout (20s) - ลองใหม่');}},20000);
+  window[cbName]=function(data){clearTimeout(timeoutId);delete window[cbName];callback(data);};
+  var s=document.createElement('script');
+  s.src=url+(url.indexOf('?')>-1?'&':'?')+'callback='+cbName;
+  s.onerror=function(){clearTimeout(timeoutId);delete window[cbName];errback('Network error - ตรวจสอบ internet/URL');};
+  document.head.appendChild(s);
+  setTimeout(function(){try{document.head.removeChild(s);}catch(e){}},25000);
+}
+function cloudPOST(url, payload, callback, errback){
+  var dataStr=encodeURIComponent(JSON.stringify(payload));
+  if(dataStr.length>7000){errback('Data too large. Use PC instead.');return;}
+  cloudGET(url+'?action=postData&data='+dataStr, callback, errback);
+}
+function initCloud0(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(url){var el=document.getElementById('appsScriptURL0');if(el)el.value=url;}
+  var lb=localStorage.getItem('mes_step0_last_backup');
+  if(lb){var e=document.getElementById('lastBackup0');if(e)e.textContent=new Date(lb).toLocaleString('th-TH');}
+}
+function saveCloud0(){
+  var url=document.getElementById('appsScriptURL0').value.trim();
+  url=url.replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,'');
+  if(!url){alert('กรุณาใส่ URL');return;}
+  localStorage.setItem('mes_apps_script_url',url);
+  document.getElementById('appsScriptURL0').value=url;
+  toast('✅ Cloud config saved!');
+}
+function testCloud0(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){document.getElementById('cloudTest0Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}
+  document.getElementById('cloudTest0Result').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';
+  cloudGET(url+'?action=getRecent&limit=1',function(d){
+    if(d.status==='success'){
+      document.getElementById('cloudTest0Result').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';
+      document.getElementById('cloudStatus0').textContent='✅ Connected';
+      document.getElementById('cloudStatus0').style.color='#10b981';
+    }else{document.getElementById('cloudTest0Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';}
+  },function(err){document.getElementById('cloudTest0Result').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+err+'</div>';});
+}
+function backupPlanToCloud(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){alert('กรุณา Save Cloud config ก่อน');return;}
+  var planData=[];
+  Object.keys(plans).forEach(function(mode){
+    Object.keys(plans[mode]).forEach(function(part){
+      var pl=plans[mode][part];
+      var cap=capacity[part]?(mode==='daily'?capacity[part].perDay:mode==='weekly'?capacity[part].perWeek:capacity[part].perMonth):0;
+      planData.push({mode:mode, partNo:part, planQty:pl.qty, date:pl.date||'', capacity:cap});
+    });
+  });
+  if(planData.length===0){alert('📭 ไม่มีแผนให้ Backup');return;}
+  document.getElementById('planBackupResult').innerHTML='<div style="color:#f59e0b;font-size:12px;padding:8px">⏳ Backing up...</div>';
+  var payload={type:'PRODPLAN_DATA',machineID:'Step0',timestamp:new Date().toISOString(),prodPlanData:planData};
+  cloudPOST(url,payload,function(result){
+    if(result.status==='success'){
+      document.getElementById('planBackupResult').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Backed up '+(result.count||planData.length)+' plan records!</div>';
+      localStorage.setItem('mes_step0_last_backup',new Date().toISOString());
+      document.getElementById('lastBackup0').textContent=new Date().toLocaleString('th-TH');
+    }else{document.getElementById('planBackupResult').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+result.message+'</div>';}
+  },function(err){document.getElementById('planBackupResult').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+err+'</div>';});
+}
+
+// ==================== NAV ====================
+function showTab(n){
+  curTab=n;
+  document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+  document.getElementById('btnPrev').style.display=n>1?'block':'none';
+  var nb=document.getElementById('btnNext');
+  if(n<5){nb.textContent='ถัดไป ▶';nb.className='btn btn-b';nb.onclick=nextTab;}
+  else if(n===5){nb.textContent='🔗 ส่งไป Step 4';nb.className='btn btn-g';nb.onclick=bridgeToStep4;}
+  else{nb.textContent='☁️ Backup';nb.className='btn btn-g';nb.onclick=backupPlanToCloud;}
+  refreshAll();
+}
+function nextTab(){if(curTab<6)showTab(curTab+1);}
+function prevTab(){if(curTab>1)showTab(curTab-1);}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MES Step 1 - Raw Material In R2 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--orange:#f97316}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:12px 14px;border-bottom:2px solid var(--orange);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800;color:#fdba74}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.flow-bar{background:var(--card);padding:8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px;position:sticky;top:54px;z-index:99}
+.flow-bar::-webkit-scrollbar{display:none}
+.flow-step{flex:0 0 auto;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.flow-step.done{background:#10b98130;color:var(--green);border-color:#10b98140}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:96px;z-index:98}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:7px 11px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--orange);color:#fff;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#fdba74;margin-bottom:10px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--orange)}
+input[type="number"]{text-align:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-o{background:var(--orange)}.btn-a{background:var(--accent)}.btn-g{background:var(--green)}.btn-r{background:var(--red)}.btn-d{background:var(--border)}
+.btn:active{transform:scale(.97)}
+.kpi{border-radius:var(--r);padding:12px;text-align:center}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:24px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.kpi-g{background:#10b98115;border:1px solid #10b98140}.kpi-o{background:#f9731615;border:1px solid #f9731640}.kpi-b{background:#2d7ff915;border:1px solid #2d7ff940}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(249,115,22,.1)}
+.tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px}
+.tbl .pn{font-size:11px;color:var(--dim)}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.tc{display:none}.tc.active{display:block}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge-ok{background:#10b98130;color:var(--green)}
+@media(max-width:400px){.g3{grid-template-columns:1fr 1fr}.card{padding:10px;margin:6px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ บันทึกสำเร็จ!</div>
+
+<div class="topbar">
+<div><div class="topbar-title">📦 MES Step 1 — Raw Material In R2 Cloud</div><div class="topbar-sub">Vandapac Co., Ltd. — ☁️ Google Sheets Sync</div></div>
+<div style="text-align:right"><div id="dd" style="font-weight:700;font-size:12px"></div><div style="font-size:10px;color:var(--orange)">รับวัตถุดิบจาก Store</div></div>
+</div>
+
+<div class="flow-bar">
+<div class="flow-step done">0️⃣ Production Plan ✓</div>
+<div class="flow-step active">1️⃣ Raw Material In ◀ ตอนนี้</div>
+<div class="flow-step">2️⃣ WIP Raw Material</div>
+<div class="flow-step">3️⃣ Production Readiness</div>
+<div class="flow-step done">4️⃣ Production Record ✓</div>
+<div class="flow-step done">5️⃣ WIP Max-Min ✓</div>
+<div class="flow-step done">6️⃣ Route Distribution ✓</div>
+<div class="flow-step done">7️⃣ WIP & WHL Rollup ✓</div>
+</div>
+
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📥 รับวัตถุดิบ</button>
+<button class="nav-btn" onclick="showTab(2)">📋 ประวัติรับเข้า</button>
+<button class="nav-btn" onclick="showTab(3)">📊 สรุปสต็อก</button>
+<button class="nav-btn" onclick="showTab(4)">📤 Export</button>
+<button class="nav-btn" onclick="showTab(5)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- TAB 1: RECEIVE -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📥 รับวัตถุดิบเข้า (Raw Material In)</div>
+<div class="card-sub">บันทึกวัตถุดิบที่รับจาก Store / Supplier</div>
+
+<div class="g2">
+<div class="f"><label class="fl">📅 วันที่รับ</label><input type="date" id="rmDate"></div>
+<div class="f"><label class="fl">🏷️ Lot No</label><input type="text" id="rmLot" placeholder="เช่น L2026-001"></div>
+</div>
+<div class="f"><label class="fl">🧪 ชนิดวัตถุดิบ (Material Type)</label>
+<select id="rmType">
+<option value="TPS 901">TPS 901</option><option value="PP">PP (Polypropylene)</option>
+<option value="ABS">ABS</option><option value="PC">PC (Polycarbonate)</option>
+<option value="PE">PE (Polyethylene)</option><option value="Nylon">Nylon (PA)</option>
+<option value="Masterbatch">Masterbatch (สี)</option><option value="Regrind">Regrind (รีไซเคิล)</option>
+<option value="Other">อื่นๆ</option>
+</select>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">⚖️ จำนวน (kg)</label><input type="number" id="rmQty" value="0" min="0" step="0.1"></div>
+<div class="f"><label class="fl">🏭 Supplier</label><input type="text" id="rmSupplier" placeholder="ชื่อผู้จัดส่ง"></div>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">📄 เลขที่ใบส่งของ (DO/Invoice)</label><input type="text" id="rmDO" placeholder="DO No."></div>
+<div class="f"><label class="fl">✅ ผล QC</label>
+<select id="rmQC"><option value="Pass">✅ Pass (ผ่าน)</option><option value="Hold">⏸️ Hold (รอตรวจ)</option><option value="Reject">❌ Reject (ไม่ผ่าน)</option></select>
+</div>
+</div>
+<div class="f"><label class="fl">📝 หมายเหตุ</label><textarea id="rmNote" rows="2" placeholder="รายละเอียดเพิ่มเติม..."></textarea></div>
+
+<button class="btn btn-o" onclick="saveReceive()">💾 บันทึกรับเข้า</button>
+</div></div>
+
+<!-- TAB 2: HISTORY -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">📋 ประวัติการรับวัตถุดิบ</div>
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>วันที่</th><th>Lot</th><th>ชนิด</th><th>kg</th><th>QC</th><th>ลบ</th></tr></thead>
+<tbody id="histTable"><tr><td colspan="6" style="text-align:center;color:var(--dim);padding:20px">ยังไม่มีข้อมูล</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- TAB 3: STOCK SUMMARY -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📊 สรุปสต็อกวัตถุดิบ (ตามชนิด)</div>
+<div class="g3" style="margin-bottom:12px">
+<div class="kpi kpi-o"><div class="kpi-l">ชนิดวัตถุดิบ</div><div class="kpi-v" id="kpiTypes" style="color:#fdba74">0</div><div class="kpi-t">types</div></div>
+<div class="kpi kpi-g"><div class="kpi-l">รวมทั้งหมด</div><div class="kpi-v" id="kpiTotalKg" style="color:var(--green);font-size:20px">0</div><div class="kpi-t">kg</div></div>
+<div class="kpi kpi-b"><div class="kpi-l">Lot ทั้งหมด</div><div class="kpi-v" id="kpiLots" style="color:var(--accent2)">0</div><div class="kpi-t">lots</div></div>
+</div>
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>ชนิดวัตถุดิบ</th><th>รวม (kg)</th><th>จำนวน Lot</th></tr></thead>
+<tbody id="stockTable"><tr><td colspan="3" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีข้อมูล</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- TAB 4: EXPORT -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">📤 Export & Bridge to Step 2</div>
+<button class="btn btn-a" style="margin-bottom:8px" onclick="exportCSV()">📥 Export CSV</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="exportJSON()">📥 Export JSON</button>
+<button class="btn btn-o" onclick="bridgeToStep2()">🔗 ส่งสต็อกไป Step 2</button>
+<div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px;font-size:12px;color:var(--dim);line-height:2">
+📥 รายการรับเข้า: <b id="sumRecords" style="color:#fdba74">0</b><br>
+⚖️ รวม kg: <b id="sumKg" style="color:var(--green)">0</b><br>
+🧪 ชนิด: <b id="sumTypes" style="color:var(--accent2)">0</b>
+</div>
+<button class="btn btn-r" style="margin-top:10px" onclick="clearStep1()">🗑️ Clear All</button>
+</div></div>
+
+<!-- TAB 5: CLOUD -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud — Backup to Google Sheets</div>
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px;color:#10b981;line-height:1.6">
+<b>☁️ Status:</b> <span id="cloudStatus1" style="font-weight:700">Not configured</span><br>
+<b>🔄 Last Backup:</b> <span id="lastBackup1" style="font-weight:700">Never</span>
+</div>
+<div class="f"><label class="fl">🔗 Apps Script URL (same as all steps)</label>
+<input type="text" id="appsScriptURL1" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"></div>
+<div class="g2" style="margin-bottom:10px">
+<button class="btn btn-o" onclick="testCloud1()" style="font-size:12px">🧪 Test</button>
+<button class="btn btn-g" onclick="saveCloud1()" style="font-size:12px">💾 Save</button>
+</div>
+<div id="cloudTest1Result" style="margin-bottom:10px"></div>
+<div style="background:var(--inp);border-radius:8px;padding:12px">
+<button class="btn btn-g" onclick="backupToCloud()">☁️ Backup Material → Google Sheets</button>
+<div id="backupResult1" style="margin-top:8px"></div>
+</div>
+</div></div>
+
+<div class="bn">
+<button class="btn btn-d" id="btnPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button>
+<button class="btn btn-o" id="btnNext" onclick="nextTab()">ถัดไป ▶</button>
+</div>
+
+<script>
+var curTab=1;
+var records=[];
+
+function init(){
+  var d=new Date();
+  document.getElementById('dd').textContent=d.toLocaleDateString('th-TH');
+  document.getElementById('rmDate').value=d.toISOString().split('T')[0];
+  loadAll();initCloud1();refreshAll();
+}
+function loadAll(){try{records=JSON.parse(localStorage.getItem('mes_step1_records')||'[]');}catch(e){}}
+function saveAll(){localStorage.setItem('mes_step1_records',JSON.stringify(records));}
+
+function saveReceive(){
+  var qty=parseFloat(document.getElementById('rmQty').value||0);
+  if(qty<=0){toast('⚠️ ใส่จำนวน kg');return;}
+  records.push({
+    id:Date.now(),
+    date:document.getElementById('rmDate').value,
+    lot:document.getElementById('rmLot').value,
+    type:document.getElementById('rmType').value,
+    qty:qty,
+    supplier:document.getElementById('rmSupplier').value,
+    do:document.getElementById('rmDO').value,
+    qc:document.getElementById('rmQC').value,
+    note:document.getElementById('rmNote').value,
+    ts:new Date().toISOString()
+  });
+  saveAll();refreshAll();
+  toast('✅ บันทึกรับเข้า '+qty+' kg');
+  document.getElementById('rmLot').value='';document.getElementById('rmQty').value='';
+  document.getElementById('rmDO').value='';document.getElementById('rmNote').value='';
+}
+
+function delRecord(id){
+  records=records.filter(function(r){return r.id!==id;});
+  saveAll();refreshAll();toast('🗑️ ลบแล้ว');
+}
+
+function refreshAll(){
+  // History
+  var hHtml='';
+  records.slice().reverse().forEach(function(r){
+    var qcBadge=r.qc==='Pass'?'<span class="badge badge-ok">Pass</span>':r.qc==='Hold'?'<span class="badge" style="background:#f59e0b30;color:var(--yellow)">Hold</span>':'<span class="badge" style="background:var(--red);color:#fff">Reject</span>';
+    hHtml+='<tr><td style="font-size:11px">'+r.date+'</td><td class="pn">'+r.lot+'</td><td class="lbl">'+r.type+'</td><td style="text-align:center">'+r.qty+'</td><td style="text-align:center">'+qcBadge+'</td><td style="text-align:center"><button onclick="delRecord('+r.id+')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  if(hHtml)document.getElementById('histTable').innerHTML=hHtml;
+  else document.getElementById('histTable').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:20px">ยังไม่มีข้อมูล</td></tr>';
+  
+  // Stock by type
+  var byType={};
+  records.forEach(function(r){if(r.qc!=='Reject'){if(!byType[r.type])byType[r.type]={kg:0,lots:0};byType[r.type].kg+=r.qty;byType[r.type].lots++;}});
+  var sHtml='';var totalKg=0,totalLots=0;
+  Object.keys(byType).forEach(function(t){
+    sHtml+='<tr><td class="lbl">'+t+'</td><td style="text-align:center;color:var(--green);font-weight:700">'+byType[t].kg.toFixed(1)+'</td><td style="text-align:center">'+byType[t].lots+'</td></tr>';
+    totalKg+=byType[t].kg;totalLots+=byType[t].lots;
+  });
+  if(sHtml)document.getElementById('stockTable').innerHTML=sHtml;
+  document.getElementById('kpiTypes').textContent=Object.keys(byType).length;
+  document.getElementById('kpiTotalKg').textContent=totalKg.toFixed(0);
+  document.getElementById('kpiLots').textContent=totalLots;
+  
+  // Summary
+  document.getElementById('sumRecords').textContent=records.length;
+  document.getElementById('sumKg').textContent=totalKg.toFixed(1);
+  document.getElementById('sumTypes').textContent=Object.keys(byType).length;
+}
+
+function exportCSV(){
+  var csv='Date,Lot,Type,Qty(kg),Supplier,DO,QC,Note\n';
+  records.forEach(function(r){csv+=r.date+','+r.lot+','+r.type+','+r.qty+','+r.supplier+','+r.do+','+r.qc+','+(r.note||'')+'\n';});
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv'});var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='MES_Step1_RawMaterial_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  toast('📥 Export CSV');
+}
+function exportJSON(){
+  var blob=new Blob([JSON.stringify({records:records,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MES_Step1_backup.json';a.click();
+  toast('📥 Export JSON');
+}
+function bridgeToStep2(){
+  var byType={};
+  records.forEach(function(r){if(r.qc!=='Reject'){if(!byType[r.type])byType[r.type]=0;byType[r.type]+=r.qty;}});
+  localStorage.setItem('mes_bridge_step1_to_2',JSON.stringify({stock:byType,timestamp:new Date().toISOString(),source:'Step1'}));
+  toast('🔗 ส่งสต็อกไป Step 2 ('+Object.keys(byType).length+' ชนิด)');
+}
+function clearStep1(){
+  if(!confirm('ล้างข้อมูล Step 1 ทั้งหมด?'))return;
+  localStorage.removeItem('mes_step1_records');records=[];refreshAll();toast('🗑️ ล้างแล้ว');
+}
+
+// CLOUD JSONP
+function cloudGET(url,cb,eb){var n='_jcb_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);var t=setTimeout(function(){if(window[n]){delete window[n];eb('Timeout - ลองใหม่');}},20000);window[n]=function(d){clearTimeout(t);delete window[n];cb(d);};var s=document.createElement('script');s.src=url+(url.indexOf('?')>-1?'&':'?')+'callback='+n;s.onerror=function(){clearTimeout(t);delete window[n];eb('Network error');};document.head.appendChild(s);setTimeout(function(){try{document.head.removeChild(s);}catch(e){}},25000);}
+function cloudPOST(url,p,cb,eb){var d=encodeURIComponent(JSON.stringify(p));if(d.length>7000){eb('Data too large. Use PC.');return;}cloudGET(url+'?action=postData&data='+d,cb,eb);}
+function initCloud1(){var url=localStorage.getItem('mes_apps_script_url');if(url){var e=document.getElementById('appsScriptURL1');if(e)e.value=url;}var lb=localStorage.getItem('mes_step1_last_backup');if(lb){var e2=document.getElementById('lastBackup1');if(e2)e2.textContent=new Date(lb).toLocaleString('th-TH');}}
+function saveCloud1(){var url=document.getElementById('appsScriptURL1').value.trim().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,'');if(!url){alert('กรุณาใส่ URL');return;}localStorage.setItem('mes_apps_script_url',url);document.getElementById('appsScriptURL1').value=url;toast('✅ Saved!');}
+function testCloud1(){var url=localStorage.getItem('mes_apps_script_url');if(!url){document.getElementById('cloudTest1Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}document.getElementById('cloudTest1Result').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';cloudGET(url+'?action=getRecent&limit=1',function(d){if(d.status==='success'){document.getElementById('cloudTest1Result').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';document.getElementById('cloudStatus1').textContent='✅ Connected';document.getElementById('cloudStatus1').style.color='#10b981';}else{document.getElementById('cloudTest1Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';}},function(e){document.getElementById('cloudTest1Result').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+function backupToCloud(){var url=localStorage.getItem('mes_apps_script_url');if(!url){alert('Save Cloud config first');return;}if(records.length===0){alert('📭 ไม่มีข้อมูล');return;}document.getElementById('backupResult1').innerHTML='<div style="color:#f59e0b;font-size:12px;padding:8px">⏳ Backing up...</div>';var matData=records.map(function(r){return {date:r.date,lot:r.lot,type:r.type,qty:r.qty,supplier:r.supplier,qc:r.qc};});cloudPOST(url,{type:'MATERIAL_DATA',machineID:'Step1',timestamp:new Date().toISOString(),materialData:matData},function(result){if(result.status==='success'){document.getElementById('backupResult1').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Backed up '+(result.count||matData.length)+' records!</div>';localStorage.setItem('mes_step1_last_backup',new Date().toISOString());document.getElementById('lastBackup1').textContent=new Date().toLocaleString('th-TH');}else{document.getElementById('backupResult1').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+result.message+'</div>';}},function(e){document.getElementById('backupResult1').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+
+function showTab(n){curTab=n;document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});document.getElementById('tab'+n).classList.add('active');document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});document.getElementById('btnPrev').style.display=n>1?'block':'none';var nb=document.getElementById('btnNext');if(n<4){nb.textContent='ถัดไป ▶';nb.className='btn btn-o';nb.onclick=nextTab;}else if(n===4){nb.textContent='🔗 ส่งไป Step 2';nb.className='btn btn-g';nb.onclick=bridgeToStep2;}else{nb.textContent='☁️ Backup';nb.className='btn btn-g';nb.onclick=backupToCloud;}refreshAll();}
+function nextTab(){if(curTab<5)showTab(curTab+1);}
+function prevTab(){if(curTab>1)showTab(curTab-1);}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+init();
+</script>
+</body>
+</html>

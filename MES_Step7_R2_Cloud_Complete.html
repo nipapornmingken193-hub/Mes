@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MES Step 7 - WIP & WHL Rollup R2 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--purple:#a855f7;--teal:#14b8a6;--indigo:#6366f1}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:12px 14px;border-bottom:2px solid var(--indigo);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800;color:#a5b4fc}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.flow-bar{background:var(--card);padding:8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px;position:sticky;top:54px;z-index:99}
+.flow-bar::-webkit-scrollbar{display:none}
+.flow-step{flex:0 0 auto;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.flow-step.done{background:#10b98130;color:var(--green);border-color:#10b98140}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:96px;z-index:98}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:7px 11px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--indigo);color:#fff;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#a5b4fc;margin-bottom:10px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--indigo)}
+input[type="number"]{text-align:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-i{background:var(--indigo)}.btn-t{background:var(--teal)}.btn-p{background:var(--purple)}.btn-a{background:var(--accent)}.btn-g{background:var(--green)}.btn-r{background:var(--red)}.btn-y{background:var(--yellow);color:#111}.btn-d{background:var(--border)}
+.btn:active{transform:scale(.97)}
+.kpi{border-radius:var(--r);padding:12px;text-align:center}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:24px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.kpi-g{background:#10b98115;border:1px solid #10b98140}.kpi-r{background:#ef444415;border:1px solid #ef444440}.kpi-y{background:#f59e0b15;border:1px solid #f59e0b40}.kpi-b{background:#2d7ff915;border:1px solid #2d7ff940}.kpi-i{background:#6366f115;border:1px solid #6366f140}.kpi-p{background:#a855f715;border:1px solid #a855f740}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(99,102,241,.1);position:sticky;top:0}
+.tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:rgba(99,102,241,.05)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px}
+.tbl .pn{font-size:11px;color:var(--dim)}
+.tbl input{padding:5px 4px;font-size:12px;min-width:60px;text-align:center}
+.status-ok{color:var(--green);font-weight:700}
+.status-low{color:var(--yellow);font-weight:700}
+.status-high{color:var(--red);font-weight:700}
+.alert-banner{background:linear-gradient(135deg,#ef444420,#ef444410);border:2px solid var(--red);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.alert-banner.warn{background:linear-gradient(135deg,#f59e0b20,#f59e0b10);border-color:var(--yellow)}
+.alert-banner.ok{background:linear-gradient(135deg,#10b98120,#10b98110);border-color:var(--green)}
+.alert-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.tc{display:none}.tc.active{display:block}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.import-box{background:linear-gradient(135deg,#6366f110,#6366f105);border:2px dashed var(--indigo);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.import-box:hover{background:rgba(99,102,241,.1)}
+.import-box.has-file{background:rgba(16,185,129,.1);border-color:var(--green)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge-ok{background:#10b98130;color:var(--green)}
+.badge-low{background:#f59e0b30;color:var(--yellow)}
+.badge-crit{background:var(--red);color:#fff}
+.badge-plan{background:#6366f130;color:#a5b4fc}
+@media(max-width:400px){.g3,.g4{grid-template-columns:1fr 1fr}.card{padding:10px;margin:6px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ บันทึกสำเร็จ!</div>
+
+<div class="topbar">
+<div><div class="topbar-title">📊 MES Step 7 — WIP & WHL Rollup R2 Cloud</div><div class="topbar-sub">Vandapac Co., Ltd. — ☁️ Google Sheets Sync</div></div>
+<div style="text-align:right"><div id="dd" style="font-weight:700;font-size:12px"></div><div style="font-size:10px;color:var(--indigo)">Connected to Step 5+6</div></div>
+</div>
+
+<!-- 8-Step Flow Map -->
+<div class="flow-bar">
+<div class="flow-step">0️⃣ Production Plan</div>
+<div class="flow-step">1️⃣ Raw Material In</div>
+<div class="flow-step">2️⃣ WIP Raw Material</div>
+<div class="flow-step">3️⃣ Production Readiness</div>
+<div class="flow-step done">4️⃣ Production Record ✓</div>
+<div class="flow-step done">5️⃣ WIP Max-Min ✓</div>
+<div class="flow-step done">6️⃣ Route Distribution ✓</div>
+<div class="flow-step active">7️⃣ WIP & WHL Rollup ◀ ตอนนี้</div>
+</div>
+
+<!-- Sub Navigation -->
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📥 Rollup ข้อมูล</button>
+<button class="nav-btn" onclick="showTab(2)">🎯 Customer Demand</button>
+<button class="nav-btn" onclick="showTab(3)">📊 Next Plan</button>
+<button class="nav-btn" onclick="showTab(4)">📈 สรุปรวม</button>
+<button class="nav-btn" onclick="showTab(5)">📤 Export</button>
+<button class="nav-btn" onclick="showTab(6)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- ==================== TAB 1: ROLLUP ==================== -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📥 Rollup — รวมข้อมูลจาก Step 5 + 6</div>
+<div class="card-sub">รวม WHL stock (Step 6) + WIP ค้าง (Step 5) ของทุก Part</div>
+
+<div id="bridgeStatus" class="alert-banner ok" style="display:none">
+<div class="alert-title">🔗 เชื่อมต่อ Step 5+6 อัตโนมัติ</div>
+<div style="font-size:12px" id="bridgeMsg">รอข้อมูล...</div>
+</div>
+
+<div class="import-box" id="importBox" onclick="rollupData()">
+<div style="font-size:32px;margin-bottom:8px">🔄</div>
+<div style="font-weight:700;color:var(--indigo)">แตะเพื่อ Rollup ข้อมูล</div>
+<div style="font-size:11px;color:var(--dim);margin-top:4px">ดึง WHL (Step 6) + WIP (Step 5)</div>
+</div>
+
+<div class="g3" style="margin-top:12px">
+<div class="kpi kpi-p"><div class="kpi-l">WHL Stock</div><div class="kpi-v" id="kpiWHL" style="color:#c4b5fd;font-size:20px">0</div><div class="kpi-t">pcs (Step 6)</div></div>
+<div class="kpi kpi-b"><div class="kpi-l">WIP ค้าง</div><div class="kpi-v" id="kpiWIP" style="color:var(--accent2);font-size:20px">0</div><div class="kpi-t">pcs (Step 5)</div></div>
+<div class="kpi kpi-g"><div class="kpi-l">รวมพร้อมส่ง</div><div class="kpi-v" id="kpiTotal" style="color:var(--green);font-size:20px">0</div><div class="kpi-t">pcs</div></div>
+</div>
+
+<div style="overflow-x:auto;margin-top:12px">
+<table class="tbl">
+<thead><tr><th>Part No</th><th>Part Name</th><th>WHL</th><th>WIP</th><th>รวม</th></tr></thead>
+<tbody id="rollupTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">แตะ Rollup ด้านบน</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- ==================== TAB 2: CUSTOMER DEMAND ==================== -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">🎯 Customer Demand (ความต้องการลูกค้า)</div>
+<div class="card-sub">ใส่ยอดสั่งซื้อของลูกค้าต่อ Part เพื่อคำนวณแผนผลิตรอบถัดไป</div>
+
+<div class="f"><label class="fl">เลือก Part No</label>
+<select id="demandPartSelect"><option value="">-- เลือก Part --</option></select>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">Customer Demand (pcs)</label>
+<input type="number" id="demandQty" value="0" min="0">
+</div>
+<div class="f"><label class="fl">กำหนดส่ง (Due Date)</label>
+<input type="date" id="demandDue">
+</div>
+</div>
+<button class="btn btn-i" onclick="saveDemand()">💾 บันทึก Demand</button>
+
+<div style="margin-top:16px">
+<div style="font-weight:700;color:#a5b4fc;font-size:13px;margin-bottom:8px">📋 Demand ที่บันทึกแล้ว</div>
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part No</th><th>Demand</th><th>Due Date</th><th>ลบ</th></tr></thead>
+<tbody id="demandTable"><tr><td colspan="4" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มี Demand</td></tr></tbody>
+</table>
+</div>
+</div>
+</div></div>
+
+<!-- ==================== TAB 3: NEXT PLAN ==================== -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📊 Next Plan (แผนผลิตรอบถัดไป)</div>
+<div class="card-sub">คำนวณอัตโนมัติ: Next Plan = Demand − (WHL + WIP ค้าง)</div>
+
+<div class="alert-banner ok" style="margin-bottom:10px">
+<div style="font-size:12px;line-height:1.6">
+📐 <b>สูตรคำนวณ:</b><br>
+Next Plan = Customer Demand − (WHL Stock + WIP ค้าง)<br>
+<span style="color:var(--dim)">ถ้าผลลบ = มี stock พอแล้ว (ไม่ต้องผลิต)</span>
+</div>
+</div>
+
+<button class="btn btn-i" style="margin-bottom:10px" onclick="calcNextPlan()">🧮 คำนวณ Next Plan</button>
+
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part No</th><th>Demand</th><th>WHL+WIP</th><th>ต้องผลิต</th><th>Status</th></tr></thead>
+<tbody id="planTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">แตะคำนวณด้านบน</td></tr></tbody>
+</table>
+</div>
+
+<div class="g2" style="margin-top:12px">
+<div class="kpi kpi-i"><div class="kpi-l">Parts ต้องผลิต</div><div class="kpi-v" id="kpiPlanParts" style="color:#a5b4fc">0</div><div class="kpi-t">รายการ</div></div>
+<div class="kpi kpi-r"><div class="kpi-l">ยอดผลิตรวม</div><div class="kpi-v" id="kpiPlanTotal" style="color:var(--red)">0</div><div class="kpi-t">pcs</div></div>
+</div>
+</div></div>
+
+<!-- ==================== TAB 4: SUMMARY ==================== -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">📈 สรุปรวมทั้งระบบ (Full Rollup)</div>
+<div class="card-sub">ภาพรวมทุก Part: Demand / Stock / Plan</div>
+
+<div class="g4" style="margin-bottom:12px">
+<div class="kpi kpi-i"><div class="kpi-l">Total Parts</div><div class="kpi-v" id="sumParts" style="color:#a5b4fc;font-size:18px">0</div></div>
+<div class="kpi kpi-y"><div class="kpi-l">Total Demand</div><div class="kpi-v" id="sumDemand" style="color:var(--yellow);font-size:18px">0</div></div>
+<div class="kpi kpi-g"><div class="kpi-l">Total Stock</div><div class="kpi-v" id="sumStock" style="color:var(--green);font-size:18px">0</div></div>
+<div class="kpi kpi-r"><div class="kpi-l">Total Plan</div><div class="kpi-v" id="sumPlan" style="color:var(--red);font-size:18px">0</div></div>
+</div>
+
+<div style="overflow-x:auto">
+<table class="tbl">
+<thead><tr><th>Part No</th><th>Demand</th><th>WHL</th><th>WIP</th><th>Plan</th></tr></thead>
+<tbody id="summaryTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">คำนวณ Next Plan ก่อน</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- ==================== TAB 5: EXPORT ==================== -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title">📤 Export & Bridge to Step 0</div>
+<div class="card-sub">ส่งออกแผน + ส่งต่อไป Step 0 (Production Plan รอบถัดไป)</div>
+
+<button class="btn btn-a" style="margin-bottom:8px" onclick="exportCSV()">📥 Export Next Plan (CSV)</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="exportJSON()">📥 Export JSON (Backup)</button>
+<button class="btn btn-i" onclick="bridgeToStep0()">🔗 ส่ง Next Plan ไป Step 0</button>
+
+<div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px">
+<div style="font-weight:700;color:#a5b4fc;font-size:13px;margin-bottom:8px">📊 สรุป Step 7</div>
+<div style="font-size:12px;color:var(--dim);line-height:2">
+📥 Parts rollup: <b id="esumParts" style="color:#a5b4fc">0</b><br>
+🎯 Demand รวม: <b id="esumDemand" style="color:var(--yellow)">0</b> pcs<br>
+📦 Stock รวม (WHL+WIP): <b id="esumStock" style="color:var(--green)">0</b> pcs<br>
+📊 Next Plan รวม: <b id="esumPlan" style="color:var(--red)">0</b> pcs
+</div>
+</div>
+
+<button class="btn btn-r" style="margin-top:10px" onclick="clearStep7()">🗑️ Clear All Step 7 Data</button>
+</div></div>
+
+<!-- ==================== TAB 6: CLOUD ==================== -->
+<div class="tc" id="tab6"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud — Backup to Google Sheets</div>
+<div class="card-sub">บันทึก Next Plan ไป Google Sheets</div>
+
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:10px">
+<div style="font-size:12px;color:#10b981;line-height:1.6">
+<b>☁️ Cloud Status:</b> <span id="cloudStatus7" style="font-weight:700">Not configured</span><br>
+<b>🔄 Last Backup:</b> <span id="lastBackup7" style="font-weight:700">Never</span>
+</div>
+</div>
+
+<div class="f"><label class="fl">🔗 Apps Script URL (same as Step 4/5/6)</label>
+<input type="text" id="appsScriptURL7" placeholder="https://script.google.com/macros/s/..." style="font-size:12px">
+</div>
+
+<div class="g2" style="margin-bottom:10px">
+<button class="btn btn-i" onclick="testCloud7()" style="font-size:12px">🧪 Test</button>
+<button class="btn btn-g" onclick="saveCloud7()" style="font-size:12px">💾 Save</button>
+</div>
+
+<div id="cloudTest7Result" style="margin-bottom:10px"></div>
+
+<div style="background:var(--inp);border-radius:8px;padding:12px">
+<div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:8px">📤 Backup Next Plan</div>
+<button class="btn btn-g" onclick="backupPlanToCloud()">☁️ Backup Plan → Google Sheets</button>
+<div id="planBackupResult" style="margin-top:8px"></div>
+</div>
+</div></div>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<div class="bn">
+<button class="btn btn-d" id="btnPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button>
+<button class="btn btn-i" id="btnNext" onclick="nextTab()">ถัดไป ▶</button>
+</div>
+
+<script>
+// ==================== STATE ====================
+var curTab = 1;
+var rollup = [];      // [{partNo, partName, whl, wip, total}]
+var demands = {};     // {partNo: {qty, due}}
+var nextPlan = [];    // [{partNo, partName, demand, stock, plan, status}]
+
+function init(){
+  var d = new Date();
+  document.getElementById('dd').textContent = d.toLocaleDateString('th-TH');
+  var due=document.getElementById('demandDue'); if(due)due.value=d.toISOString().split('T')[0];
+  loadAll();
+  checkBridge();
+  initCloud7();
+  refreshAll();
+}
+
+// ==================== LOAD/SAVE ====================
+function loadAll(){
+  try{ rollup = JSON.parse(localStorage.getItem('mes_step7_rollup')||'[]'); }catch(e){}
+  try{ demands = JSON.parse(localStorage.getItem('mes_step7_demands')||'{}'); }catch(e){}
+  try{ nextPlan = JSON.parse(localStorage.getItem('mes_step7_plan')||'[]'); }catch(e){}
+}
+function saveAll(){
+  localStorage.setItem('mes_step7_rollup', JSON.stringify(rollup));
+  localStorage.setItem('mes_step7_demands', JSON.stringify(demands));
+  localStorage.setItem('mes_step7_plan', JSON.stringify(nextPlan));
+}
+
+// ==================== BRIDGE CHECK ====================
+function checkBridge(){
+  var hasWHL=false, hasWIP=false;
+  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock)hasWHL=true; }catch(e){}
+  try{ var w=JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); if(Array.isArray(w)&&w.length>0)hasWIP=true; }catch(e){}
+  try{ var s6=JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); if(Object.keys(s6).length>0)hasWHL=true; }catch(e){}
+  
+  if(hasWHL||hasWIP){
+    document.getElementById('bridgeStatus').style.display='block';
+    var msg=[];
+    if(hasWHL)msg.push('WHL จาก Step 6');
+    if(hasWIP)msg.push('WIP จาก Step 5');
+    document.getElementById('bridgeMsg').textContent='พบ '+msg.join(' + ')+' — แตะ Rollup เพื่อรวมข้อมูล';
+  }
+}
+
+// ==================== ROLLUP ====================
+function rollupData(){
+  var whlData={};
+  // From Step 6 bridge or direct
+  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock)whlData=b6.whlStock; }catch(e){}
+  if(Object.keys(whlData).length===0){
+    try{ whlData=JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); }catch(e){}
+  }
+  
+  // From Step 5 WIP
+  var wipData=[];
+  try{ wipData=JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); }catch(e){}
+  if(!Array.isArray(wipData)) wipData=[];
+  
+  // Merge by partNo
+  var merged={};
+  Object.keys(whlData).forEach(function(part){
+    if(!merged[part])merged[part]={partNo:part,partName:whlData[part].name||'',whl:0,wip:0};
+    merged[part].whl=parseInt(whlData[part].qty||0);
+  });
+  wipData.forEach(function(w){
+    var part=w.partNo||w.part||'';
+    if(!part)return;
+    if(!merged[part])merged[part]={partNo:part,partName:w.partName||w.name||'',whl:0,wip:0};
+    merged[part].wip=parseInt(w.current||w.cur||0);
+    if(!merged[part].partName)merged[part].partName=w.partName||w.name||'';
+  });
+  
+  rollup=Object.keys(merged).map(function(part){
+    var m=merged[part];
+    m.total=m.whl+m.wip;
+    return m;
+  });
+  
+  if(rollup.length===0){
+    toast('📭 ไม่พบข้อมูลจาก Step 5/6 — กรุณาทำ Step 5+6 ก่อน');
+    return;
+  }
+  
+  saveAll();
+  refreshAll();
+  document.getElementById('importBox').classList.add('has-file');
+  toast('✅ Rollup สำเร็จ '+rollup.length+' Parts');
+}
+
+// ==================== DEMAND ====================
+function saveDemand(){
+  var part=document.getElementById('demandPartSelect').value;
+  var qty=parseInt(document.getElementById('demandQty').value||0);
+  var due=document.getElementById('demandDue').value;
+  if(!part){toast('⚠️ เลือก Part');return;}
+  if(qty<=0){toast('⚠️ ใส่จำนวน Demand');return;}
+  demands[part]={qty:qty,due:due};
+  saveAll();
+  refreshAll();
+  toast('✅ บันทึก Demand '+part+' = '+qty+' pcs');
+  document.getElementById('demandQty').value='';
+}
+function delDemand(part){
+  delete demands[part];
+  saveAll();refreshAll();
+  toast('🗑️ ลบ Demand '+part);
+}
+
+// ==================== NEXT PLAN ====================
+function calcNextPlan(){
+  if(rollup.length===0){toast('⚠️ Rollup ข้อมูลก่อน (Tab 1)');return;}
+  if(Object.keys(demands).length===0){toast('⚠️ ใส่ Customer Demand ก่อน (Tab 2)');return;}
+  
+  nextPlan=[];
+  rollup.forEach(function(r){
+    var demand=demands[r.partNo]?demands[r.partNo].qty:0;
+    var stock=r.total;
+    var plan=demand-stock;
+    nextPlan.push({
+      partNo:r.partNo, partName:r.partName,
+      demand:demand, whl:r.whl, wip:r.wip, stock:stock,
+      plan:plan>0?plan:0,
+      status:plan>0?'ต้องผลิต':'stock พอ'
+    });
+  });
+  // Add parts that have demand but no rollup
+  Object.keys(demands).forEach(function(part){
+    if(!rollup.find(function(r){return r.partNo===part;})){
+      nextPlan.push({partNo:part,partName:'',demand:demands[part].qty,whl:0,wip:0,stock:0,plan:demands[part].qty,status:'ต้องผลิต'});
+    }
+  });
+  
+  saveAll();
+  refreshAll();
+  toast('🧮 คำนวณ Next Plan สำเร็จ');
+  showTab(3);
+}
+
+// ==================== REFRESH ====================
+function refreshAll(){
+  // Part selects
+  var partOpts='<option value="">-- เลือก Part --</option>';
+  rollup.forEach(function(r){partOpts+='<option value="'+r.partNo+'">'+r.partNo+' — '+r.partName+'</option>';});
+  var dps=document.getElementById('demandPartSelect');
+  if(dps){var v=dps.value;dps.innerHTML=partOpts;dps.value=v;}
+  
+  // Tab 1: Rollup
+  var whlSum=rollup.reduce(function(s,r){return s+r.whl;},0);
+  var wipSum=rollup.reduce(function(s,r){return s+r.wip;},0);
+  document.getElementById('kpiWHL').textContent=whlSum;
+  document.getElementById('kpiWIP').textContent=wipSum;
+  document.getElementById('kpiTotal').textContent=whlSum+wipSum;
+  var rtHtml='';
+  rollup.forEach(function(r){
+    rtHtml+='<tr><td class="lbl">'+r.partNo+'</td><td class="pn">'+r.partName+'</td><td style="text-align:center;color:#c4b5fd">'+r.whl+'</td><td style="text-align:center;color:var(--accent2)">'+r.wip+'</td><td style="text-align:center;font-weight:700;color:var(--green)">'+r.total+'</td></tr>';
+  });
+  if(rtHtml)document.getElementById('rollupTable').innerHTML=rtHtml;
+  
+  // Tab 2: Demand table
+  var dtHtml='';
+  Object.keys(demands).forEach(function(part){
+    var d=demands[part];
+    dtHtml+='<tr><td class="lbl">'+part+'</td><td style="text-align:center;color:var(--yellow);font-weight:700">'+d.qty+'</td><td style="text-align:center;font-size:11px">'+(d.due||'-')+'</td><td style="text-align:center"><button onclick="delDemand(\''+part+'\')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  if(dtHtml)document.getElementById('demandTable').innerHTML=dtHtml;
+  
+  // Tab 3: Plan table
+  var ptHtml='';
+  var planParts=0,planTotal=0;
+  nextPlan.forEach(function(p){
+    if(p.plan>0){planParts++;planTotal+=p.plan;}
+    var stColor=p.plan>0?'var(--red)':'var(--green)';
+    var stBadge=p.plan>0?'<span class="badge badge-crit">ต้องผลิต</span>':'<span class="badge badge-ok">stock พอ</span>';
+    ptHtml+='<tr><td class="lbl">'+p.partNo+'</td><td style="text-align:center;color:var(--yellow)">'+p.demand+'</td><td style="text-align:center;color:var(--green)">'+p.stock+'</td><td style="text-align:center;font-weight:700;color:'+stColor+'">'+p.plan+'</td><td style="text-align:center">'+stBadge+'</td></tr>';
+  });
+  if(ptHtml)document.getElementById('planTable').innerHTML=ptHtml;
+  document.getElementById('kpiPlanParts').textContent=planParts;
+  document.getElementById('kpiPlanTotal').textContent=planTotal;
+  
+  // Tab 4: Summary
+  var totDemand=0,totStock=0,totPlan=0;
+  var stHtml='';
+  nextPlan.forEach(function(p){
+    totDemand+=p.demand;totStock+=p.stock;totPlan+=p.plan;
+    stHtml+='<tr><td class="lbl">'+p.partNo+'</td><td style="text-align:center;color:var(--yellow)">'+p.demand+'</td><td style="text-align:center;color:#c4b5fd">'+p.whl+'</td><td style="text-align:center;color:var(--accent2)">'+p.wip+'</td><td style="text-align:center;font-weight:700;color:'+(p.plan>0?'var(--red)':'var(--green)')+'">'+p.plan+'</td></tr>';
+  });
+  if(stHtml)document.getElementById('summaryTable').innerHTML=stHtml;
+  document.getElementById('sumParts').textContent=nextPlan.length;
+  document.getElementById('sumDemand').textContent=totDemand;
+  document.getElementById('sumStock').textContent=totStock;
+  document.getElementById('sumPlan').textContent=totPlan;
+  
+  // Tab 5: Export summary
+  document.getElementById('esumParts').textContent=rollup.length;
+  document.getElementById('esumDemand').textContent=totDemand;
+  document.getElementById('esumStock').textContent=totStock;
+  document.getElementById('esumPlan').textContent=totPlan;
+}
+
+// ==================== EXPORT ====================
+function exportCSV(){
+  var csv='PartNo,PartName,Demand,WHL,WIP,Stock,NextPlan,Status\n';
+  nextPlan.forEach(function(p){
+    csv+=p.partNo+','+p.partName+','+p.demand+','+p.whl+','+p.wip+','+p.stock+','+p.plan+','+p.status+'\n';
+  });
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='MES_Step7_NextPlan_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  toast('📥 Export CSV สำเร็จ');
+}
+function exportJSON(){
+  var data={rollup:rollup,demands:demands,nextPlan:nextPlan,exported:new Date().toISOString()};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='MES_Step7_backup.json';a.click();
+  toast('📥 Export JSON สำเร็จ');
+}
+function bridgeToStep0(){
+  if(nextPlan.length===0){toast('⚠️ คำนวณ Next Plan ก่อน');return;}
+  var planToSend=nextPlan.filter(function(p){return p.plan>0;});
+  var bridge={nextPlan:planToSend,timestamp:new Date().toISOString(),source:'Step7'};
+  localStorage.setItem('mes_bridge_step7_to_0', JSON.stringify(bridge));
+  toast('🔗 ส่ง Next Plan ไป Step 0 แล้ว ('+planToSend.length+' parts)');
+}
+function clearStep7(){
+  if(!confirm('ล้างข้อมูล Step 7 ทั้งหมด?')) return;
+  ['mes_step7_rollup','mes_step7_demands','mes_step7_plan'].forEach(function(k){localStorage.removeItem(k);});
+  rollup=[];demands={};nextPlan=[];
+  refreshAll();
+  toast('🗑️ ล้างข้อมูลแล้ว');
+}
+
+// ==================== CLOUD (JSONP - iPad compatible) ====================
+function cloudGET(url, callback, errback){
+  var cbName='_jcb_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+  var timeoutId=setTimeout(function(){if(window[cbName]){delete window[cbName];errback('Timeout (20s) - ลองใหม่');}},20000);
+  window[cbName]=function(data){clearTimeout(timeoutId);delete window[cbName];callback(data);};
+  var s=document.createElement('script');
+  s.src=url+(url.indexOf('?')>-1?'&':'?')+'callback='+cbName;
+  s.onerror=function(){clearTimeout(timeoutId);delete window[cbName];errback('Network error - ตรวจสอบ internet/URL');};
+  document.head.appendChild(s);
+  setTimeout(function(){try{document.head.removeChild(s);}catch(e){}},25000);
+}
+function cloudPOST(url, payload, callback, errback){
+  var dataStr=encodeURIComponent(JSON.stringify(payload));
+  if(dataStr.length>7000){errback('Data too large. Use PC instead.');return;}
+  cloudGET(url+'?action=postData&data='+dataStr, callback, errback);
+}
+function initCloud7(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(url){var el=document.getElementById('appsScriptURL7');if(el)el.value=url;}
+  var lb=localStorage.getItem('mes_step7_last_backup');
+  if(lb){var e=document.getElementById('lastBackup7');if(e)e.textContent=new Date(lb).toLocaleString('th-TH');}
+}
+function saveCloud7(){
+  var url=document.getElementById('appsScriptURL7').value.trim();
+  url=url.replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,'');
+  if(!url){alert('กรุณาใส่ URL');return;}
+  localStorage.setItem('mes_apps_script_url',url);
+  document.getElementById('appsScriptURL7').value=url;
+  toast('✅ Cloud config saved!');
+}
+function testCloud7(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){document.getElementById('cloudTest7Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}
+  document.getElementById('cloudTest7Result').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';
+  cloudGET(url+'?action=getRecent&limit=1',function(d){
+    if(d.status==='success'){
+      document.getElementById('cloudTest7Result').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';
+      document.getElementById('cloudStatus7').textContent='✅ Connected';
+      document.getElementById('cloudStatus7').style.color='#10b981';
+    }else{document.getElementById('cloudTest7Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';}
+  },function(err){document.getElementById('cloudTest7Result').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+err+'</div>';});
+}
+function backupPlanToCloud(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){alert('กรุณา Save Cloud config ก่อน');return;}
+  if(nextPlan.length===0){alert('📭 คำนวณ Next Plan ก่อน');return;}
+  document.getElementById('planBackupResult').innerHTML='<div style="color:#f59e0b;font-size:12px;padding:8px">⏳ Backing up...</div>';
+  var payload={type:'PLAN_DATA',machineID:'Step7',timestamp:new Date().toISOString(),planData:nextPlan};
+  cloudPOST(url,payload,function(result){
+    if(result.status==='success'){
+      document.getElementById('planBackupResult').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Backed up '+(result.count||nextPlan.length)+' plan records!</div>';
+      localStorage.setItem('mes_step7_last_backup',new Date().toISOString());
+      document.getElementById('lastBackup7').textContent=new Date().toLocaleString('th-TH');
+    }else{document.getElementById('planBackupResult').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+result.message+'</div>';}
+  },function(err){document.getElementById('planBackupResult').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+err+'</div>';});
+}
+
+// ==================== NAV ====================
+function showTab(n){
+  curTab=n;
+  document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+  document.getElementById('btnPrev').style.display=n>1?'block':'none';
+  var nb=document.getElementById('btnNext');
+  if(n<5){nb.textContent='ถัดไป ▶';nb.className='btn btn-i';nb.onclick=nextTab;}
+  else if(n===5){nb.textContent='🔗 ส่งไป Step 0';nb.className='btn btn-g';nb.onclick=bridgeToStep0;}
+  else{nb.textContent='☁️ Backup';nb.className='btn btn-g';nb.onclick=backupPlanToCloud;}
+  refreshAll();
+}
+function nextTab(){if(curTab<6)showTab(curTab+1);}
+function prevTab(){if(curTab>1)showTab(curTab-1);}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+init();
+</script>
+</body>
+</html>

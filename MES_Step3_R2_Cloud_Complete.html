@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MES Step 3 - Production Readiness 4M R2 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--emerald:#059669}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:12px 14px;border-bottom:2px solid var(--emerald);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:16px;font-weight:800;color:#6ee7b7}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.flow-bar{background:var(--card);padding:8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px;position:sticky;top:54px;z-index:99}
+.flow-bar::-webkit-scrollbar{display:none}
+.flow-step{flex:0 0 auto;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--emerald);color:#fff;border-color:var(--emerald)}
+.flow-step.done{background:#10b98130;color:var(--green);border-color:#10b98140}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:96px;z-index:98}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:0 0 auto;padding:7px 11px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--emerald);color:#fff;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#6ee7b7;margin-bottom:10px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--emerald)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn{width:100%;padding:12px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-e{background:var(--emerald)}.btn-a{background:var(--accent)}.btn-g{background:var(--green)}.btn-r{background:var(--red)}.btn-d{background:var(--border)}
+.btn:active{transform:scale(.97)}
+.kpi{border-radius:var(--r);padding:12px;text-align:center}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:24px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.kpi-g{background:#10b98115;border:1px solid #10b98140}.kpi-r{background:#ef444415;border:1px solid #ef444440}.kpi-e{background:#05966915;border:1px solid #05966940}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(5,150,105,.1)}
+.tbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px}
+.alert-banner{background:linear-gradient(135deg,#ef444420,#ef444410);border:2px solid var(--red);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.alert-banner.warn{background:linear-gradient(135deg,#f59e0b20,#f59e0b10);border-color:var(--yellow)}
+.alert-banner.ok{background:linear-gradient(135deg,#10b98120,#10b98110);border-color:var(--green)}
+.alert-title{font-weight:800;font-size:14px;margin-bottom:6px}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.tc{display:none}.tc.active{display:block}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.check-row{display:flex;align-items:center;gap:10px;padding:12px;background:var(--inp);border-radius:8px;margin-bottom:8px;border:1px solid var(--border)}
+.check-box{width:28px;height:28px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+.check-box.on{background:var(--green);border-color:var(--green);color:#fff}
+.check-label{flex:1;font-size:13px;font-weight:600}
+.m-section{background:var(--card2);border-radius:var(--r);padding:12px;margin-bottom:10px;border-left:4px solid var(--emerald)}
+.m-title{font-weight:800;font-size:14px;color:#6ee7b7;margin-bottom:10px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.badge-ok{background:#10b98130;color:var(--green)}.badge-no{background:var(--red);color:#fff}
+.gauge{width:100%;height:24px;background:var(--inp);border-radius:12px;overflow:hidden;margin:8px 0}
+.gauge-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));transition:width .3s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+@media(max-width:400px){.card{padding:10px;margin:6px}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ บันทึกสำเร็จ!</div>
+
+<div class="topbar">
+<div><div class="topbar-title">✅ MES Step 3 — Production Readiness 4M R2 Cloud</div><div class="topbar-sub">Vandapac Co., Ltd. — ☁️ Google Sheets Sync</div></div>
+<div style="text-align:right"><div id="dd" style="font-weight:700;font-size:12px"></div><div style="font-size:10px;color:var(--emerald)">เช็คความพร้อมก่อนผลิต</div></div>
+</div>
+
+<div class="flow-bar">
+<div class="flow-step done">0️⃣ Production Plan ✓</div>
+<div class="flow-step done">1️⃣ Raw Material In ✓</div>
+<div class="flow-step done">2️⃣ WIP Raw Material ✓</div>
+<div class="flow-step active">3️⃣ Production Readiness ◀ ตอนนี้</div>
+<div class="flow-step done">4️⃣ Production Record ✓</div>
+<div class="flow-step done">5️⃣ WIP Max-Min ✓</div>
+<div class="flow-step done">6️⃣ Route Distribution ✓</div>
+<div class="flow-step done">7️⃣ WIP & WHL Rollup ✓</div>
+</div>
+
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📋 4M Checklist</button>
+<button class="nav-btn" onclick="showTab(2)">📊 Readiness Score</button>
+<button class="nav-btn" onclick="showTab(3)">📜 ประวัติ</button>
+<button class="nav-btn" onclick="showTab(4)">📤 Export</button>
+<button class="nav-btn" onclick="showTab(5)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- TAB 1: 4M CHECKLIST -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📋 4M Readiness Check</div>
+<div class="card-sub">เช็คความพร้อม 4M ก่อนเริ่มผลิต (Man / Machine / Material / Method)</div>
+
+<div class="g2" style="margin-bottom:10px">
+<div class="f"><label class="fl">📅 วันที่</label><input type="date" id="chkDate"></div>
+<div class="f"><label class="fl">⚙️ Machine/Line</label>
+<select id="chkMachine">
+<option value="IJ01">IJ01</option><option value="IJ02">IJ02</option><option value="IJ03">IJ03</option>
+<option value="IJ04">IJ04</option><option value="IJ05">IJ05</option><option value="BM01">BM01</option>
+<option value="BM02">BM02</option><option value="BM03">BM03</option><option value="BM04">BM04</option>
+<option value="BM05">BM05</option><option value="BM06">BM06</option><option value="BM07">BM07</option>
+<option value="BM08">BM08</option><option value="BM09">BM09</option><option value="BM10">BM10</option>
+</select></div>
+</div>
+
+<!-- MAN -->
+<div class="m-section">
+<div class="m-title">👤 MAN (คน)</div>
+<div class="check-row"><div class="check-box" data-k="man1" onclick="toggle(this)"></div><div class="check-label">พนักงานครบตามแผน + มีทักษะ</div></div>
+<div class="check-row"><div class="check-box" data-k="man2" onclick="toggle(this)"></div><div class="check-label">ผ่านการอบรม/มี Work Instruction</div></div>
+<div class="check-row"><div class="check-box" data-k="man3" onclick="toggle(this)"></div><div class="check-label">มี PPE ครบ (อุปกรณ์ความปลอดภัย)</div></div>
+</div>
+
+<!-- MACHINE -->
+<div class="m-section">
+<div class="m-title">⚙️ MACHINE (เครื่องจักร)</div>
+<div class="check-row"><div class="check-box" data-k="mc1" onclick="toggle(this)"></div><div class="check-label">เครื่องจักรพร้อม + ผ่าน PM</div></div>
+<div class="check-row"><div class="check-box" data-k="mc2" onclick="toggle(this)"></div><div class="check-label">Mold/Die ติดตั้งถูกต้อง</div></div>
+<div class="check-row"><div class="check-box" data-k="mc3" onclick="toggle(this)"></div><div class="check-label">ตั้งค่า parameter ครบ (Temp/Pressure)</div></div>
+</div>
+
+<!-- MATERIAL -->
+<div class="m-section">
+<div class="m-title">📦 MATERIAL (วัตถุดิบ)</div>
+<div id="matAutoStatus" style="font-size:11px;color:var(--dim);margin-bottom:8px"></div>
+<div class="check-row"><div class="check-box" data-k="mat1" onclick="toggle(this)"></div><div class="check-label">วัตถุดิบพร้อม + เพียงพอ (จาก Step 2)</div></div>
+<div class="check-row"><div class="check-box" data-k="mat2" onclick="toggle(this)"></div><div class="check-label">วัตถุดิบผ่าน QC (Pass)</div></div>
+<div class="check-row"><div class="check-box" data-k="mat3" onclick="toggle(this)"></div><div class="check-label">Masterbatch/สี พร้อม</div></div>
+</div>
+
+<!-- METHOD -->
+<div class="m-section">
+<div class="m-title">📐 METHOD (วิธีการ)</div>
+<div class="check-row"><div class="check-box" data-k="met1" onclick="toggle(this)"></div><div class="check-label">มี Production Plan ชัดเจน (จาก Step 0)</div></div>
+<div class="check-row"><div class="check-box" data-k="met2" onclick="toggle(this)"></div><div class="check-label">มี Standard/Spec + เอกสารควบคุม</div></div>
+<div class="check-row"><div class="check-box" data-k="met3" onclick="toggle(this)"></div><div class="check-label">First Article Inspection พร้อม</div></div>
+</div>
+
+<button class="btn btn-e" onclick="saveCheck()">💾 บันทึกผลตรวจ 4M</button>
+</div></div>
+
+<!-- TAB 2: SCORE -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">📊 Readiness Score</div>
+<div class="card-sub">คะแนนความพร้อมรวม (12 รายการ)</div>
+
+<div style="text-align:center;margin:16px 0">
+<div style="font-size:48px;font-weight:900;color:var(--green)" id="scorePercent">0%</div>
+<div style="font-size:12px;color:var(--dim)">ความพร้อมรวม</div>
+</div>
+<div class="gauge"><div class="gauge-fill" id="scoreGauge" style="width:0%">0/12</div></div>
+
+<div id="readyVerdict" style="margin-top:16px"></div>
+
+<div style="margin-top:14px">
+<table class="tbl"><thead><tr><th>หมวด 4M</th><th>ผ่าน</th><th>Status</th></tr></thead>
+<tbody id="scoreTable"></tbody></table>
+</div>
+</div></div>
+
+<!-- TAB 3: HISTORY -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📜 ประวัติการตรวจ 4M</div>
+<div style="overflow-x:auto">
+<table class="tbl"><thead><tr><th>วันที่</th><th>Machine</th><th>Score</th><th>ผล</th><th>ลบ</th></tr></thead>
+<tbody id="histTable"><tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">ยังไม่มีข้อมูล</td></tr></tbody></table>
+</div>
+</div></div>
+
+<!-- TAB 4: EXPORT -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">📤 Export & Bridge to Step 4</div>
+<button class="btn btn-a" style="margin-bottom:8px" onclick="exportCSV()">📥 Export CSV</button>
+<button class="btn btn-g" style="margin-bottom:8px" onclick="exportJSON()">📥 Export JSON</button>
+<button class="btn btn-e" onclick="bridgeToStep4()">🔗 ส่งสถานะพร้อมไป Step 4</button>
+<div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px;font-size:12px;color:var(--dim);line-height:2">
+📋 ประวัติตรวจ: <b id="sumChecks" style="color:#6ee7b7">0</b> ครั้ง<br>
+✅ พร้อมผลิต: <b id="sumReady" style="color:var(--green)">0</b> ครั้ง<br>
+❌ ไม่พร้อม: <b id="sumNotReady" style="color:var(--red)">0</b> ครั้ง
+</div>
+<button class="btn btn-r" style="margin-top:10px" onclick="clearStep3()">🗑️ Clear All</button>
+</div></div>
+
+<!-- TAB 5: CLOUD -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud — Backup to Google Sheets</div>
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px;color:#10b981;line-height:1.6">
+<b>☁️ Status:</b> <span id="cloudStatus3" style="font-weight:700">Not configured</span><br>
+<b>🔄 Last Backup:</b> <span id="lastBackup3" style="font-weight:700">Never</span>
+</div>
+<div class="f"><label class="fl">🔗 Apps Script URL (same as all steps)</label>
+<input type="text" id="appsScriptURL3" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"></div>
+<div class="g2" style="margin-bottom:10px">
+<button class="btn btn-e" onclick="testCloud3()" style="font-size:12px">🧪 Test</button>
+<button class="btn btn-g" onclick="saveCloud3()" style="font-size:12px">💾 Save</button>
+</div>
+<div id="cloudTest3Result" style="margin-bottom:10px"></div>
+<div style="background:var(--inp);border-radius:8px;padding:12px">
+<button class="btn btn-g" onclick="backupToCloud()">☁️ Backup Readiness → Google Sheets</button>
+<div id="backupResult3" style="margin-top:8px"></div>
+</div>
+</div></div>
+
+<div class="bn">
+<button class="btn btn-d" id="btnPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button>
+<button class="btn btn-e" id="btnNext" onclick="nextTab()">ถัดไป ▶</button>
+</div>
+
+<script>
+var curTab=1;
+var checkState={};
+var history=[];
+var CHECK_KEYS=['man1','man2','man3','mc1','mc2','mc3','mat1','mat2','mat3','met1','met2','met3'];
+
+function init(){
+  document.getElementById('dd').textContent=new Date().toLocaleDateString('th-TH');
+  document.getElementById('chkDate').value=new Date().toISOString().split('T')[0];
+  loadAll();checkMatBridge();initCloud3();refreshScore();refreshHist();
+}
+function loadAll(){try{history=JSON.parse(localStorage.getItem('mes_step3_history')||'[]');}catch(e){}}
+function saveAll(){localStorage.setItem('mes_step3_history',JSON.stringify(history));}
+
+function checkMatBridge(){
+  var b=null;try{b=JSON.parse(localStorage.getItem('mes_bridge_step2_to_3')||'null');}catch(e){}
+  if(b&&b.material){
+    var types=Object.keys(b.material);
+    var ready=types.filter(function(t){return b.material[t].ok;}).length;
+    document.getElementById('matAutoStatus').innerHTML='🔗 จาก Step 2: วัตถุดิบ '+ready+'/'+types.length+' ชนิดพร้อม'+(ready===types.length&&types.length>0?' ✅':' ⚠️');
+    if(ready===types.length&&types.length>0){
+      var mb=document.querySelector('[data-k="mat1"]');if(mb&&!mb.classList.contains('on')){mb.classList.add('on');mb.textContent='✓';checkState.mat1=true;}
+    }
+  }
+}
+
+function toggle(el){
+  el.classList.toggle('on');
+  var on=el.classList.contains('on');
+  el.textContent=on?'✓':'';
+  checkState[el.getAttribute('data-k')]=on;
+  refreshScore();
+}
+
+function refreshScore(){
+  var passed=CHECK_KEYS.filter(function(k){return checkState[k];}).length;
+  var pct=Math.round((passed/12)*100);
+  document.getElementById('scorePercent').textContent=pct+'%';
+  var g=document.getElementById('scoreGauge');g.style.width=pct+'%';g.textContent=passed+'/12';
+  var v=document.getElementById('readyVerdict');
+  if(pct===100)v.innerHTML='<div class="alert-banner ok"><div class="alert-title">✅ พร้อมผลิต 100%</div><div style="font-size:12px">ผ่านครบทุกรายการ 4M — เริ่มผลิตได้</div></div>';
+  else if(pct>=75)v.innerHTML='<div class="alert-banner warn"><div class="alert-title">⚠️ เกือบพร้อม ('+pct+'%)</div><div style="font-size:12px">ยังขาด '+(12-passed)+' รายการ — ตรวจสอบก่อนผลิต</div></div>';
+  else v.innerHTML='<div class="alert-banner"><div class="alert-title">🔴 ยังไม่พร้อม ('+pct+'%)</div><div style="font-size:12px">ขาด '+(12-passed)+' รายการ — ห้ามเริ่มผลิต</div></div>';
+  // Category table
+  var cats=[['👤 MAN',['man1','man2','man3']],['⚙️ MACHINE',['mc1','mc2','mc3']],['📦 MATERIAL',['mat1','mat2','mat3']],['📐 METHOD',['met1','met2','met3']]];
+  var html='';
+  cats.forEach(function(c){
+    var p=c[1].filter(function(k){return checkState[k];}).length;
+    var badge=p===3?'<span class="badge badge-ok">ครบ</span>':'<span class="badge badge-no">'+(3-p)+' ขาด</span>';
+    html+='<tr><td class="lbl">'+c[0]+'</td><td style="text-align:center;font-weight:700">'+p+'/3</td><td style="text-align:center">'+badge+'</td></tr>';
+  });
+  document.getElementById('scoreTable').innerHTML=html;
+}
+
+function saveCheck(){
+  var passed=CHECK_KEYS.filter(function(k){return checkState[k];}).length;
+  var pct=Math.round((passed/12)*100);
+  history.push({
+    id:Date.now(),
+    date:document.getElementById('chkDate').value,
+    machine:document.getElementById('chkMachine').value,
+    score:passed, pct:pct,
+    ready:pct===100,
+    state:Object.assign({},checkState),
+    ts:new Date().toISOString()
+  });
+  saveAll();refreshHist();
+  toast('✅ บันทึกผลตรวจ '+pct+'%');
+}
+
+function delCheck(id){history=history.filter(function(h){return h.id!==id;});saveAll();refreshHist();toast('🗑️ ลบแล้ว');}
+
+function refreshHist(){
+  var hHtml='';var ready=0,notReady=0;
+  history.slice().reverse().forEach(function(h){
+    if(h.ready)ready++;else notReady++;
+    var badge=h.ready?'<span class="badge badge-ok">พร้อม</span>':'<span class="badge badge-no">ไม่พร้อม</span>';
+    var col=h.pct===100?'var(--green)':h.pct>=75?'var(--yellow)':'var(--red)';
+    hHtml+='<tr><td style="font-size:11px">'+h.date+'</td><td class="lbl">'+h.machine+'</td><td style="text-align:center;font-weight:700;color:'+col+'">'+h.pct+'%</td><td style="text-align:center">'+badge+'</td><td style="text-align:center"><button onclick="delCheck('+h.id+')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  if(hHtml)document.getElementById('histTable').innerHTML=hHtml;
+  else document.getElementById('histTable').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">ยังไม่มีข้อมูล</td></tr>';
+  document.getElementById('sumChecks').textContent=history.length;
+  document.getElementById('sumReady').textContent=ready;
+  document.getElementById('sumNotReady').textContent=notReady;
+}
+
+function exportCSV(){
+  var csv='Date,Machine,Score,Percent,Ready\n';
+  history.forEach(function(h){csv+=h.date+','+h.machine+','+h.score+'/12,'+h.pct+'%,'+(h.ready?'YES':'NO')+'\n';});
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MES_Step3_Readiness_'+new Date().toISOString().split('T')[0]+'.csv';a.click();toast('📥 Export CSV');
+}
+function exportJSON(){var blob=new Blob([JSON.stringify({history:history,exported:new Date().toISOString()},null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MES_Step3_backup.json';a.click();toast('📥 Export JSON');}
+function bridgeToStep4(){
+  var latest=history.length>0?history[history.length-1]:null;
+  if(!latest){toast('⚠️ บันทึกผลตรวจก่อน');return;}
+  localStorage.setItem('mes_bridge_step3_to_4',JSON.stringify({readiness:{machine:latest.machine,pct:latest.pct,ready:latest.ready,date:latest.date},timestamp:new Date().toISOString(),source:'Step3'}));
+  toast('🔗 ส่งสถานะพร้อม ('+latest.pct+'%) ไป Step 4');
+}
+function clearStep3(){if(!confirm('ล้างข้อมูล Step 3?'))return;localStorage.removeItem('mes_step3_history');history=[];refreshHist();toast('🗑️ ล้างแล้ว');}
+
+// CLOUD JSONP
+function cloudGET(url,cb,eb){var n='_jcb_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);var t=setTimeout(function(){if(window[n]){delete window[n];eb('Timeout - ลองใหม่');}},20000);window[n]=function(d){clearTimeout(t);delete window[n];cb(d);};var s=document.createElement('script');s.src=url+(url.indexOf('?')>-1?'&':'?')+'callback='+n;s.onerror=function(){clearTimeout(t);delete window[n];eb('Network error');};document.head.appendChild(s);setTimeout(function(){try{document.head.removeChild(s);}catch(e){}},25000);}
+function cloudPOST(url,p,cb,eb){var d=encodeURIComponent(JSON.stringify(p));if(d.length>7000){eb('Data too large. Use PC.');return;}cloudGET(url+'?action=postData&data='+d,cb,eb);}
+function initCloud3(){var url=localStorage.getItem('mes_apps_script_url');if(url){var e=document.getElementById('appsScriptURL3');if(e)e.value=url;}var lb=localStorage.getItem('mes_step3_last_backup');if(lb){var e2=document.getElementById('lastBackup3');if(e2)e2.textContent=new Date(lb).toLocaleString('th-TH');}}
+function saveCloud3(){var url=document.getElementById('appsScriptURL3').value.trim().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\s+/g,'');if(!url){alert('กรุณาใส่ URL');return;}localStorage.setItem('mes_apps_script_url',url);document.getElementById('appsScriptURL3').value=url;toast('✅ Saved!');}
+function testCloud3(){var url=localStorage.getItem('mes_apps_script_url');if(!url){document.getElementById('cloudTest3Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}document.getElementById('cloudTest3Result').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';cloudGET(url+'?action=getRecent&limit=1',function(d){if(d.status==='success'){document.getElementById('cloudTest3Result').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';document.getElementById('cloudStatus3').textContent='✅ Connected';document.getElementById('cloudStatus3').style.color='#10b981';}else{document.getElementById('cloudTest3Result').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';}},function(e){document.getElementById('cloudTest3Result').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+function backupToCloud(){var url=localStorage.getItem('mes_apps_script_url');if(!url){alert('Save Cloud config first');return;}if(history.length===0){alert('📭 ไม่มีข้อมูล');return;}document.getElementById('backupResult3').innerHTML='<div style="color:#f59e0b;font-size:12px;padding:8px">⏳ Backing up...</div>';var rdData=history.map(function(h){return {date:h.date,machine:h.machine,score:h.score,pct:h.pct,ready:h.ready?'YES':'NO'};});cloudPOST(url,{type:'READINESS_DATA',machineID:'Step3',timestamp:new Date().toISOString(),readinessData:rdData},function(result){if(result.status==='success'){document.getElementById('backupResult3').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Backed up '+(result.count||rdData.length)+' records!</div>';localStorage.setItem('mes_step3_last_backup',new Date().toISOString());document.getElementById('lastBackup3').textContent=new Date().toLocaleString('th-TH');}else{document.getElementById('backupResult3').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+result.message+'</div>';}},function(e){document.getElementById('backupResult3').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+e+'</div>';});}
+
+function showTab(n){curTab=n;document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});document.getElementById('tab'+n).classList.add('active');document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});document.getElementById('btnPrev').style.display=n>1?'block':'none';var nb=document.getElementById('btnNext');if(n<4){nb.textContent='ถัดไป ▶';nb.className='btn btn-e';nb.onclick=nextTab;}else if(n===4){nb.textContent='🔗 ส่งไป Step 4';nb.className='btn btn-g';nb.onclick=bridgeToStep4;}else{nb.textContent='☁️ Backup';nb.className='btn btn-g';nb.onclick=backupToCloud;}}
+function nextTab(){if(curTab<5)showTab(curTab+1);}
+function prevTab(){if(curTab>1)showTab(curTab-1);}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+init();
+</script>
+</body>
+</html>
