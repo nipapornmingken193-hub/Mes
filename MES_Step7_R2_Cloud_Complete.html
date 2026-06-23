@@ -225,7 +225,8 @@ Next Plan = Customer Demand − (WHL Stock + WIP ค้าง)<br>
 </div>
 </div>
 
-<button class="btn btn-r" style="margin-top:10px" onclick="clearStep7()">🗑️ Clear All Step 7 Data</button>
+<button class="btn btn-i" style="margin-top:10px" onclick="rollupData()">🔄 อัปเดตข้อมูลจาก Cloud (Re-Rollup — ปลอดภัย ไม่ลบข้อมูล)</button>
+<button class="btn btn-d" style="margin-top:8px;font-size:12px" onclick="clearStep7()">🗑️ ล้างข้อมูล (เริ่มรอบใหม่ — ต้องพิมพ์ยืนยัน)</button>
 </div></div>
 
 <!-- ==================== TAB 6: CLOUD ==================== -->
@@ -295,63 +296,89 @@ function saveAll(){
 
 // ==================== BRIDGE CHECK ====================
 function checkBridge(){
-  var hasWHL=false, hasWIP=false;
-  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock)hasWHL=true; }catch(e){}
-  try{ var w=JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); if(Array.isArray(w)&&w.length>0)hasWIP=true; }catch(e){}
+  var url=localStorage.getItem('mes_apps_script_url');
+  var bs=document.getElementById('bridgeStatus'), bm=document.getElementById('bridgeMsg');
+  if(url){
+    if(bs)bs.style.display='block';
+    if(bm)bm.textContent='⏳ ตรวจข้อมูลจาก Cloud (Step 5 WIP + Step 6 WHL)...';
+    if(rollup.length===0){
+      rollupFromCloud(function(ok){
+        if(ok&&rollup.length>0){ if(bm)bm.textContent='✅ Rollup อัตโนมัติจาก Cloud — '+rollup.length+' Parts'; }
+        else{ if(bm)bm.textContent='ยังไม่พบข้อมูลบน Cloud — ไป Backup ที่ Step 5/6 ก่อน'; }
+      });
+    }else{
+      if(bm)bm.textContent='มี Rollup แล้ว '+rollup.length+' Parts — แตะ Rollup เพื่ออัปเดตจาก Cloud';
+    }
+    return;
+  }
+  var hasWHL=false,hasWIP=false;
+  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock&&Object.keys(b6.whlStock).length)hasWHL=true; }catch(e){}
   try{ var s6=JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); if(Object.keys(s6).length>0)hasWHL=true; }catch(e){}
-  
+  try{ var w=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); var n=Array.isArray(w)?w.length:Object.keys(w||{}).length; if(n>0)hasWIP=true; }catch(e){}
   if(hasWHL||hasWIP){
-    document.getElementById('bridgeStatus').style.display='block';
-    var msg=[];
-    if(hasWHL)msg.push('WHL จาก Step 6');
-    if(hasWIP)msg.push('WIP จาก Step 5');
-    document.getElementById('bridgeMsg').textContent='พบ '+msg.join(' + ')+' — แตะ Rollup เพื่อรวมข้อมูล';
+    if(bs)bs.style.display='block';
+    var msg=[]; if(hasWHL)msg.push('WHL (Step 6)'); if(hasWIP)msg.push('WIP (Step 5)');
+    if(bm)bm.textContent='พบ '+msg.join(' + ')+' (local) — แตะ Rollup';
   }
 }
 
 // ==================== ROLLUP ====================
-function rollupData(){
-  var whlData={};
-  // From Step 6 bridge or direct
-  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock)whlData=b6.whlStock; }catch(e){}
-  if(Object.keys(whlData).length===0){
-    try{ whlData=JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); }catch(e){}
-  }
-  
-  // From Step 5 WIP
-  var wipData=[];
-  try{ wipData=JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); }catch(e){}
-  if(!Array.isArray(wipData)) wipData=[];
-  
-  // Merge by partNo
+function buildRollup(wipMap, whlMap, srcLabel){
   var merged={};
-  Object.keys(whlData).forEach(function(part){
-    if(!merged[part])merged[part]={partNo:part,partName:whlData[part].name||'',whl:0,wip:0};
-    merged[part].whl=parseInt(whlData[part].qty||0);
+  Object.keys(whlMap).forEach(function(p){ merged[p]={partNo:p,partName:whlMap[p].partName||'',whl:whlMap[p].qty||0,wip:0}; });
+  Object.keys(wipMap).forEach(function(p){
+    if(!merged[p])merged[p]={partNo:p,partName:wipMap[p].partName||'',whl:0,wip:0};
+    merged[p].wip=wipMap[p].current||0;
+    if(!merged[p].partName)merged[p].partName=wipMap[p].partName||'';
   });
-  wipData.forEach(function(w){
-    var part=w.partNo||w.part||'';
-    if(!part)return;
-    if(!merged[part])merged[part]={partNo:part,partName:w.partName||w.name||'',whl:0,wip:0};
-    merged[part].wip=parseInt(w.current||w.cur||0);
-    if(!merged[part].partName)merged[part].partName=w.partName||w.name||'';
-  });
-  
-  rollup=Object.keys(merged).map(function(part){
-    var m=merged[part];
-    m.total=m.whl+m.wip;
-    return m;
-  });
-  
-  if(rollup.length===0){
-    toast('📭 ไม่พบข้อมูลจาก Step 5/6 — กรุณาทำ Step 5+6 ก่อน');
+  rollup=Object.keys(merged).map(function(p){var m=merged[p];m.total=m.whl+m.wip;return m;});
+  if(rollup.length>0){
+    saveAll(); refreshAll();
+    var ib=document.getElementById('importBox'); if(ib)ib.classList.add('has-file');
+    toast('✅ Rollup สำเร็จ '+rollup.length+' Parts'+(srcLabel?(' ('+srcLabel+')'):''));
+    return true;
+  }
+  return false;
+}
+
+function rollupFromCloud(onDone){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){ if(onDone)onDone(false); return; }
+  var wipMap={}, whlMap={}, pending=2;
+  function step(){ if(--pending===0){ var ok=buildRollup(wipMap,whlMap,'Cloud'); if(onDone)onDone(ok); } }
+  cloudGET(url+'?action=getWIP', function(d){
+    var arr=(d&&(d.wip||d.data))||[];
+    arr.forEach(function(w){ if(w.part) wipMap[w.part]={current:Number(w.current)||0,partName:w.partName||''}; });
+    step();
+  }, function(err){ step(); });
+  cloudGET(url+'?action=getRoute', function(d){
+    var arr=(d&&(d.route||d.data))||[];
+    arr.forEach(function(r){ var p=r.Part||r.part||''; if(p) whlMap[p]={qty:Number(r.WHLQty||r.whlQty||0),partName:r.PartName||r.partName||''}; });
+    step();
+  }, function(err){ step(); });
+}
+
+function rollupLocal(){
+  var whlData={};
+  try{ var b6=JSON.parse(localStorage.getItem('mes_bridge_step6_to_7')||'null'); if(b6&&b6.whlStock)whlData=b6.whlStock; }catch(e){}
+  if(Object.keys(whlData).length===0){ try{ whlData=JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); }catch(e){} }
+  var wipRaw={};
+  try{ wipRaw=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); }catch(e){}
+  var wipMap={}, whlMap={};
+  Object.keys(whlData).forEach(function(p){ whlMap[p]={qty:parseInt(whlData[p].qty||0)||0,partName:whlData[p].name||whlData[p].partName||''}; });
+  if(Array.isArray(wipRaw)){ wipRaw.forEach(function(w){ var p=w.partNo||w.part||''; if(p)wipMap[p]={current:parseInt(w.current||w.cur||0)||0,partName:w.partName||w.name||''}; }); }
+  else{ Object.keys(wipRaw).forEach(function(p){ var w=wipRaw[p]||{}; wipMap[p]={current:parseInt(w.current||0)||0,partName:w.partName||w.name||''}; }); }
+  if(!buildRollup(wipMap,whlMap,'Local')){ toast('📭 ไม่พบข้อมูลจาก Step 5/6 — ตั้งค่า Cloud หรือทำ Step 5+6 ก่อน'); }
+}
+
+function rollupData(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(url){
+    toast('⏳ Rollup จาก Cloud...');
+    rollupFromCloud(function(ok){ if(!ok||rollup.length===0) rollupLocal(); });
     return;
   }
-  
-  saveAll();
-  refreshAll();
-  document.getElementById('importBox').classList.add('has-file');
-  toast('✅ Rollup สำเร็จ '+rollup.length+' Parts');
+  rollupLocal();
 }
 
 // ==================== DEMAND ====================
@@ -490,7 +517,8 @@ function bridgeToStep0(){
   toast('🔗 ส่ง Next Plan ไป Step 0 แล้ว ('+planToSend.length+' parts)');
 }
 function clearStep7(){
-  if(!confirm('ล้างข้อมูล Step 7 ทั้งหมด?')) return;
+  var ans=prompt('⚠️ จะลบ Rollup / Demand / Next Plan ในเครื่องนี้ทั้งหมด (กู้คืนไม่ได้)\nหากต้องการรีเฟรชข้อมูล ให้กด "อัปเดตจาก Cloud" แทน\n\nพิมพ์  CLEAR  เพื่อยืนยันการล้าง:');
+  if(ans!=='CLEAR'){ toast('ยกเลิกการล้างข้อมูล'); return; }
   ['mes_step7_rollup','mes_step7_demands','mes_step7_plan'].forEach(function(k){localStorage.removeItem(k);});
   rollup=[];demands={};nextPlan=[];
   refreshAll();

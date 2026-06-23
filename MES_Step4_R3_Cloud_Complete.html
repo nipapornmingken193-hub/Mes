@@ -71,7 +71,11 @@ select{appearance:auto}
 <div class="card-sub">Vandapac Co., Ltd. — R1</div>
 <div class="g2">
 <div class="f"><label class="fl">📅 Date วันที่</label><input type="date" id="hDate" onchange="updateDisplay()"></div>
-<div class="f"><label class="fl">🔄 Shift กะ</label><select id="hShift" onchange="updateDisplay();buildHourlyTable()"><option value="A">A — Day (08:00-20:00)</option><option value="B">B — Night (20:00-08:00)</option></select></div>
+<div class="f"><label class="fl">🔄 Shift กะ</label><select id="hShift" onchange="shiftChanged()"><option value="A">A</option><option value="B">B</option></select></div>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">🌗 Period ช่วงเวลา</label><select id="hPeriod" onchange="periodChanged()"><option value="Day">Day</option><option value="Night">Night</option></select></div>
+<div class="f"><label class="fl">⏰ Time เวลา</label><select id="hTime" onchange="updateDisplay()"><option value="08:00-20:00">08:00-20:00</option><option value="20:00-08:00">20:00-08:00</option></select></div>
 </div>
 <div class="g2">
 <div class="f"><label class="fl">👤 Customer ลูกค้า</label><select id="hCust"><option value="">— เลือก —</option><option>IAST</option><option>TSAM</option><option>TOYOTA</option><option>TDEM</option><option>IMCT</option><option>SAAB</option><option>SAB</option><option>MMTH</option><option>MG</option><option>FORD</option><option>HONDA</option><option>TCD</option><option>VDP</option><option>ALJ</option><option>ICD-ASIA</option></select></div>
@@ -718,7 +722,7 @@ let curTab=1,defs=[],dts=[],hourly={};
 
 // ==================== INIT ====================
 function init(){
-  document.getElementById('hDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('hDate').value=toThaiDate();
   buildHourlyTable();
   buildManpower();
   calcMaterial();
@@ -734,7 +738,8 @@ function init(){
 
 function updateDisplay(){
   document.getElementById('dd').textContent=document.getElementById('hDate').value;
-  document.getElementById('di').textContent='Shift '+document.getElementById('hShift').value+' | '+(document.getElementById('hMc').value||'—');
+  var _pe=(document.getElementById('hPeriod')||{}).value||'',_ti=(document.getElementById('hTime')||{}).value||'';
+  document.getElementById('di').textContent='Shift '+document.getElementById('hShift').value+(_pe?' ('+_pe+' '+_ti+')':'')+' | '+(document.getElementById('hMc').value||'—');
 }
 
 // ==================== MOLD DATALIST BUILD ====================
@@ -904,7 +909,7 @@ function showTab(n){
   });
   document.getElementById('btnPrev').style.display=n>1?'block':'none';
   var nb=document.getElementById('btnNext');
-  if(n===7){nb.textContent='💾 บันทึกข้อมูล';nb.className='btn btn-g';nb.onclick=saveData;}
+  if(n===7){nb.textContent='☁️ Cloud ▶';nb.className='btn btn-a';nb.onclick=nextTab;}
   else if(n===8){nb.textContent='☁️ Sync to Cloud';nb.className='btn btn-g';nb.onclick=syncToCloud;}
   else{nb.textContent='ถัดไป ▶';nb.className='btn btn-a';nb.onclick=nextTab;}
   if(n===7)buildSummary();
@@ -928,8 +933,7 @@ function autoFillPlan(){
   var found = MOLDS[moldVal] || {};
   var isFamily = found.grp === 'Family';
 
-  var s = document.getElementById('hShift').value;
-  var hrs = s==='A' ? DayHours : NightHours;
+  var hrs = getShiftHours();
   hrs.forEach(function(hr){
     if(!hourly[hr]) hourly[hr]={p:0,a:0,gl:0,gr:0,dl:0,dr:0};
     hourly[hr].p = uph;
@@ -943,11 +947,32 @@ function autoFillPlan(){
   t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000);
 }
 
+// ==================== SHIFT / PERIOD / TIME LINKING ====================
+// Auto-link (editable): Shift A -> Day / 08:00-20:00, Shift B -> Night / 20:00-08:00
+function shiftChanged(){
+  var s=document.getElementById('hShift').value;
+  var pe=document.getElementById('hPeriod'); if(pe) pe.value = s==='A' ? 'Day' : 'Night';
+  var ti=document.getElementById('hTime');   if(ti) ti.value = s==='A' ? '08:00-20:00' : '20:00-08:00';
+  updateDisplay(); buildHourlyTable();
+}
+function periodChanged(){
+  var p=document.getElementById('hPeriod').value;
+  var ti=document.getElementById('hTime'); if(ti) ti.value = p==='Day' ? '08:00-20:00' : '20:00-08:00';
+  updateDisplay(); buildHourlyTable();
+}
+// Hourly grid now follows the Period field (fallback to Shift letter for backward compat)
+function getShiftHours(){
+  var pe=document.getElementById('hPeriod');
+  var period = pe ? pe.value : (document.getElementById('hShift').value==='A'?'Day':'Night');
+  return period==='Night' ? NightHours : DayHours;
+}
+
 // ==================== TAB 2: HOURLY ====================
 function buildHourlyTable(){
-  var s=document.getElementById('hShift').value;
-  var hrs=s==='A'?DayHours:NightHours;
-  document.getElementById('shiftLabel').textContent=s==='A'?'Day Shift':'Night Shift';
+  var pe=document.getElementById('hPeriod');
+  var period = pe ? pe.value : (document.getElementById('hShift').value==='A'?'Day':'Night');
+  var hrs=period==='Night'?NightHours:DayHours;
+  document.getElementById('shiftLabel').textContent=period==='Night'?'Night Shift':'Day Shift';
   // Detect current mold type for column labels
   var moldVal = (document.getElementById('hMold') ? document.getElementById('hMold').value||'' : '').trim();
   var curMold = MOLDS[moldVal] || {};
@@ -998,7 +1023,7 @@ function getMoldFamilyMult(){
 }
 
 function getHTot(){
-  var hrs=document.getElementById('hShift').value==='A'?DayHours:NightHours;
+  var hrs=getShiftHours();
   var tp=0,ta=0,gl=0,gr=0,dl=0,dr=0;
   hrs.forEach(function(h){var d=hourly[h]||{};tp+=d.p||0;ta+=d.a||0;gl+=d.gl||0;gr+=d.gr||0;dl+=d.dl||0;dr+=d.dr||0;});
   var g=gl+gr,df=dl+dr,t=g+df,y=t>0?(g/t*100).toFixed(1):'0.0';
@@ -1201,15 +1226,27 @@ function calcMaterial(){var mi=Number(document.getElementById('mIn').value)||0,m
 // ==================== TAB 7: SUMMARY ====================
 function buildSummary(){var t=getHTot(),tdt=dts.reduce(function(s,d){return s+(d.m||0);},0);var av=((720-tdt)/720*100).toFixed(1),pf=t.tp>0?(t.ta/t.tp*100).toFixed(1):'0.0';var oee=(av/100*pf/100*t.yield/100*100).toFixed(1);var mi=Number(document.getElementById('mIn').value)||0,mv=Number(document.getElementById('mVirgin').value)||0,mr=Number(document.getElementById('mRegrind').value)||0,mp=Number(document.getElementById('mPurge').value)||0,mc=Number(document.getElementById('mContam').value)||0,md=Number(document.getElementById('mDust').value)||0;var u=mv+mr,mt=u+mp+mc+md,w=mt>0?((mt-u)/mt*100).toFixed(1):'0.0';var st=0,at=0;Positions.forEach(function(_,i){st+=Number(document.getElementById('mps'+i)?.value)||0;at+=Number(document.getElementById('mpa'+i)?.value)||0;});var dt=document.getElementById('hDate').value,sh=document.getElementById('hShift').value,mc3=document.getElementById('hMc').value||'—',cu=document.getElementById('hCust').value||'—',mo=document.getElementById('hModel').value||'—';var oc=Number(oee)>=76?'g':Number(oee)>=70?'y':'r',yc=Number(t.yield)>=93?'g':Number(t.yield)>=90?'y':'r',wc=Number(w)<=3?'g':'r';var ds='';defs.sort(function(a,b){return b.q-a.q;}).slice(0,5).forEach(function(d){var i=Defects.find(function(x){return x.c===d.c;});ds+='<div class="sr"><span>'+d.c+' '+(i?.t||'')+' ('+d.s+')</span><span style="font-weight:700;color:var(--red)">'+d.q+' pcs</span></div>';});if(!ds)ds='<div style="color:var(--dim);font-size:12px">ไม่มีรายการของเสีย</div>';var dts2='';dts.forEach(function(d){var i=Downtimes.find(function(x){return x.c===d.c;});dts2+='<div class="sr"><span>['+(i?.cat||'')+'] '+d.c+' '+(i?.t||'')+'</span><span style="color:var(--yellow)">'+d.m+' min</span></div>';});document.getElementById('summaryContent').innerHTML='<div class="card-title">📊 KPI Summary — MES Webapp Production_R1</div><div style="font-size:12px;color:var(--dim);margin-bottom:10px">'+dt+' | Shift '+sh+' | '+mc3+' | '+cu+' — '+mo+'</div><div class="g2" style="margin-bottom:8px"><div class="kpi kpi-'+oc+'"><div class="kpi-l">🎯 OEE</div><div class="kpi-v" style="font-size:30px">'+oee+'%</div><div class="kpi-t">Target: 76%</div></div><div class="kpi kpi-'+yc+'"><div class="kpi-l">🎯 Yield Rate</div><div class="kpi-v" style="font-size:30px">'+t.yield+'%</div><div class="kpi-t">Target: 93%</div></div></div><div class="g2" style="margin-bottom:8px"><div class="kpi kpi-b"><div class="kpi-l">📦 Total Produced</div><div class="kpi-v">'+t.total+'</div><div class="kpi-t">Good: '+t.good+' | Defect: '+t.defect+'</div></div><div class="kpi kpi-'+wc+'"><div class="kpi-l">♻️ Material Waste</div><div class="kpi-v">'+w+'%</div><div class="kpi-t">Target: 3%</div></div></div><div class="g3" style="margin-bottom:10px"><div class="kpi kpi-b"><div class="kpi-l">Availability</div><div class="kpi-v" style="font-size:16px">'+av+'%</div></div><div class="kpi kpi-b"><div class="kpi-l">Performance</div><div class="kpi-v" style="font-size:16px">'+pf+'%</div></div><div class="kpi kpi-b"><div class="kpi-l">Plan Achieve</div><div class="kpi-v" style="font-size:16px">'+(t.tp>0?(t.ta/t.tp*100).toFixed(1):'0')+'%</div></div></div><div style="background:var(--inp);border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="font-weight:700;margin-bottom:6px;color:var(--red)">⚠️ Top Defects</div>'+ds+'</div><div style="background:var(--inp);border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="font-weight:700;margin-bottom:6px;color:var(--yellow)">⏱️ Downtime: '+tdt+' นาที ('+(tdt/60).toFixed(1)+' ชม.)</div>'+(dts2||'<div style="color:var(--dim);font-size:12px">ไม่มี Downtime</div>')+'</div><div style="background:var(--inp);border-radius:var(--r);padding:10px"><div style="font-weight:700;margin-bottom:6px;color:var(--accent2)">👷 ManPower</div><div style="font-size:13px">STD: '+st+' | ACT: '+at+' | Eff: '+(at>0?(st/at*100).toFixed(0):0)+'%</div></div>';}
 
+// ==================== THAI TIME HELPER ====================
+function toThaiISO(){
+  var d = new Date();
+  var thai = new Date(d.getTime() + 7 * 60 * 60000);
+  return thai.toISOString().replace('Z', '+07:00');
+}
+function toThaiDate(){
+  return toThaiISO().split('T')[0];
+}
+
 // ==================== SAVE & EXPORT ====================
 function saveData(){
   var totals=getHTot();
   var r={
     id:Date.now(),
-    ts:new Date().toISOString(),
+    ts:toThaiISO(),
     h:{
       d:document.getElementById('hDate').value,
       sh:document.getElementById('hShift').value,
+      period:(document.getElementById('hPeriod')||{}).value||'',
+      time:(document.getElementById('hTime')||{}).value||'',
       mc:document.getElementById('hMc').value,
       cu:document.getElementById('hCust').value,
       mo:document.getElementById('hModel').value,
@@ -1227,7 +1264,28 @@ function saveData(){
     hourly:hourly,
     defects:defs,
     downtimes:dts,
-    tot:totals
+    tot:totals,
+    mp:(function(){
+      var detail=[];
+      Positions.forEach(function(p,i){
+        var name=document.getElementById('mpn'+i)?document.getElementById('mpn'+i).value:'';
+        var std=Number(document.getElementById('mps'+i)?document.getElementById('mps'+i).value:0)||0;
+        var act=Number(document.getElementById('mpa'+i)?document.getElementById('mpa'+i).value:0)||0;
+        if(std>0||act>0||name) detail.push({pos:p,name:name,std:std,act:act});
+      });
+      var s=0,a=0; detail.forEach(function(d){s+=d.std;a+=d.act;});
+      return {std:s,act:a,detail:detail};
+    })(),
+    mat:(function(){
+      return {
+        type:document.getElementById('mMaterial')?document.getElementById('mMaterial').value:'',
+        color:document.getElementById('mColor')?document.getElementById('mColor').value:'',
+        matIn:Number(document.getElementById('mIn')?document.getElementById('mIn').value:0)||0,
+        virgin:Number(document.getElementById('mVirgin')?document.getElementById('mVirgin').value:0)||0,
+        regrind:Number(document.getElementById('mRegrind')?document.getElementById('mRegrind').value:0)||0,
+        purge:Number(document.getElementById('mPurge')?document.getElementById('mPurge').value:0)||0
+      };
+    })()
   };
   var recs=[];
   try{recs=JSON.parse(localStorage.getItem('mes_r1')||'[]');}catch(e){}
@@ -1243,6 +1301,8 @@ function saveData(){
       ts:r.ts,
       date:r.h.d,
       shift:r.h.sh,
+      period:r.h.period||'',
+      time:r.h.time||'',
       machine:r.h.mc,
       mold:r.h.mold,
       poLH:r.h.poLH,
@@ -1272,8 +1332,8 @@ function saveData(){
   updateSaveInfo();
 }
 function updateSaveInfo(){var recs=[];try{recs=JSON.parse(localStorage.getItem('mes_r1')||'[]');}catch(e){}document.getElementById('saveInfo').textContent='📊 Records: '+recs.length+(recs.length>0?' | Last: '+new Date(recs[recs.length-1].ts).toLocaleString('th-TH'):'');}
-function exportCSV(){var s=document.getElementById('hShift').value,hrs=s==='A'?DayHours:NightHours;var dt=document.getElementById('hDate').value;var csv='Date,Shift,Hour,Plan,Actual,GoodLH,GoodRH,DefectLH,DefectRH\n';hrs.forEach(function(h){var d=hourly[h]||{};csv+=dt+','+s+','+h+','+(d.p||0)+','+(d.a||0)+','+(d.gl||0)+','+(d.gr||0)+','+(d.dl||0)+','+(d.dr||0)+'\n';});var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='MES_R1_'+dt+'_Shift'+s+'.csv';a.click();URL.revokeObjectURL(url);}
-function clearForm(){if(!confirm('ล้างข้อมูลทั้งหมด?'))return;hourly={};defs=[];dts=[];['hDate','hMold','hPnLH','hPnRH','hPoLH','hPoRH'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=id==='hDate'?new Date().toISOString().split('T')[0]:'';});['hCust','hModel','hMc'].forEach(function(id){return document.getElementById(id).selectedIndex=0;});['mIn','mVirgin','mRegrind','mPurge','mContam','mDust'].forEach(function(id){return document.getElementById(id).value=0;});document.getElementById('autoInfo').style.display='none';buildHourlyTable();renderDefects();renderDowntimes();buildManpower();calcMaterial();showTab(1);updateDisplay();}
+function exportCSV(){var s=document.getElementById('hShift').value,hrs=getShiftHours();var pe=(document.getElementById('hPeriod')||{}).value||'',ti=(document.getElementById('hTime')||{}).value||'';var dt=document.getElementById('hDate').value;var csv='Date,Shift,Period,Time,Hour,Plan,Actual,GoodLH,GoodRH,DefectLH,DefectRH\n';hrs.forEach(function(h){var d=hourly[h]||{};csv+=dt+','+s+','+pe+','+ti+','+h+','+(d.p||0)+','+(d.a||0)+','+(d.gl||0)+','+(d.gr||0)+','+(d.dl||0)+','+(d.dr||0)+'\n';});var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='MES_R1_'+dt+'_Shift'+s+'.csv';a.click();URL.revokeObjectURL(url);}
+function clearForm(){if(!confirm('ล้างข้อมูลทั้งหมด?'))return;hourly={};defs=[];dts=[];['hDate','hMold','hPnLH','hPnRH','hPoLH','hPoRH'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=id==='hDate'?toThaiDate():'';});['hCust','hModel','hMc'].forEach(function(id){return document.getElementById(id).selectedIndex=0;});['mIn','mVirgin','mRegrind','mPurge','mContam','mDust'].forEach(function(id){return document.getElementById(id).value=0;});document.getElementById('autoInfo').style.display='none';buildHourlyTable();renderDefects();renderDowntimes();buildManpower();calcMaterial();showTab(1);updateDisplay();}
 
 // ==================== CLOUD SYNC FUNCTIONS ====================
 var machineID_cloud = '';
@@ -1403,12 +1463,52 @@ function syncToCloud(){
     return;
   }
 
+  // === Flatten records so Apps Script can store Part No. as top-level columns ===
+  // This ensures Step 5 can extract poLH/poRH/goodLH/goodRH from Google Sheet
+  var flatPending = pending.map(function(r){
+    var h = r.h || {};
+    var tot = r.tot || {};
+    return {
+      id: r.id,
+      ts: r.ts,
+      timestamp: r.ts,
+      date: h.d || '',
+      shift: h.sh || '',
+      period: h.period || '',
+      time: h.time || '',
+      machine: h.mc || '',
+      customer: h.cu || '',
+      model: h.mo || '',
+      mold: h.mold || '',
+      poLH: h.poLH || '',
+      poRH: h.poRH || '',
+      pnLH: h.pnLH || '',
+      pnRH: h.pnRH || '',
+      cav: h.cav || '',
+      cyc: h.cyc || '',
+      uph: h.uph || '',
+      goodLH: Number(tot.gl || 0),
+      goodRH: Number(tot.gr || 0),
+      defectLH: Number(tot.dl || 0),
+      defectRH: Number(tot.dr || 0),
+      good: Number(tot.good || 0),
+      defect: Number(tot.defect || 0),
+      total: Number(tot.total || 0),
+      actual: Number(tot.ta || tot.total || 0),
+      plan: Number(tot.tp || 0),
+      yield: Number(tot.yield || 0),
+      machineID: machineID_cloud,
+      status: 'pending',
+      rawData: JSON.stringify(r)  // Full record JSON — Step 5 parses this for full structure
+    };
+  });
+
   var data = {
     machineID: machineID_cloud,
-    timestamp: new Date().toISOString(),
-    recordCount: pending.length,
-    records: pending,
-    source: 'Step4_R2_Cloud_Manual'
+    timestamp: toThaiISO(),
+    recordCount: flatPending.length,
+    records: flatPending,
+    source: 'Step4_R3_Cloud_Flat'
   };
 
   var t=document.getElementById('toast');
@@ -1426,7 +1526,7 @@ function syncToCloud(){
 
       cloudSyncCount = recs.filter(function(r){ return r._synced; }).length;
       localStorage.setItem('mes_cloud_sync_count', cloudSyncCount.toString());
-      localStorage.setItem('mes_last_sync', new Date().toISOString());
+      localStorage.setItem('mes_last_sync', toThaiISO());
 
       t.textContent='✅ Synced ' + pending.length + ' records! (skipped: '+(result.message||'').match(/\d+/g)?.[1]||0+' dup)';
       t.style.background='var(--green)'; t.style.color='#fff';

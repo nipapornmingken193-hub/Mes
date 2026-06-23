@@ -295,16 +295,42 @@ input[type="number"]{text-align:center}
 <button class="btn btn-t" onclick="bridgeToStep7()">🔗 ส่งต่อไป Step 7</button>
 
 <div style="margin-top:14px;background:var(--inp);border-radius:var(--r);padding:12px">
-<div style="font-weight:700;color:#5eead4;font-size:13px;margin-bottom:8px">📊 สรุป Step 6</div>
-<div style="font-size:12px;color:var(--dim);line-height:2">
-📥 Parts รับจาก Step 5: <b id="sumImport" style="color:#5eead4">0</b><br>
-🚦 กระจายเข้า Process: <b id="sumDist" style="color:var(--accent2)">0</b> pcs<br>
-✅ ผ่าน Process เสร็จ: <b id="sumComplete" style="color:var(--green)">0</b> pcs<br>
-📦 เข้า WHL: <b id="sumWHL" style="color:#c4b5fd">0</b> pcs
-</div>
+<div style="font-weight:700;color:#5eead4;font-size:13px;margin-bottom:8px">📊 สรุป Step 6 <span id="sumToday" style="font-size:10px;color:var(--dim);font-weight:400"></span></div>
+<table class="tbl" style="font-size:12px">
+<thead><tr><th style="text-align:left">หมวด</th><th>วันนี้</th><th>สะสม</th></tr></thead>
+<tbody>
+<tr><td class="lbl">📥 Parts รับจาก Step 5</td><td style="text-align:center;color:var(--dim)">—</td><td style="text-align:center;font-weight:700;color:#5eead4" id="sumImport">0</td></tr>
+<tr><td class="lbl">🚦 กระจายเข้า Process</td><td style="text-align:center;font-weight:700;color:var(--accent2)" id="sumDistToday">0</td><td style="text-align:center;color:var(--accent2)" id="sumDist">0</td></tr>
+<tr><td class="lbl">✅ ผ่าน Process เสร็จ</td><td style="text-align:center;font-weight:700;color:var(--green)" id="sumCompleteToday">0</td><td style="text-align:center;color:var(--green)" id="sumComplete">0</td></tr>
+<tr><td class="lbl">📦 เข้า WHL</td><td style="text-align:center;font-weight:700;color:#c4b5fd" id="sumWHLToday">0</td><td style="text-align:center;color:#c4b5fd" id="sumWHL">0</td></tr>
+</tbody></table>
 </div>
 
-<button class="btn btn-r" style="margin-top:10px" onclick="clearStep6()">🗑️ Clear All Step 6 Data</button>
+<button class="btn btn-t" style="margin-top:10px" onclick="manualImportFromStep5()">🔄 อัปเดต WIP จาก Cloud (Re-Import — ปลอดภัย ไม่ลบข้อมูล)</button>
+<button class="btn btn-d" style="margin-top:8px;font-size:12px" onclick="clearStep6()">🗑️ ล้างข้อมูล (เริ่มรอบใหม่ — ต้องพิมพ์ยืนยัน)</button>
+
+<div style="margin-top:12px;background:var(--inp);border-radius:var(--r);padding:12px;font-size:12px;line-height:1.7">
+<div style="font-weight:700;color:#5eead4;margin-bottom:8px">📖 ควร Clear All ตอนไหน?</div>
+
+<div style="border-left:3px solid var(--green);padding:6px 10px;margin-bottom:8px;background:rgba(16,185,129,.06);border-radius:4px">
+<b style="color:var(--green)">✅ ควร Clear เมื่อ</b><br>
+• เริ่มรอบใหม่ (ขึ้นเดือน / สัปดาห์ / รอบผลิตใหม่) ที่ต้องการเริ่มนับยอด "สะสม" ใหม่<br>
+• <b>หลังจาก Backup ขึ้น Cloud หรือ Export JSON เก็บไว้แล้วเท่านั้น</b>
+</div>
+
+<div style="border-left:3px solid var(--red);padding:6px 10px;margin-bottom:8px;background:rgba(239,68,68,.06);border-radius:4px">
+<b style="color:var(--red)">❌ ไม่ต้อง Clear เมื่อ</b><br>
+• หลังบันทึก WHL In แต่ละครั้ง<br>
+• หลังกด "ส่งต่อไป Step 7"<br>
+• สิ้นวันปกติ — ยอด "วันนี้" จะรีเซ็ตเองอัตโนมัติเมื่อขึ้นวันใหม่
+</div>
+
+<div style="border-left:3px solid var(--yellow);padding:6px 10px;background:rgba(245,158,11,.06);border-radius:4px">
+<b style="color:var(--yellow)">⚠️ Clear จะลบทั้งหมด (กู้คืนไม่ได้)</b><br>
+Import จาก Step 5 · <b>Route Setup (เส้นทางที่ตั้งไว้)</b> · ประวัติกระจายงาน · สถานะ Secondary · ยอด WHL สะสม<br>
+💡 ก่อน Clear ทุกครั้ง แนะนำกด <b>Export JSON (Backup)</b> หรือ <b>Backup → Cloud</b> ก่อน
+</div>
+</div>
 </div></div>
 
 <!-- ==================== TAB 7: CLOUD ==================== -->
@@ -351,6 +377,8 @@ var routes = {};          // {partNo: [proc1, proc2...]}
 var distLog = [];         // [{ts, partNo, proc, qty}]
 var procStatus = {};      // {partNo: {proc: {in, done}}}
 var whlStock = {};        // {partNo: {name, qty}}
+var completeLog = [];     // [{ts, date, partNo, proc, qty}]
+var whlLog = [];          // [{ts, date, partNo, qty}]
 var selectedProcs = [];
 
 function init(){
@@ -370,6 +398,8 @@ function loadAll(){
   try{ distLog = JSON.parse(localStorage.getItem('mes_step6_dist')||'[]'); }catch(e){}
   try{ procStatus = JSON.parse(localStorage.getItem('mes_step6_procstatus')||'{}'); }catch(e){}
   try{ whlStock = JSON.parse(localStorage.getItem('mes_step6_whl')||'{}'); }catch(e){}
+  try{ completeLog = JSON.parse(localStorage.getItem('mes_step6_complete')||'[]'); }catch(e){}
+  try{ whlLog = JSON.parse(localStorage.getItem('mes_step6_whllog')||'[]'); }catch(e){}
 }
 function saveAll(){
   localStorage.setItem('mes_step6_import', JSON.stringify(importedParts));
@@ -377,42 +407,82 @@ function saveAll(){
   localStorage.setItem('mes_step6_dist', JSON.stringify(distLog));
   localStorage.setItem('mes_step6_procstatus', JSON.stringify(procStatus));
   localStorage.setItem('mes_step6_whl', JSON.stringify(whlStock));
+  localStorage.setItem('mes_step6_complete', JSON.stringify(completeLog));
+  localStorage.setItem('mes_step6_whllog', JSON.stringify(whlLog));
 }
 
 // ==================== BRIDGE FROM STEP 5 ====================
+function wipToParts(arr){
+  var list=[];
+  if(Array.isArray(arr)){
+    arr.forEach(function(w){ list.push({partNo:w.part||w.partNo||'', partName:w.partName||w.name||'', qty:parseInt(w.current!=null?w.current:(w.cur||0))||0}); });
+  }else if(arr && typeof arr==='object'){
+    Object.keys(arr).forEach(function(k){ var w=arr[k]||{}; list.push({partNo:k, partName:w.partName||w.name||'', qty:parseInt(w.current!=null?w.current:(w.cur||0))||0}); });
+  }
+  return list.filter(function(p){return p.partNo;});
+}
+
+function applyWIP(arr, srcLabel){
+  var parts=wipToParts(arr);
+  if(parts.length===0){ toast('📭 ไม่พบข้อมูล WIP'+(srcLabel?(' จาก '+srcLabel):'')); return false; }
+  importedParts=parts;
+  saveAll(); refreshAll();
+  var ib=document.getElementById('importBox'); if(ib) ib.classList.add('has-file');
+  toast('✅ Import สำเร็จ '+parts.length+' Parts'+(srcLabel?(' จาก '+srcLabel):''));
+  return true;
+}
+
+function importFromCloud(onDone){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){ if(onDone)onDone(false); return; }
+  cloudGET(url+'?action=getWIP', function(d){
+    var arr=(d&&(d.wip||d.data))||[];
+    if(d&&d.status==='success'&&arr.length>0){ var ok=applyWIP(arr,'Cloud'); if(onDone)onDone(ok); }
+    else{ if(onDone)onDone(false); }
+  }, function(err){ console.log('Cloud getWIP failed:',err); if(onDone)onDone(false); });
+}
+
 function checkBridgeFromStep5(){
-  var wip = [];
-  try{ wip = JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); }catch(e){}
-  if(!Array.isArray(wip)) wip = [];
-  
-  if(wip.length > 0){
-    document.getElementById('bridgeStatus').style.display = 'block';
-    document.getElementById('bridgeMsg').textContent = 'พบข้อมูล WIP ' + wip.length + ' รายการจาก Step 5 — แตะ Import เพื่อรับเข้า';
+  var localCount=0;
+  try{ var raw=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); localCount=Array.isArray(raw)?raw.length:Object.keys(raw||{}).length; }catch(e){}
+  var bs=document.getElementById('bridgeStatus'), bm=document.getElementById('bridgeMsg');
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(url){
+    if(bs) bs.style.display='block';
+    if(bm) bm.textContent='⏳ กำลังตรวจ WIP จาก Cloud...';
+    cloudGET(url+'?action=getWIP', function(d){
+      var arr=(d&&(d.wip||d.data))||[];
+      if(d&&d.status==='success'&&arr.length>0){
+        if(bm) bm.textContent='พบ WIP '+arr.length+' รายการจาก Cloud — แตะ Import เพื่อรับเข้า';
+        if(importedParts.length===0) applyWIP(arr,'Cloud');
+      }else if(localCount>0){
+        if(bm) bm.textContent='พบ WIP '+localCount+' รายการ (local) — แตะ Import';
+      }else{
+        if(bm) bm.textContent='ยังไม่พบ WIP บน Cloud — ไป Backup ที่ Step 5 ก่อน';
+      }
+    }, function(err){
+      if(bm) bm.textContent=(localCount>0?('พบ WIP '+localCount+' รายการ (local) — แตะ Import'):('เชื่อม Cloud ไม่ได้: '+err));
+    });
+  }else if(localCount>0){
+    if(bs) bs.style.display='block';
+    if(bm) bm.textContent='พบ WIP '+localCount+' รายการ (local) — แตะ Import เพื่อรับเข้า';
   }
 }
 
 function manualImportFromStep5(){
-  var wip = [];
-  try{ wip = JSON.parse(localStorage.getItem('mes_step5_wip')||'[]'); }catch(e){}
-  if(!Array.isArray(wip)) wip = [];
-  
-  if(wip.length === 0){
-    toast('📭 ไม่พบข้อมูลใน Step 5 — กรุณาตั้งค่า WIP ใน Step 5 ก่อน');
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(url){
+    toast('⏳ ดึง WIP จาก Cloud...');
+    importFromCloud(function(ok){
+      if(!ok){
+        var raw={}; try{ raw=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); }catch(e){}
+        applyWIP(raw,'Local');
+      }
+    });
     return;
   }
-  
-  importedParts = wip.map(function(w){
-    return {
-      partNo: w.partNo || w.part || '',
-      partName: w.partName || w.name || '',
-      qty: parseInt(w.current || w.cur || 0)
-    };
-  }).filter(function(p){ return p.partNo; });
-  
-  saveAll();
-  refreshAll();
-  document.getElementById('importBox').classList.add('has-file');
-  toast('✅ Import สำเร็จ ' + importedParts.length + ' Parts จาก Step 5');
+  var raw={}; try{ raw=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); }catch(e){}
+  applyWIP(raw,'Local');
 }
 
 // ==================== ROUTE SETUP ====================
@@ -508,7 +578,7 @@ function distribute(){
   if(!proc){ toast('⚠️ เลือก Process'); return; }
   if(qty <= 0){ toast('⚠️ ใส่จำนวน'); return; }
   
-  distLog.push({ts:new Date().toISOString(), partNo:part, proc:proc, qty:qty});
+  distLog.push({ts:new Date().toISOString(), date:(document.getElementById('distDate').value||new Date().toISOString().split('T')[0]), partNo:part, proc:proc, qty:qty});
   
   if(!procStatus[part]) procStatus[part] = {};
   if(!procStatus[part][proc]) procStatus[part][proc] = {in:0, done:0};
@@ -532,6 +602,7 @@ function completeProcess(){
   if(!procStatus[part]) procStatus[part] = {};
   if(!procStatus[part][proc]) procStatus[part][proc] = {in:0, done:0};
   procStatus[part][proc].done += qty;
+  completeLog.push({ts:new Date().toISOString(), date:new Date().toISOString().split('T')[0], partNo:part, proc:proc, qty:qty});
   
   saveAll();
   refreshAll();
@@ -551,6 +622,7 @@ function whlIn(){
   if(!whlStock[part]) whlStock[part] = {name: p ? p.partName : '', qty:0};
   whlStock[part].qty += qty;
   whlStock[part].lastDate = document.getElementById('whlDate').value;
+  whlLog.push({ts:new Date().toISOString(), date:(document.getElementById('whlDate').value||new Date().toISOString().split('T')[0]), partNo:part, qty:qty});
   
   saveAll();
   refreshAll();
@@ -621,13 +693,23 @@ function refreshAll(){
   document.getElementById('kpiWHLToday').textContent=whlToday;
   document.getElementById('kpiWHLTotal').textContent=whlTotal;
   
-  // Tab 6: Summary
-  document.getElementById('sumImport').textContent=importedParts.length;
-  document.getElementById('sumDist').textContent=distLog.reduce(function(s,d){return s+d.qty;},0);
+  // Tab 6: Summary (today vs accumulated)
+  var today6=new Date().toISOString().split('T')[0];
+  function ld(x){ return x.date || (x.ts? String(x.ts).split('T')[0] : ''); }
+  var distTot=distLog.reduce(function(s,d){return s+(d.qty||0);},0);
+  var distToday=distLog.reduce(function(s,d){return s+(ld(d)===today6?(d.qty||0):0);},0);
   var compTot=0;
   Object.keys(procStatus).forEach(function(part){Object.keys(procStatus[part]).forEach(function(proc){compTot+=procStatus[part][proc].done;});});
+  var compToday=completeLog.reduce(function(s,d){return s+(ld(d)===today6?(d.qty||0):0);},0);
+  var whlTodayS=whlLog.reduce(function(s,d){return s+(ld(d)===today6?(d.qty||0):0);},0);
+  document.getElementById('sumImport').textContent=importedParts.length;
+  document.getElementById('sumDist').textContent=distTot;
+  document.getElementById('sumDistToday').textContent=distToday;
   document.getElementById('sumComplete').textContent=compTot;
+  document.getElementById('sumCompleteToday').textContent=compToday;
   document.getElementById('sumWHL').textContent=whlTotal;
+  document.getElementById('sumWHLToday').textContent=whlTodayS;
+  var stEl=document.getElementById('sumToday'); if(stEl) stEl.textContent='('+today6+')';
 }
 
 // ==================== EXPORT ====================
@@ -653,9 +735,10 @@ function bridgeToStep7(){
   toast('🔗 ส่งข้อมูลไป Step 7 แล้ว ('+Object.keys(whlStock).length+' parts)');
 }
 function clearStep6(){
-  if(!confirm('ล้างข้อมูล Step 6 ทั้งหมด? (ไม่สามารถ undo)')) return;
-  ['mes_step6_import','mes_step6_routes','mes_step6_dist','mes_step6_procstatus','mes_step6_whl'].forEach(function(k){localStorage.removeItem(k);});
-  importedParts=[];routes={};distLog=[];procStatus={};whlStock={};
+  var ans=prompt('⚠️ จะลบ Import / Route / กระจาย / WHL ในเครื่องนี้ทั้งหมด (กู้คืนไม่ได้)\nหากต้องการรีเฟรชข้อมูล ให้กด "อัปเดตจาก Cloud" แทน\n\nพิมพ์  CLEAR  เพื่อยืนยันการล้าง:');
+  if(ans!=='CLEAR'){ toast('ยกเลิกการล้างข้อมูล'); return; }
+  ['mes_step6_import','mes_step6_routes','mes_step6_dist','mes_step6_procstatus','mes_step6_whl','mes_step6_complete','mes_step6_whllog'].forEach(function(k){localStorage.removeItem(k);});
+  importedParts=[];routes={};distLog=[];procStatus={};whlStock={};completeLog=[];whlLog=[];
   refreshAll();
   toast('🗑️ ล้างข้อมูลแล้ว');
 }

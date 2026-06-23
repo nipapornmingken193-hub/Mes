@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MES Step 2 - WIP Raw Material Control R1 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--teal:#14b8a6;--purple:#a855f7}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:10px 14px;border-bottom:2px solid var(--teal);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+.topbar-title{font-size:16px;font-weight:800;color:#5eead4}
+.topbar-sub{font-size:11px;color:var(--dim)}
+.rolebar{display:flex;align-items:center;gap:6px;font-size:12px}
+.rolebar select{padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--inp);color:var(--text);font-family:inherit;font-size:12px}
+.flow-bar{background:var(--card);padding:7px 8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px}
+.flow-step{flex:0 0 auto;padding:5px 9px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--teal);color:#fff}.flow-step.done{background:#10b98130;color:var(--green)}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:98}
+.nav-btn{flex:0 0 auto;padding:8px 13px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--teal);color:#fff}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#5eead4;margin-bottom:8px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--teal)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btn{width:100%;padding:11px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-t{background:var(--teal)}.btn-g{background:var(--green)}.btn-y{background:var(--yellow);color:#111}.btn-r{background:var(--red)}.btn-d{background:var(--border)}.btn-a{background:var(--accent)}.btn-p{background:var(--purple)}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.kpi{border-radius:var(--r);padding:10px;text-align:center;background:var(--inp);border:1px solid var(--border)}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:20px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:7px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(20,184,166,.12);position:sticky;top:0}
+.tbl td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:rgba(20,184,166,.05)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px;text-align:left}
+.tbl .pn{font-size:10px;color:var(--dim);text-align:left}
+.tc{display:none}.tc.active{display:block}
+.subnav{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.subnav button{padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--inp);color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.subnav button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.b-rm{background:#2d7ff930;color:#5b9cff}.b-comp{background:#a855f730;color:#c4b5fd}
+.st-ok{color:var(--green);font-weight:700}.st-low{color:var(--red);font-weight:700}.st-high{color:var(--accent2);font-weight:700}
+.ro-note{font-size:11px;color:var(--teal);background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);border-radius:6px;padding:6px 10px;margin-bottom:8px}
+.search{margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">✅</div>
+<div class="topbar">
+<div><div class="topbar-title">📦 MES Step 2 — WIP Raw Material Control</div><div class="topbar-sub">Vandapac · Raw Material + Component (BOM) · Cloud</div></div>
+<div class="rolebar">👤 <select id="roleSel" onchange="changeRole()">
+<option>Operator</option><option>Leader</option><option>Foreman</option><option>Engineer</option><option>Supervisor</option><option>Admin</option>
+</select></div>
+</div>
+<div class="flow-bar">
+<div class="flow-step done">1 Production Plan ✓</div>
+<div class="flow-step active">2 WIP Raw Material ◀</div>
+<div class="flow-step">3 Readiness</div>
+<div class="flow-step done">4 Production ✓</div>
+<div class="flow-step done">5 WIP FG ✓</div>
+<div class="flow-step done">6 Route ✓</div>
+<div class="flow-step done">7 Rollup ✓</div>
+</div>
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📥 รับเข้า</button>
+<button class="nav-btn" onclick="showTab(2)">📤 เบิก</button>
+<button class="nav-btn" onclick="showTab(3)">📊 Stock Balance</button>
+<button class="nav-btn" onclick="showTab(4)">🧩 BOM / Components</button>
+<button class="nav-btn" onclick="showTab(5)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- TAB 1 RECEIVE -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📥 Goods Receipt — รับวัสดุ/Component เข้า</div>
+<div id="ro1" class="ro-note" style="display:none">โหมดดูอย่างเดียว — รับเข้าได้เฉพาะ Leader ขึ้นไป</div>
+<div class="g2">
+<div class="f"><label class="fl">ประเภท</label><select id="rcType" onchange="fillItemSel('rcItem',this.value)"><option value="RM">Raw Material (kg)</option><option value="Comp">Component (pcs)</option></select></div>
+<div class="f"><label class="fl">วันที่</label><input type="date" id="rcDate"></div>
+</div>
+<div class="f"><label class="fl">รายการ</label><select id="rcItem" onchange="rcUnit()"></select></div>
+<div class="g3">
+<div class="f"><label class="fl">จำนวน</label><input type="number" id="rcQty" value="0" min="0"></div>
+<div class="f"><label class="fl">หน่วย</label><input id="rcUnit2" readonly></div>
+<div class="f"><label class="fl">Lot/Batch</label><input id="rcLot" placeholder="—"></div>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">Supplier</label><input id="rcSup" placeholder="—"></div>
+<div class="f"><label class="fl">PO no.</label><input id="rcPo" placeholder="—"></div>
+</div>
+<button class="btn btn-g" id="rcBtn" onclick="addReceipt()">📥 บันทึกรับเข้า</button>
+<div style="overflow-x:auto;margin-top:12px"><table class="tbl"><thead><tr><th>วันที่</th><th>รายการ</th><th>ปร.</th><th>จำนวน</th><th>Lot</th><th>Supplier</th><th>ลบ</th></tr></thead><tbody id="rcTable"></tbody></table></div>
+</div></div>
+
+<!-- TAB 2 ISSUE -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">📤 Goods Issue — เบิกไปผลิต</div>
+<div id="ro2" class="ro-note" style="display:none">โหมดดูอย่างเดียว — เบิกได้เฉพาะ Leader ขึ้นไป</div>
+<div class="f"><label class="fl">รายการ</label><select id="isItem"></select></div>
+<div class="g3">
+<div class="f"><label class="fl">จำนวน</label><input type="number" id="isQty" value="0" min="0"></div>
+<div class="f"><label class="fl">วันที่</label><input type="date" id="isDate"></div>
+<div class="f"><label class="fl">อ้างอิง (Job/เครื่อง)</label><input id="isRef" placeholder="—"></div>
+</div>
+<button class="btn btn-t" id="isBtn" onclick="addIssue()">📤 บันทึกเบิก</button>
+<div style="overflow-x:auto;margin-top:12px"><table class="tbl"><thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน</th><th>อ้างอิง</th><th>ลบ</th></tr></thead><tbody id="isTable"></tbody></table></div>
+</div></div>
+
+<!-- TAB 3 STOCK -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📊 Stock Balance — ยอดคงเหลือ</div>
+<div class="card-sub">Balance = ยอดยกมา + Σรับเข้า − Σเบิก · แจ้งเตือนเมื่อ &lt; Min</div>
+<div class="g3" style="margin-bottom:8px">
+<div class="kpi"><div class="kpi-l">รายการ RM</div><div class="kpi-v" id="kRM" style="color:#5b9cff">0</div></div>
+<div class="kpi"><div class="kpi-l">รายการ Component</div><div class="kpi-v" id="kComp" style="color:#c4b5fd">0</div></div>
+<div class="kpi"><div class="kpi-l">ต่ำกว่า Min</div><div class="kpi-v" id="kLow" style="color:var(--red)">0</div></div>
+</div>
+<div class="search"><input id="stSearch" placeholder="🔍 ค้นหา" oninput="renderStock()"></div>
+<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ปร.</th><th>ยกมา</th><th>รับ</th><th>เบิก</th><th>คงเหลือ</th><th>Min</th><th>Max</th><th>สถานะ</th></tr></thead><tbody id="stTable"></tbody></table></div>
+</div></div>
+
+<!-- TAB 4 BOM -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title">🧩 BOM / Components</div>
+<div class="subnav">
+<button class="on" onclick="showBom('bom',this)">BOM ต่อ Part</button>
+<button onclick="showBom('rm',this)">RM Master</button>
+<button onclick="showBom('comp',this)">Component Master</button>
+</div>
+<div id="bomPartWrap">
+<div class="g2">
+<div class="f"><label class="fl">เลือก Part</label><select id="bomPart" onchange="renderBom()"><option value="">-- เลือก Part --</option></select></div>
+<div class="f"><label class="fl">จำนวนผลิต (pcs) — คำนวณความต้องการ</label><input type="number" id="bomQty" value="0" min="0" oninput="renderBom()"></div>
+</div>
+</div>
+<div id="bomBody" style="overflow:auto;max-height:60vh"></div>
+</div></div>
+
+<!-- TAB 5 CLOUD -->
+<div class="tc" id="tab5"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud + Export</div>
+<div class="card-sub">ดึง/ส่งข้อมูลขึ้น Google Sheet (Apps Script v5+)</div>
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#10b981"><b>Status:</b> <span id="cs">Not configured</span><br><b>Last sync:</b> <span id="ls">Never</span></div>
+<div class="f"><label class="fl">🔗 Apps Script URL</label><input id="url" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"></div>
+<div class="g2" style="margin-bottom:8px"><button class="btn btn-t" onclick="testCloud()">🧪 Test</button><button class="btn btn-g" onclick="saveUrl()">💾 Save URL</button></div>
+<div class="g2" style="margin-bottom:8px"><button class="btn btn-y" id="pushBtn" onclick="pushAll()">⬆️ Push → Cloud</button><button class="btn btn-a" onclick="pullStock()">⬇️ Pull (รับ/เบิก)</button></div>
+<div id="cloudResult" style="font-size:12px;margin-bottom:10px"></div>
+<div class="g2"><button class="btn btn-d" style="font-size:12px" onclick="exportCSV()">📥 Export Stock (CSV)</button><button class="btn btn-d" style="font-size:12px" onclick="exportJSON()">📥 Export JSON</button></div>
+</div></div>
+
+<div class="bn"><button class="btn btn-d" id="bPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button><button class="btn btn-t" id="bNext" onclick="nextTab()">ถัดไป ▶</button></div>
+
+<script>
+var SEED={"rm": [{"process": "BLOW MOLD", "code": "R8003011", "name": "DYNACHISSO POLYPRO T217/CMX26011-790", "onhand": 35000, "unit": "kg"}, {"process": "BLOW MOLD", "code": "R2003050", "name": "VISTAMAXX 6102  (CARGO", "onhand": 35000, "unit": "kg"}, {"process": "BLOW MOLD", "code": "R8004013", "name": "CYCLOFREND V 63", "onhand": 35000, "unit": "kg"}, {"process": "BLOW MOLD", "code": "R8003014", "name": "HIFAX EBG 628P C16010", "onhand": 35000, "unit": "kg"}, {"process": "BLOW MOLD", "code": "R2003026", "name": "ABS # 747 R (TOP)", "onhand": 0, "unit": "kg"}, {"process": "BLOW MOLD", "code": "R8003010", "name": "ABS NOVODUR N 550", "onhand": 0, "unit": "kg"}, {"process": "INJECTION", "code": "R8004011", "name": "PP COMPOUND X 170T CMX 26011", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8004015", "name": "CK-KF165UV POLYPROPYLENE COMPOUND (TEO)", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8004016", "name": "TP8LDZ-901 THEMOPLASTIC (TPS)", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8004017", "name": "2404014-CP-PSVPP (5ND-1)", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8004018", "name": "2404015-CP-PBKPP (C1-1/7D)", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8003015", "name": "ABP-2036 GT", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8003016", "name": "PP X655T 11BK10", "onhand": 35000, "unit": "kg"}, {"process": "INJECTION", "code": "R8003001", "name": "ABS AP102", "onhand": 35000, "unit": "kg"}], "components": [{"code": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "unit": "pcs"}, {"code": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "unit": "pcs"}, {"code": "R0013825", "desc": "INSER NUT M6#13x5mm.", "unit": "pcs"}, {"code": "R0013826", "desc": "INSER NUT M8#15x10mm.", "unit": "pcs"}, {"code": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "unit": "pcs"}, {"code": "R0013578", "desc": "FLANGE NUT M6", "unit": "pcs"}, {"code": "R0013650", "desc": "INSERT NUT M6 13x5mm.", "unit": "pcs"}, {"code": "R0013958", "desc": "INSERT NUT M6 x 1.0mm.", "unit": "pcs"}, {"code": "R0013959", "desc": "INSERT NUT M8 x 1.25mm.", "unit": "pcs"}], "bom": [{"partno": "F8222ISDC1", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8223ISDC1", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8221ISDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8224ISDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8225ISDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8221TODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8222TODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -10.5, "unit": "kg"}, {"partno": "F8223TODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -10.5, "unit": "kg"}, {"partno": "F8224TODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8225TODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8269LTOD00", "type": "RM", "item": "COMPOUND PP-EGF 15B", "qty": -4, "unit": "kg"}, {"partno": "F8269RTOD00", "type": "RM", "item": "COMPOUND PP-EGF 15B", "qty": -4, "unit": "kg"}, {"partno": "F8223TODCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8222TODCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 4.9, "unit": "kg"}, {"partno": "F8221TODCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4, "unit": "kg"}, {"partno": "F8224TODCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8225TODCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8224TOXCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -6.5, "unit": "kg"}, {"partno": "F8225TOXCA", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8272AMIDC0", "type": "RM", "item": "COMPOUND ABS", "qty": -4.5, "unit": "kg"}, {"partno": "F8272AMIDC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8272BMIDC0", "type": "RM", "item": "COMPOUND ABS", "qty": -4, "unit": "kg"}, {"partno": "F8272BMIDC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 11.0, "unit": "pcs"}, {"partno": "F8272BMIDC0", "type": "Comp", "item": "R0013650", "desc": "INSERT NUT M6 13x5mm.", "qty": 4.0, "unit": "pcs"}, {"partno": "F8263ISDC1", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -10.05, "unit": "kg"}, {"partno": "F8264ISDC1", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8221MGDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -3, "unit": "kg"}, {"partno": "F8222MGDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8223MGDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8224MGDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -6, "unit": "kg"}, {"partno": "F8225MGDC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8275AXXB01", "type": "RM", "item": "PP-EGF 15 BK (G-FORCE)", "qty": 12, "unit": "kg"}, {"partno": "F8275AXXB01", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 11.0, "unit": "pcs"}, {"partno": "F8275AXXB01", "type": "Comp", "item": "R0013650", "desc": "INSERT NUT M6 13x5mm.", "qty": 4.0, "unit": "pcs"}, {"partno": "F8275AXXC01", "type": "RM", "item": "PP-EGF 15 BK (G-FORCE)", "qty": -6.5, "unit": "kg"}, {"partno": "F8221ISDAC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8223ISDAC1", "type": "RM", "item": "ABS # 747 R", "qty": 2.0999999999999996, "unit": "kg"}, {"partno": "F8223ISDAC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8223ISDBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8222ISDAC1", "type": "RM", "item": "ABS # 747 R", "qty": 2.0999999999999996, "unit": "kg"}, {"partno": "F8222ISDAC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8222ISDBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -9, "unit": "kg"}, {"partno": "F8224ISDAC1", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8224ISDAC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8225ISDAC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8224ISDBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8225ISDAC1", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8225ISDBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8221BTOGC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.750000000000001, "unit": "kg"}, {"partno": "F8221BTOGC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8224BTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.62, "unit": "kg"}, {"partno": "F8224BTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8224BTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8224BTODC0", "type": "Comp", "item": "R0013826", "desc": "INSER NUT M8#15x10mm.", "qty": 4.0, "unit": "pcs"}, {"partno": "F8224BTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8225BTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.62, "unit": "kg"}, {"partno": "F8225BTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8225BTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8225BTODC0", "type": "Comp", "item": "R0013826", "desc": "INSER NUT M8#15x10mm.", "qty": 4.0, "unit": "pcs"}, {"partno": "F8225BTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8224BTOXC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.26, "unit": "kg"}, {"partno": "F8224BTOXC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8224BTOXC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8224BTOXC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8225BTOXC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.26, "unit": "kg"}, {"partno": "F8225BTOXC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8225BTOXC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8225BTOXC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8222BTOGC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.9000000000000004, "unit": "kg"}, {"partno": "F8222BTOGC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8222BTOGC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8222BTOGC0", "type": "Comp", "item": "R0013826", "desc": "INSER NUT M8#15x10mm.", "qty": 2.0, "unit": "pcs"}, {"partno": "F8222BTOGC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8223BTOGC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.9000000000000004, "unit": "kg"}, {"partno": "F8223BTOGC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8223BTOGC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8223BTOGC0", "type": "Comp", "item": "R0013826", "desc": "INSER NUT M8#15x10mm.", "qty": 2.0, "unit": "pcs"}, {"partno": "F8223BTOGC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8224ISXBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.6, "unit": "kg"}, {"partno": "F8225ISXBC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.6, "unit": "kg"}, {"partno": "F8221AMADC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.3999999999999995, "unit": "kg"}, {"partno": "F8221AMADC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8221AMADC0", "type": "Comp", "item": "R0013578", "desc": "FLANGE NUT M6", "qty": 8.0, "unit": "pcs"}, {"partno": "F8222AMADC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.365, "unit": "kg"}, {"partno": "F8222AMADC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8223AMADC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 2.37, "unit": "kg"}, {"partno": "F8223AMADC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8224AMADC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.2, "unit": "kg"}, {"partno": "F8224AMADC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8225AMADC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 1.2, "unit": "kg"}, {"partno": "F8225AMADC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F828032CB01", "type": "RM", "item": "CP-GBKPP-210535A2 25%", "qty": -6, "unit": "kg"}, {"partno": "F828032CB01", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 9.0, "unit": "pcs"}, {"partno": "96101A040P-1", "type": "RM", "item": "DYNACHISSO POLYPRO T217/CMX26011-790", "qty": 0, "unit": "kg"}, {"partno": "96100A040P-1", "type": "RM", "item": "DYNACHISSO POLYPRO T217/CMX26011-790", "qty": 0, "unit": "kg"}, {"partno": "F8269LMID00", "type": "RM", "item": "DYNACHISSO POLYPRO T217/CMX26011-790", "qty": 4.699999999999999, "unit": "kg"}, {"partno": "F8269LMID00", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8269LMID00", "type": "Comp", "item": "R0013958", "desc": "INSERT NUT M6 x 1.0mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8269LMID00", "type": "Comp", "item": "R0013959", "desc": "INSERT NUT M8 x 1.25mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8269RMID00", "type": "RM", "item": "DYNACHISSO POLYPRO T217/CMX26011-790", "qty": 4.699999999999999, "unit": "kg"}, {"partno": "F8269XTOD00", "type": "RM", "item": "PP-EGF 15B + COMPOUND PP-EGF 15BK", "qty": 0, "unit": "kg"}, {"partno": "F8269XTOD00", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 21.0, "unit": "pcs"}, {"partno": "F8221CTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8221CTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8221CTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8221CTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8224CTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -4.5, "unit": "kg"}, {"partno": "F8224CTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8224CTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8224CTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8225CTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": 0, "unit": "kg"}, {"partno": "F8225CTODC0", "type": "Comp", "item": "R2029022", "desc": "LABEL  W10 x L3.5 cm.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8225CTODC0", "type": "Comp", "item": "R0013578", "desc": "FLANGE NUT M6", "qty": 8.0, "unit": "pcs"}, {"partno": "F8272AISDC0", "type": "RM", "item": "COMPOUND ABS", "qty": 1.6, "unit": "kg"}, {"partno": "F8272AISDC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8272AISDC0", "type": "Comp", "item": "R0013958", "desc": "INSERT NUT M6 x 1.0mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8272AISDC0", "type": "Comp", "item": "R0013959", "desc": "INSERT NUT M8 x 1.25mm.", "qty": 8.0, "unit": "pcs"}, {"partno": "F8272ATODC0", "type": "RM", "item": "COMPOUND ABS", "qty": 1.7999999999999998, "unit": "kg"}, {"partno": "F8272ATODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8272ATODC0", "type": "Comp", "item": "R0013958", "desc": "INSERT NUT M6 x 1.0mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8272ATODC0", "type": "Comp", "item": "R0013959", "desc": "INSERT NUT M8 x 1.25mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8222CTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -10.5, "unit": "kg"}, {"partno": "F8222CTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8222CTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8222CTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8223CTODC0", "type": "RM", "item": "ABS # 747 R  / ABS NOVODUR N 550", "qty": -10.5, "unit": "kg"}, {"partno": "F8223CTODC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8223CTODC0", "type": "Comp", "item": "R0013825", "desc": "INSER NUT M6#13x5mm.", "qty": 6.0, "unit": "pcs"}, {"partno": "F8223CTODC0", "type": "Comp", "item": "R0013787", "desc": "INSERT NUT M8#15x6mm.", "qty": 3.0, "unit": "pcs"}, {"partno": "F8272ISDC0", "type": "RM", "item": "COMPOUND ABS", "qty": 0, "unit": "kg"}, {"partno": "F8272ISDC0", "type": "Comp", "item": "R2029065", "desc": ":LABEL PP  W4.5*L2CM.", "qty": 1.0, "unit": "pcs"}, {"partno": "F8272ISDC0", "type": "Comp", "item": "R0013958", "desc": "INSERT NUT M6 x 1.0mm.", "qty": 7.0, "unit": "pcs"}, {"partno": "F8272ISDC0", "type": "Comp", "item": "R0013959", "desc": "INSERT NUT M8 x 1.25mm.", "qty": 8.0, "unit": "pcs"}, {"partno": "F8246ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8247ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8211001", "type": "RM", "item": "PP TJ 755510", "qty": 0, "unit": "kg"}, {"partno": "F8244ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8245ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8248ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8249ISDC0", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8244TODC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.06, "unit": "kg"}, {"partno": "F8245TODC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.06, "unit": "kg"}, {"partno": "F8246TODC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.055, "unit": "kg"}, {"partno": "F8247TODC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.055, "unit": "kg"}, {"partno": "F8215TOD001", "type": "RM", "item": "ABS AP102", "qty": 0.244, "unit": "kg"}, {"partno": "F8210T00", "type": "RM", "item": "PP 7555 BROWN", "qty": 0.32, "unit": "kg"}, {"partno": "F8212RLTOXC0", "type": "RM", "item": "ABS AP102", "qty": 0.145, "unit": "kg"}, {"partno": "F8212RRTOXC0", "type": "RM", "item": "ABS AP102", "qty": 0.145, "unit": "kg"}, {"partno": "F8212RLTOD001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.178, "unit": "kg"}, {"partno": "F8212RRTOD001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.178, "unit": "kg"}, {"partno": "F8212FLTOD001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.217, "unit": "kg"}, {"partno": "F8212FRTOD001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.217, "unit": "kg"}, {"partno": "F8215TOP001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.235, "unit": "kg"}, {"partno": "F8244TODCA", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8245TODCA", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8248TODCA", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8249TODCA", "type": "RM", "item": "ABS # 747 R", "qty": 0, "unit": "kg"}, {"partno": "F8268TOD00", "type": "RM", "item": "PP AP-EX33,PP COMPOUND X 170T", "qty": 0.06, "unit": "kg"}, {"partno": "F8268MGD00", "type": "RM", "item": "PP AP-EX33", "qty": 0.0435, "unit": "kg"}, {"partno": "F8246ISDAC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.078, "unit": "kg"}, {"partno": "F8247ISDAC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.078, "unit": "kg"}, {"partno": "F8277BTOGC0", "type": "RM", "item": "PP AP-EX33,PP COMPOUND X 170T", "qty": 0.227, "unit": "kg"}, {"partno": "F8278BTOGC0", "type": "RM", "item": "PP AP-EX33,PP COMPOUND X 170T", "qty": 0.227, "unit": "kg"}, {"partno": "F8246BTOGC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.194, "unit": "kg"}, {"partno": "F8247BTOGC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.194, "unit": "kg"}, {"partno": "F8244BTOGC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.164, "unit": "kg"}, {"partno": "F8245BTOGC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.164, "unit": "kg"}, {"partno": "F8279TOD00", "type": "RM", "item": "PP AP-EX33", "qty": 0.438, "unit": "kg"}, {"partno": "F8271LHOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.16, "unit": "kg"}, {"partno": "F8271RHOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.16, "unit": "kg"}, {"partno": "F8234LTOL00", "type": "RM", "item": "ABS AP102", "qty": 0.128, "unit": "kg"}, {"partno": "F8234RTOL00", "type": "RM", "item": "ABS AP102", "qty": 0.128, "unit": "kg"}, {"partno": "F8233LTOL00", "type": "RM", "item": "ABS AP102", "qty": 0.265, "unit": "kg"}, {"partno": "F8233RTOL00", "type": "RM", "item": "ABS AP102", "qty": 0.265, "unit": "kg"}, {"partno": "F8211TOX00", "type": "RM", "item": "ABS BLACK COLOR FOR CONSOLE BOX SEPARATOR", "qty": 0.18, "unit": "kg"}, {"partno": "F8213RLTOC001", "type": "RM", "item": "ABS AP102", "qty": 0.144, "unit": "kg"}, {"partno": "F8213RRTOC001", "type": "RM", "item": "ABS AP102", "qty": 0.144, "unit": "kg"}, {"partno": "F8213FLTOC001", "type": "RM", "item": "ABS AP102", "qty": 0.26, "unit": "kg"}, {"partno": "F8213FRTOC001", "type": "RM", "item": "ABS AP102", "qty": 0.26, "unit": "kg"}, {"partno": "F8272TOYAC0", "type": "RM", "item": "ABS # 747 R", "qty": 0.455, "unit": "kg"}, {"partno": "F8281LTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8281RTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8252LTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8252RTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8253LTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8254RTOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8274F5ERLMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.0628, "unit": "kg"}, {"partno": "F8274F5ERRMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.06, "unit": "kg"}, {"partno": "F8271LHOCAC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0.3, "unit": "kg"}, {"partno": "F8271RHOCAC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0.3, "unit": "kg"}, {"partno": "F8267ISPC0", "type": "RM", "item": "PP AP-EX33", "qty": 1.325, "unit": "kg"}, {"partno": "F8271ISPC0", "type": "RM", "item": "PP AP-EX33", "qty": 1.2899999999999998, "unit": "kg"}, {"partno": "F8267ISPC1", "type": "RM", "item": "PP AP-EX33", "qty": 1.315, "unit": "kg"}, {"partno": "F8271ISPC1", "type": "RM", "item": "PP AP-EX33", "qty": 1.1749999999999998, "unit": "kg"}, {"partno": "F8267ISGC0", "type": "RM", "item": "PP AP-EX33", "qty": 2, "unit": "kg"}, {"partno": "F8274F5AFLMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.1738, "unit": "kg"}, {"partno": "F8274F5AFRMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.17, "unit": "kg"}, {"partno": "F8234LH001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8234RH001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0, "unit": "kg"}, {"partno": "F8274F5BFLMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.325, "unit": "kg"}, {"partno": "F8274F5BFRMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.33, "unit": "kg"}, {"partno": "F8274F5CRLMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.185, "unit": "kg"}, {"partno": "F8274F5CRRMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.185, "unit": "kg"}, {"partno": "F8274F5DRLMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.2985, "unit": "kg"}, {"partno": "F8274F5DRRMIPC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.3, "unit": "kg"}, {"partno": "F8215TOL001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.55, "unit": "kg"}, {"partno": "F8233LH001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.512, "unit": "kg"}, {"partno": "F8233RH001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.512, "unit": "kg"}, {"partno": "F8212FLTOXC0", "type": "RM", "item": "ABS AP102", "qty": 0.4, "unit": "kg"}, {"partno": "F8212FRTOXC0", "type": "RM", "item": "ABS AP102", "qty": 0.4, "unit": "kg"}, {"partno": "F8271LTOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.415, "unit": "kg"}, {"partno": "F8271RTOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.42, "unit": "kg"}, {"partno": "F8267LTOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0, "unit": "kg"}, {"partno": "F8267RTOCC0", "type": "RM", "item": "PP AP-EX33", "qty": 0, "unit": "kg"}, {"partno": "F8267SLISGC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.617, "unit": "kg"}, {"partno": "F8267SRISGC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.617, "unit": "kg"}, {"partno": "F8267CTISGC0", "type": "RM", "item": "PP AP-EX33", "qty": 0.65, "unit": "kg"}, {"partno": "F8252ISXC0", "type": "RM", "item": "PP AP-EX33", "qty": 2.01, "unit": "kg"}, {"partno": "F8233LMIDC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0, "unit": "kg"}, {"partno": "F8233RMIDC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0, "unit": "kg"}, {"partno": "F8234LMIDC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0, "unit": "kg"}, {"partno": "F8234RMIDC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0, "unit": "kg"}, {"partno": "F8267LHOCC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0.22, "unit": "kg"}, {"partno": "F8267RHOCC0", "type": "RM", "item": "PP COMPOUND X 170T CMX 26011", "qty": 0.22, "unit": "kg"}, {"partno": "F8218MID001", "type": "RM", "item": "ABS25 CPT-915021E3", "qty": 0.645, "unit": "kg"}, {"partno": "F8240LH001", "type": "RM", "item": "ABS PA 747 S (UV)", "qty": 0, "unit": "kg"}, {"partno": "F8240RH001", "type": "RM", "item": "ABS PA 747 S (UV)", "qty": 0, "unit": "kg"}, {"partno": "F8241LH001", "type": "RM", "item": "ABS PA 747 S (UV)", "qty": 0, "unit": "kg"}, {"partno": "F8241RH001", "type": "RM", "item": "ABS PA 747 S (UV)", "qty": 0, "unit": "kg"}, {"partno": "F8261ISXC0", "type": "RM", "item": "F8261ISXC0", "qty": 0.42, "unit": "kg"}, {"partno": "F8262ISXC0", "type": "RM", "item": "F8261ISXC0", "qty": 0.42, "unit": "kg"}]};
+var items=[]; // {id,name,type,unit,opening}
+var receipts=[], issues=[], minmax={}; var role='Operator'; var curTab=1;
+
+function buildItems(){
+  items=[];
+  SEED.rm.forEach(function(m){ items.push({id:m.code,name:m.name,type:'RM',unit:'kg',opening:Number(m.onhand)||0,process:m.process}); });
+  SEED.components.forEach(function(c){ var id=c.code||c.desc; items.push({id:id,name:c.desc,type:'Comp',unit:'pcs',opening:0}); });
+}
+function init(){
+  buildItems();
+  try{ receipts=JSON.parse(localStorage.getItem('mes_step2_receipts')||'[]'); }catch(e){}
+  try{ issues=JSON.parse(localStorage.getItem('mes_step2_issues')||'[]'); }catch(e){}
+  try{ minmax=JSON.parse(localStorage.getItem('mes_step2_minmax')||'{}'); }catch(e){}
+  role=localStorage.getItem('mes_role')||'Operator'; document.getElementById('roleSel').value=role;
+  var u=localStorage.getItem('mes_apps_script_url'); if(u){document.getElementById('url').value=u;document.getElementById('cs').textContent='Configured';}
+  var t=new Date().toISOString().split('T')[0];
+  document.getElementById('rcDate').value=t; document.getElementById('isDate').value=t;
+  applyRole(); fillItemSel('rcItem','RM'); rcUnit(); fillItemSel('isItem','ALL'); fillPartSel();
+  renderReceipts(); renderIssues(); showTab(1);
+}
+function save(){ localStorage.setItem('mes_step2_receipts',JSON.stringify(receipts)); localStorage.setItem('mes_step2_issues',JSON.stringify(issues)); localStorage.setItem('mes_step2_minmax',JSON.stringify(minmax)); }
+function canTxn(){ return role!=='Operator'; }
+function canEdit(){ return role==='Engineer'||role==='Admin'; }
+function changeRole(){ role=document.getElementById('roleSel').value; localStorage.setItem('mes_role',role); applyRole(); }
+function applyRole(){
+  document.getElementById('ro1').style.display=canTxn()?'none':'block';
+  document.getElementById('ro2').style.display=canTxn()?'none':'block';
+  document.getElementById('rcBtn').disabled=!canTxn();
+  document.getElementById('isBtn').disabled=!canTxn();
+  document.getElementById('pushBtn').disabled=!canEdit();
+}
+function itemById(id){ for(var i=0;i<items.length;i++) if(items[i].id===id) return items[i]; return null; }
+function fillItemSel(selId,type){
+  var o='', list=items.filter(function(it){return type==='ALL'||it.type===type;});
+  list.forEach(function(it){ o+='<option value="'+it.id+'">'+it.id+' — '+((it.name||'').substring(0,34))+'</option>'; });
+  var el=document.getElementById(selId); if(el) el.innerHTML=o;
+}
+function rcUnit(){ var it=itemById(document.getElementById('rcItem').value); if(it)document.getElementById('rcUnit2').value=it.unit; }
+
+// ===== RECEIVE =====
+function addReceipt(){
+  if(!canTxn()){toast('⛔ เฉพาะ Leader ขึ้นไป');return;}
+  var id=document.getElementById('rcItem').value; var it=itemById(id); if(!it){toast('เลือกรายการ');return;}
+  var q=parseFloat(document.getElementById('rcQty').value||0); if(q<=0){toast('ใส่จำนวน');return;}
+  receipts.push({date:document.getElementById('rcDate').value,item:id,name:it.name,type:it.type,unit:it.unit,qty:q,
+    lot:document.getElementById('rcLot').value,supplier:document.getElementById('rcSup').value,po:document.getElementById('rcPo').value,by:role});
+  save(); renderReceipts(); toast('📥 รับเข้า '+id+' '+q+' '+it.unit); document.getElementById('rcQty').value='';
+}
+function delReceipt(i){ if(!canTxn())return; receipts.splice(i,1); save(); renderReceipts(); }
+function renderReceipts(){
+  var h='';
+  receipts.slice().reverse().forEach(function(r,ri){ var i=receipts.length-1-ri;
+    h+='<tr><td style="font-size:10px">'+(r.date||'')+'</td><td class="lbl">'+r.item+'</td><td><span class="badge '+(r.type==='RM'?'b-rm':'b-comp')+'">'+r.type+'</span></td><td style="text-align:center">'+r.qty+' '+r.unit+'</td><td class="pn">'+(r.lot||'-')+'</td><td class="pn">'+(r.supplier||'-')+'</td><td style="text-align:center"><button onclick="delReceipt('+i+')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  document.getElementById('rcTable').innerHTML=h||'<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีรายการรับเข้า</td></tr>';
+}
+
+// ===== ISSUE =====
+function addIssue(){
+  if(!canTxn()){toast('⛔ เฉพาะ Leader ขึ้นไป');return;}
+  var id=document.getElementById('isItem').value; var it=itemById(id); if(!it){toast('เลือกรายการ');return;}
+  var q=parseFloat(document.getElementById('isQty').value||0); if(q<=0){toast('ใส่จำนวน');return;}
+  var bal=balanceOf(it);
+  if(q>bal){ if(!confirm('⚠️ เบิก '+q+' '+it.unit+' มากกว่ายอดคงเหลือ ('+bal+' '+it.unit+')\nยอดจะติดลบ — ยืนยันบันทึกหรือไม่?\n(ถ้าเบิกผิด: ไปแท็บนี้แล้วกดลบรายการ)')) return; }
+  issues.push({date:document.getElementById('isDate').value,item:id,name:it.name,type:it.type,unit:it.unit,qty:q,ref:document.getElementById('isRef').value,by:role});
+  save(); renderIssues(); toast('📤 เบิก '+id+' '+q+' '+it.unit); document.getElementById('isQty').value='';
+}
+function delIssue(i){ if(!canTxn())return; issues.splice(i,1); save(); renderIssues(); }
+function renderIssues(){
+  var h='';
+  issues.slice().reverse().forEach(function(r,ri){ var i=issues.length-1-ri;
+    h+='<tr><td style="font-size:10px">'+(r.date||'')+'</td><td class="lbl">'+r.item+'</td><td style="text-align:center">'+r.qty+' '+r.unit+'</td><td class="pn">'+(r.ref||'-')+'</td><td style="text-align:center"><button onclick="delIssue('+i+')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  document.getElementById('isTable').innerHTML=h||'<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีรายการเบิก</td></tr>';
+}
+
+// ===== STOCK =====
+function sumBy(arr,id){ var s=0; arr.forEach(function(x){ if(x.item===id) s+=Number(x.qty)||0; }); return s; }
+function balanceOf(it){ return it.opening + sumBy(receipts,it.id) - sumBy(issues,it.id); }
+function renderStock(){
+  var q=(document.getElementById('stSearch').value||'').toLowerCase();
+  var h='',low=0,nrm=0,ncomp=0;
+  items.forEach(function(it){
+    if(it.type==='RM')nrm++; else ncomp++;
+    var s=(it.id+' '+(it.name||'')).toLowerCase(); if(q&&s.indexOf(q)<0) return;
+    var rec=sumBy(receipts,it.id), iss=sumBy(issues,it.id), bal=balanceOf(it);
+    var mm=minmax[it.id]||{}; var mn=Number(mm.min)||0, mx=Number(mm.max)||0;
+    var st='<span class="st-ok">🟢 ปกติ</span>';
+    if(mn>0&&bal<mn){ st='<span class="st-low">🔴 ต่ำกว่า Min</span>'; low++; }
+    else if(mx>0&&bal>mx){ st='<span class="st-high">🔵 เกิน Max</span>'; }
+    var ed=canEdit();
+    h+='<tr><td class="lbl">'+it.id+'</td><td class="pn">'+((it.name||'').substring(0,28))+'</td><td><span class="badge '+(it.type==='RM'?'b-rm':'b-comp')+'">'+it.type+'</span></td>'+
+      '<td style="text-align:center">'+it.opening.toLocaleString()+'</td><td style="text-align:center;color:var(--green)">'+rec.toLocaleString()+'</td><td style="text-align:center;color:var(--yellow)">'+iss.toLocaleString()+'</td>'+
+      '<td style="text-align:center;font-weight:700">'+bal.toLocaleString()+' '+it.unit+'</td>'+
+      '<td style="text-align:center">'+(ed?'<input type="number" value="'+mn+'" style="width:64px;padding:3px;text-align:center" onchange="setMM(\''+it.id+'\',\'min\',this.value)">':mn)+'</td>'+
+      '<td style="text-align:center">'+(ed?'<input type="number" value="'+mx+'" style="width:64px;padding:3px;text-align:center" onchange="setMM(\''+it.id+'\',\'max\',this.value)">':mx)+'</td>'+
+      '<td style="text-align:center;font-size:11px">'+st+'</td></tr>';
+  });
+  document.getElementById('stTable').innerHTML=h||'<tr><td colspan="10" style="text-align:center;color:var(--dim);padding:16px">—</td></tr>';
+  document.getElementById('kRM').textContent=nrm; document.getElementById('kComp').textContent=ncomp; document.getElementById('kLow').textContent=low;
+}
+function setMM(id,k,v){ if(!minmax[id])minmax[id]={}; minmax[id][k]=Number(v)||0; save(); renderStock(); }
+
+// ===== BOM =====
+var curBom='bom';
+function fillPartSel(){
+  var parts={}; SEED.bom.forEach(function(b){ parts[b.partno]=1; });
+  var o='<option value="">-- เลือก Part --</option>'; Object.keys(parts).sort().forEach(function(p){o+='<option>'+p+'</option>';});
+  var el=document.getElementById('bomPart'); if(el)el.innerHTML=o;
+}
+function showBom(which,el){
+  curBom=which;
+  if(el){ document.querySelectorAll('#tab4 .subnav button').forEach(function(b){b.classList.remove('on');}); el.classList.add('on'); }
+  document.getElementById('bomPartWrap').style.display=which==='bom'?'block':'none';
+  if(which==='bom') renderBom(); else if(which==='rm') renderRmMaster(); else renderCompMaster();
+}
+function renderBom(){
+  var pn=document.getElementById('bomPart').value;
+  var qty=parseFloat(document.getElementById('bomQty').value||0);
+  if(!pn){ document.getElementById('bomBody').innerHTML='<div style="color:var(--dim);text-align:center;padding:16px">เลือก Part เพื่อดู BOM</div>'; return; }
+  var lines=SEED.bom.filter(function(b){return b.partno===pn;});
+  var h='<table class="tbl"><thead><tr><th>ประเภท</th><th>รายการ</th><th>ต่อ 1 ชิ้น</th><th>หน่วย</th><th>ต้องใช้ (×'+qty+')</th></tr></thead><tbody>';
+  lines.forEach(function(b){
+    var need=qty>0?(b.qty*qty):'';
+    h+='<tr><td><span class="badge '+(b.type==='RM'?'b-rm':'b-comp')+'">'+b.type+'</span></td><td class="lbl">'+(b.item||'')+(b.desc?(' <span class="pn">'+b.desc.substring(0,20)+'</span>'):'')+'</td><td style="text-align:center">'+b.qty+'</td><td style="text-align:center">'+b.unit+'</td><td style="text-align:center;font-weight:700;color:var(--teal)">'+(need!==''?need.toLocaleString()+' '+b.unit:'-')+'</td></tr>';
+  });
+  document.getElementById('bomBody').innerHTML=h+'</tbody></table>'+(lines.length===0?'<div style="color:var(--dim);text-align:center;padding:10px">ไม่มี BOM ของ part นี้</div>':'');
+}
+function renderRmMaster(){
+  var h='<table class="tbl"><thead><tr><th>Code</th><th>ชื่อวัสดุ</th><th>Process</th><th>หน่วย</th><th>ยกมา</th></tr></thead><tbody>';
+  SEED.rm.forEach(function(m){ h+='<tr><td class="lbl">'+m.code+'</td><td class="pn">'+(m.name||'')+'</td><td style="text-align:center;font-size:11px">'+(m.process||'')+'</td><td style="text-align:center">'+m.unit+'</td><td style="text-align:center">'+(Number(m.onhand)||0).toLocaleString()+'</td></tr>'; });
+  document.getElementById('bomBody').innerHTML=h+'</tbody></table><div style="font-size:11px;color:var(--dim);margin-top:6px">RM '+SEED.rm.length+' รายการ (จากไฟล์เบิกเม็ดจริง)</div>';
+}
+function renderCompMaster(){
+  var h='<table class="tbl"><thead><tr><th>Code</th><th>รายละเอียด</th><th>หน่วย</th></tr></thead><tbody>';
+  SEED.components.forEach(function(c){ h+='<tr><td class="lbl">'+(c.code||'-')+'</td><td class="pn">'+(c.desc||'')+'</td><td style="text-align:center">'+c.unit+'</td></tr>'; });
+  document.getElementById('bomBody').innerHTML=h+'</tbody></table><div style="font-size:11px;color:var(--dim);margin-top:6px">Component '+SEED.components.length+' รายการ (จาก BOM Part List)</div>';
+}
+
+// ===== CLOUD =====
+function cloudGET(u){ return fetch(u).then(function(r){return r.json();}); }
+function cloudPOST(u,p){ return fetch(u,{method:'POST',body:JSON.stringify(p)}).then(function(r){return r.json();}); }
+function cres(m,c){ var col=c==='green'?'#10b981':c==='red'?'#ef4444':'#f59e0b'; document.getElementById('cloudResult').innerHTML='<div style="color:'+col+';padding:6px">'+m+'</div>'; }
+function saveUrl(){ var u=document.getElementById('url').value.trim().replace(/[​-‍﻿]/g,'').replace(/\s+/g,''); if(!u){alert('ใส่ URL');return;} localStorage.setItem('mes_apps_script_url',u); document.getElementById('cs').textContent='Configured'; toast('✅ บันทึก URL'); }
+function testCloud(){ var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;} cres('⏳ Testing...','yellow');
+  cloudGET(u+'?action=ping').then(function(d){ cres(d.status==='success'?'✅ Connected ('+d.message+')':'❌ '+d.message,d.status==='success'?'green':'red'); document.getElementById('cs').textContent=d.status==='success'?'Connected':'Error'; }).catch(function(e){cres('❌ '+e,'red');}); }
+function pushAll(){
+  if(!canEdit()){toast('⛔ เฉพาะ Engineer/Admin');return;}
+  var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;}
+  if(!confirm('⚠️ การ Push จะเขียนทับข้อมูลใน Google Sheet (Master + รับ/เบิก) ด้วยข้อมูลในเครื่องนี้\nยืนยันหรือไม่? (ถ้าไม่แน่ใจ ให้ Pull ดูข้อมูลล่าสุดก่อน)')) return;
+  cres('⏳ Push...','yellow');
+  var P=[
+   {type:'SAVE_SHEET',name:'RawMat_Master',headers:['Code','Name','Process','Unit','Opening'],rows:SEED.rm.map(function(m){return [m.code,m.name,m.process,m.unit,m.onhand];})},
+   {type:'SAVE_SHEET',name:'Component_Master',headers:['Code','Desc','Unit'],rows:SEED.components.map(function(c){return [c.code,c.desc,c.unit];})},
+   {type:'SAVE_SHEET',name:'BOM_Master',headers:['PartNo','Type','Item','Desc','QtyPerPc','Unit'],rows:SEED.bom.map(function(b){return [b.partno,b.type,b.item,b.desc||'',b.qty,b.unit];})},
+   {type:'SAVE_SHEET',name:'RawMat_Receipt',headers:['Date','Item','Type','Qty','Unit','Lot','Supplier','PO','By'],rows:receipts.map(function(r){return [r.date,r.item,r.type,r.qty,r.unit,r.lot||'',r.supplier||'',r.po||'',r.by||''];})},
+   {type:'SAVE_SHEET',name:'RawMat_Issue',headers:['Date','Item','Type','Qty','Unit','Ref','By'],rows:issues.map(function(r){return [r.date,r.item,r.type,r.qty,r.unit,r.ref||'',r.by||''];})}
+  ];
+  var i=0,ok=0;
+  function nx(){ if(i>=P.length){ cres('✅ Push สำเร็จ '+ok+'/'+P.length+' ตาราง','green'); localStorage.setItem('mes_step2_lastsync',new Date().toISOString()); document.getElementById('ls').textContent=new Date().toLocaleString('th-TH'); return; }
+    var p=P[i++]; cloudPOST(u,p).then(function(d){ if(d.status==='success')ok++; cres('⏳ '+p.name+': '+(d.status==='success'?('OK '+d.count):('ERR '+d.message)),'yellow'); nx(); }).catch(function(e){ cres('❌ '+p.name+': '+e,'red'); nx(); }); }
+  nx();
+}
+function pullStock(){
+  var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;}
+  cres('⏳ Pull...','yellow');
+  cloudGET(u+'?action=getSheet&name=RawMat_Receipt').then(function(d){
+    if(d.status==='success'&&d.rows){ receipts=d.rows.map(function(r){return {date:r['Date'],item:r['Item'],type:r['Type'],qty:Number(r['Qty']||0),unit:r['Unit'],lot:r['Lot'],supplier:r['Supplier'],po:r['PO'],by:r['By']};}).filter(function(x){return x.item;}); }
+    return cloudGET(u+'?action=getSheet&name=RawMat_Issue');
+  }).then(function(d){
+    if(d&&d.status==='success'&&d.rows){ issues=d.rows.map(function(r){return {date:r['Date'],item:r['Item'],type:r['Type'],qty:Number(r['Qty']||0),unit:r['Unit'],ref:r['Ref'],by:r['By']};}).filter(function(x){return x.item;}); }
+    save(); renderReceipts(); renderIssues(); renderStock(); cres('✅ Pull สำเร็จ (รับ '+receipts.length+' / เบิก '+issues.length+')','green');
+  }).catch(function(e){cres('❌ '+e,'red');});
+}
+function exportCSV(){
+  var csv='Code,Name,Type,Opening,Received,Issued,Balance,Min,Max,Unit\n';
+  items.forEach(function(it){ var mm=minmax[it.id]||{}; csv+=[it.id,'"'+(it.name||'')+'"',it.type,it.opening,sumBy(receipts,it.id),sumBy(issues,it.id),balanceOf(it),mm.min||0,mm.max||0,it.unit].join(',')+'\n'; });
+  dl(new Blob(['﻿'+csv],{type:'text/csv'}),'MES_Step2_Stock_'+new Date().toISOString().split('T')[0]+'.csv'); toast('📥 Export CSV');
+}
+function exportJSON(){ dl(new Blob([JSON.stringify({receipts:receipts,issues:issues,minmax:minmax},null,2)],{type:'application/json'}),'MES_Step2_backup.json'); toast('📥 Export JSON'); }
+function dl(b,n){ var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
+
+// ===== NAV =====
+function showTab(n){ curTab=n; document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+  document.getElementById('bPrev').style.display=n>1?'block':'none';
+  document.getElementById('bNext').style.display=n<5?'block':'none';
+  if(n===3) renderStock(); if(n===4){ if(curBom==='bom')renderBom(); else if(curBom==='rm')renderRmMaster(); else renderCompMaster(); }
+}
+function nextTab(){ if(curTab<5) showTab(curTab+1); }
+function prevTab(){ if(curTab>1) showTab(curTab-1); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2200); }
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MES Step 3 - Production Readiness R1 Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c1222;--card:#162032;--card2:#1a2840;--accent:#2d7ff9;--accent2:#5b9cff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e8edf5;--dim:#7b8ca8;--border:#253350;--inp:#0e1729;--r:10px;--violet:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:70px}
+.topbar{background:linear-gradient(135deg,#162032,#1a2840);padding:10px 14px;border-bottom:2px solid var(--violet);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+.topbar-title{font-size:16px;font-weight:800;color:#c4b5fd}.topbar-sub{font-size:11px;color:var(--dim)}
+.rolebar{display:flex;align-items:center;gap:6px;font-size:12px}
+.rolebar select{padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--inp);color:var(--text);font-family:inherit;font-size:12px}
+.flow-bar{background:var(--card);padding:7px 8px;border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:6px}
+.flow-step{flex:0 0 auto;padding:5px 9px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--inp);color:var(--dim);border:1px solid var(--border)}
+.flow-step.active{background:var(--violet);color:#fff}.flow-step.done{background:#10b98130;color:var(--green)}
+.nav{display:flex;overflow-x:auto;gap:4px;padding:6px 8px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:98}
+.nav-btn{flex:0 0 auto;padding:8px 13px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.nav-btn.active{background:var(--violet);color:#fff}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin:8px;border:1px solid var(--border)}
+.card-title{font-size:16px;font-weight:800;color:#c4b5fd;margin-bottom:8px}
+.card-sub{font-size:11px;color:var(--dim);margin-bottom:10px}
+label.fl{font-size:11px;color:var(--dim);display:block;margin-bottom:3px;font-weight:600}
+.f{margin-bottom:8px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--inp);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--violet)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btn{width:100%;padding:11px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.btn-v{background:var(--violet)}.btn-g{background:var(--green)}.btn-y{background:var(--yellow);color:#111}.btn-r{background:var(--red)}.btn-d{background:var(--border)}.btn-a{background:var(--accent)}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.kpi{border-radius:var(--r);padding:10px;text-align:center;background:var(--inp);border:1px solid var(--border)}
+.kpi-l{font-size:10px;color:var(--dim)}.kpi-v{font-size:22px;font-weight:900}.kpi-t{font-size:9px;color:var(--dim)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:7px 6px;text-align:center;font-weight:700;font-size:10px;color:var(--dim);background:rgba(139,92,246,.12)}
+.tbl td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.tbl .lbl{font-weight:600;color:var(--accent2);font-size:11px;text-align:left}
+.tc{display:none}.tc.active{display:block}
+.sec{background:var(--inp);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
+.sec-h{font-weight:800;color:#c4b5fd;font-size:13px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.item{display:grid;grid-template-columns:34px 1fr 120px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.item .no{font-size:11px;color:var(--dim);font-weight:700}
+.item .nm{font-size:12px}
+.item select{padding:5px;font-size:12px}
+.item .rmk{grid-column:2 / 4;margin-top:3px}
+.item .rmk input{padding:5px 8px;font-size:11px}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:10px;font-weight:700;z-index:200;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{display:block}
+.bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
+.ro-note{font-size:11px;color:var(--violet);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:6px;padding:6px 10px;margin-bottom:8px}
+.pill{display:inline-block;padding:3px 12px;border-radius:14px;font-size:12px;font-weight:800}
+.pill-ok{background:#10b98130;color:var(--green)}.pill-no{background:#ef444430;color:var(--red)}
+.bar{height:10px;border-radius:6px;background:var(--inp);overflow:hidden;margin-top:4px}
+.bar>div{height:100%;background:var(--violet)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">✅</div>
+<div class="topbar">
+<div><div class="topbar-title">✅ MES Step 3 — Production Readiness (4M)</div><div class="topbar-sub">Vandapac · Pre-Production Readiness Form · Cloud</div></div>
+<div class="rolebar">👤 <select id="roleSel" onchange="changeRole()">
+<option>Operator</option><option>Leader</option><option>Foreman</option><option>Engineer</option><option>Supervisor</option><option>Admin</option>
+</select></div>
+</div>
+<div class="flow-bar">
+<div class="flow-step done">1 Production Plan ✓</div>
+<div class="flow-step done">2 WIP Raw ✓</div>
+<div class="flow-step active">3 Readiness ◀</div>
+<div class="flow-step done">4 Production ✓</div>
+<div class="flow-step done">5 WIP FG ✓</div>
+<div class="flow-step done">6 Route ✓</div>
+<div class="flow-step done">7 Rollup ✓</div>
+</div>
+<div class="nav">
+<button class="nav-btn active" onclick="showTab(1)">📋 Readiness Form</button>
+<button class="nav-btn" onclick="showTab(2)">📊 สรุป/Score</button>
+<button class="nav-btn" onclick="showTab(3)">📜 ประวัติ</button>
+<button class="nav-btn" onclick="showTab(4)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud</button>
+</div>
+
+<!-- TAB 1 FORM -->
+<div class="tc active" id="tab1"><div class="card">
+<div class="card-title">📋 Pre-Production Readiness Form</div>
+<div id="ro1" class="ro-note" style="display:none">โหมดดูอย่างเดียว — บันทึก/อนุมัติได้เฉพาะ Leader ขึ้นไป</div>
+<div class="g2">
+<div class="f"><label class="fl">Part No</label><select id="fPart" onchange="onPart()"><option value="">-- เลือก Part --</option></select></div>
+<div class="f"><label class="fl">Part Name</label><input id="fName" readonly></div>
+</div>
+<div class="g3">
+<div class="f"><label class="fl">Project</label><input id="fProj" placeholder="OE..."></div>
+<div class="f"><label class="fl">จำนวนผลิต</label><input type="number" id="fQty" value="0" min="0"></div>
+<div class="f"><label class="fl">วันที่</label><input type="date" id="fDate"></div>
+</div>
+<div class="g2">
+<div class="f"><label class="fl">ผู้จัดทำ</label><input id="fPrep" placeholder="ชื่อ"></div>
+<div class="f"><label class="fl">ผู้อนุมัติ</label><input id="fAppr" placeholder="ชื่อ"></div>
+</div>
+<div id="checklist"></div>
+<button class="btn btn-v" id="saveBtn" style="margin-top:8px" onclick="saveForm()">💾 บันทึก Readiness</button>
+<button class="btn btn-d" style="margin-top:6px;font-size:12px" onclick="resetForm()">🔄 ฟอร์มใหม่</button>
+</div></div>
+
+<!-- TAB 2 SUMMARY -->
+<div class="tc" id="tab2"><div class="card">
+<div class="card-title">📊 สรุปความพร้อม</div>
+<div style="text-align:center;margin-bottom:10px"><span id="overall" class="pill pill-no">—</span></div>
+<div class="g4" style="margin-bottom:8px">
+<div class="kpi"><div class="kpi-l">ผ่าน</div><div class="kpi-v" id="kPass" style="color:var(--green)">0</div></div>
+<div class="kpi"><div class="kpi-l">รอแก้ไข</div><div class="kpi-v" id="kFix" style="color:var(--yellow)">0</div></div>
+<div class="kpi"><div class="kpi-l">ไม่ผ่าน</div><div class="kpi-v" id="kFail" style="color:var(--red)">0</div></div>
+<div class="kpi"><div class="kpi-l">คะแนน</div><div class="kpi-v" id="kScore" style="color:#c4b5fd">0%</div></div>
+</div>
+<div id="secScores"></div>
+</div></div>
+
+<!-- TAB 3 HISTORY -->
+<div class="tc" id="tab3"><div class="card">
+<div class="card-title">📜 ประวัติ Readiness</div>
+<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>วันที่</th><th>Part</th><th>Project</th><th>Qty</th><th>Score</th><th>ผล</th><th>ผู้อนุมัติ</th><th>ลบ</th></tr></thead><tbody id="hisTable"></tbody></table></div>
+</div></div>
+
+<!-- TAB 4 CLOUD -->
+<div class="tc" id="tab4"><div class="card">
+<div class="card-title" style="color:#10b981">☁️ Cloud + Export</div>
+<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#10b981"><b>Status:</b> <span id="cs">Not configured</span><br><b>Last sync:</b> <span id="ls">Never</span></div>
+<div class="f"><label class="fl">🔗 Apps Script URL</label><input id="url" placeholder="https://script.google.com/macros/s/..." style="font-size:12px"></div>
+<div class="g2" style="margin-bottom:8px"><button class="btn btn-a" onclick="testCloud()">🧪 Test</button><button class="btn btn-g" onclick="saveUrl()">💾 Save URL</button></div>
+<div class="g2" style="margin-bottom:8px"><button class="btn btn-v" id="pushBtn" onclick="pushAll()">⬆️ Push ประวัติ → Cloud</button><button class="btn btn-a" onclick="pullAll()">⬇️ Pull จาก Cloud</button></div>
+<div id="cloudResult" style="font-size:12px;margin-bottom:10px"></div>
+<div class="g2"><button class="btn btn-d" style="font-size:12px" onclick="exportCSV()">📥 Export (CSV)</button><button class="btn btn-d" style="font-size:12px" onclick="exportJSON()">📥 Export JSON</button></div>
+</div></div>
+
+<div class="bn"><button class="btn btn-d" id="bPrev" style="display:none" onclick="prevTab()">◀ ย้อนกลับ</button><button class="btn btn-v" id="bNext" onclick="nextTab()">ถัดไป ▶</button></div>
+
+<script>
+var PARTS=[{"p": "F8222ISDC1", "n": "BODY SIDE SPORT BAR 01 LH ISUZU RT93 2020 ก่อนทำสี", "m": "BM3/220K"}, {"p": "F8223ISDC1", "n": "BODY SIDE SPORT BAR 01 RH ISUZU RT93 2020 ก่อนทำสี", "m": "BM3/220K"}, {"p": "F8221ISDC0", "n": "BODY CENTER SPORT BAR ISUZU D-MAX 2012 ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8224ISDC0", "n": "BODY BOX  RAIL SPORT BAR 01 LH ISUZU D-MAX 2012 ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8225ISDC0", "n": "BODY BOX  RAIL SPORT BAR 01 RH ISUZU D-MAX 2012 ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8221TODC0", "n": "BODY CENTER MAXSTYLISH BAR TOYOTA  HILUX DBC 2016  ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8222TODC0", "n": "BODY SIDE SPORT BAR LH TOYOTA HILUX DBC 2016 ก่อนทำสี           ", "m": "BM3/220K"}, {"p": "F8223TODC0", "n": "BODY SIDE SPORT BAR RH TOYOTA HILUX DBC 2016 ก่อนทำสี              ", "m": "BM3/220K"}, {"p": "F8224TODC0", "n": "BODY BOX RAIL SPORT BAR LH TOYOTA HILUX DBC 2016 ก่อนทำสี       ", "m": "BM2/120K"}, {"p": "F8225TODC0", "n": "BODY BOX RAIL SPORT BAR RH TOYOTA HILUX DBC 2016 ก่อนทำสี     ", "m": "BM2/120K"}, {"p": "F8269LTOD00", "n": "BODY SIDE STEP LH TOYOTA HILUX DBC 2015", "m": "BM1/220K"}, {"p": "F8269RTOD00", "n": "BODY SIDE STEP RH TOYOTA HILUX DBC 2015", "m": "BM1/220K"}, {"p": "F8223TODCA", "n": "BODY SIDE RH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM3/220K"}, {"p": "F8222TODCA", "n": "BODY SIDE LH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM3/220K"}, {"p": "F8221TODCA", "n": "BODY CENTER SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8224TODCA", "n": "BODY BOX RAIL LH SPORT BAR D-CAB BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8225TODCA", "n": "BODY BOX RAIL RH SPORT BAR D-CAB BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8224TOXCA", "n": "BODY BOX RAIL LH SPORT BAR C-CAB A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8225TOXCA", "n": "BODY BOX RAIL RH SPORT BAR C-CAB A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "BM2/120K"}, {"p": "F8272AMIDC0", "n": "SPOILER PREMIUM  MITSUBISHI L200 MY20  ก่อนทำสี (A)", "m": "BM2/120K"}, {"p": "F8272BMIDC0", "n": "SPOILER STANDARD  MITSUBISHI L200 MY20 ก่อนทำสี ", "m": "BM1/220K"}, {"p": "F8263ISDC1", "n": "BODY CARGO EXTENDER ICL RG10 LH", "m": "BM6/120K"}, {"p": "F8264ISDC1", "n": "BODY CARGO EXTENDER ICL RG10 RH", "m": "BM6/120K"}, {"p": "F8221MGDC0", "n": "BODY CENTER SK82 MG ก่อนทำสี               ", "m": "BM2/120K"}, {"p": "F8222MGDC0", "n": "BODY SIDE FRONT SK82 MG LH ก่อนทำสี", "m": "BM3/220K"}, {"p": "F8223MGDC0", "n": "BODY SIDE FRONT SK82 MG RH ก่อนทำสี            ", "m": "BM3/220K"}, {"p": "F8224MGDC0", "n": "BODY SIDE RAIL SK82 MG LH ก่อนทำสี              ", "m": "BM2/120K"}, {"p": "F8225MGDC0", "n": "BODY SIDE RAIL SK82 MG RH ก่อนทำสี               ", "m": "BM2/120K"}, {"p": "F8275AXXB01", "n": "BODY MAX BOX CONCORDE EXTRA V2 FOR EXPORT MARKET", "m": "BM1/220K"}, {"p": "F8275AXXC01", "n": "COVER MAX BOX BLOW MOLD                       ", "m": "BM1/220K"}, {"p": "F8221ISDAC0", "n": "BODY CENTER SAIL PLANE RG01", "m": "BM6/120K"}, {"p": "F8223ISDAC1", "n": "BODY FRONT RH SAIL PLANE RG01 #ก่อนทำสี", "m": "BM7/220K"}, {"p": "F8223ISDAC0", "n": "BODY FRONT RH SAIL PLANE RG01", "m": "BM7/220K"}, {"p": "F8223ISDBC0", "n": "BODY CARGO SPOILER FR RH RG05", "m": "BM7/220K"}, {"p": "F8222ISDAC1", "n": "BODY FRONT LH SAIL PLANE RG01 #ก่อนทำสี", "m": "BM7/220K"}, {"p": "F8222ISDAC0", "n": "BODY FRONT LH SAIL PLANE RG01", "m": "BM7/220K"}, {"p": "F8222ISDBC0", "n": "BODY CARGO SPOILER FR LH RG05 ", "m": "BM7/220K"}, {"p": "F8224ISDAC1", "n": "BODY REAR LH SAIL PLANE RG01 #ก่อนทำสี", "m": "BM6/120K"}, {"p": "F8224ISDAC0", "n": "BODY REAR LH SAIL PLANE RG01 ", "m": "BM6/120K"}, {"p": "F8225ISDAC0", "n": "BODY REAR RH SAIL PLANE RG01", "m": "BM6/120K"}, {"p": "F8224ISDBC0", "n": "BODY CARGO SPOILER RR CREW CAB LH RG05", "m": "BM6/120K"}, {"p": "F8225ISDAC1", "n": "BODY REAR RH SAIL PLANE RG01 #ก่อนทำสี", "m": "BM6/120K"}, {"p": "F8225ISDBC0", "n": "BODY CARGO SPOILER RR CREW CAB RH RG05 ", "m": "BM6/120K"}, {"p": "F8221BTOGC0", "n": "BODY CENTER DECK BAR  645B     ", "m": "BM2/120K"}, {"p": "F8224BTODC0", "n": "BODY BOX RAIL DECK BAR LH D-CAB   645B", "m": "BM2/120K"}, {"p": "F8225BTODC0", "n": "BODY BOX RAIL DECK BAR RH D-CAB  645B  ", "m": "BM2/120K"}, {"p": "F8224BTOXC0", "n": "BODY BOX RAIL LH SPORT BAR C-CAB 645B    ", "m": "BM2/120K"}, {"p": "F8225BTOXC0", "n": "BODY BOX RAIL RH SPORT BAR C-CAB 645B      ", "m": "BM2/120K"}, {"p": "F8222BTOGC0", "n": "BODY SIDE DECK BAR LH  645B      ", "m": "BM3/220K"}, {"p": "F8223BTOGC0", "n": "BODY SIDE DECK BAR RH  645B      ", "m": "BM3/220K"}, {"p": "F8224ISXBC0", "n": "BODY CARGO SPOILER RR EXTEN CAB LH RG05", "m": "BM6/120K"}, {"p": "F8225ISXBC0", "n": "BODY CARGO SPOILER RR EXTEN CAB RH RG05", "m": "BM6/120K"}, {"p": "F8221AMADC0", "n": "BODY CENTER STYLING BAR BT-50 #BEFORE PAINT", "m": "BM2/120K"}, {"p": "F8222AMADC0", "n": "BODY SIDE LH STYLING BAR BT-50 #BEFORE PAINT", "m": "BM3/220K"}, {"p": "F8223AMADC0", "n": "BODY SIDE RH STYLING BAR BT-50 #BEFORE PAINT", "m": "BM3/220K"}, {"p": "F8224AMADC0", "n": "BODY REAR LH STYLING BAR BT-50 #BEFORE PAINT", "m": "BM2/120K"}, {"p": "F8225AMADC0", "n": "BODY REAR RH STYLING BAR BT-50 #BEFORE PAINT", "m": "BM2/120K"}, {"p": "F828032CB01", "n": "BODY SURF SKATE 32 inch #CARBON BLACK (PP-GF25%)", "m": "BM1/220K"}, {"p": "96101A040P-1", "n": "FACE STEP LH (C-CAB)", "m": "BM8/220K"}, {"p": "96100A040P-1", "n": "FACE STEP RH (C-CAB)", "m": "BM8/220K"}, {"p": "F8269LMID00", "n": "FACE STEP LH (D-CAB)", "m": "BM9/220K"}, {"p": "F8269RMID00", "n": "FACE STEP RH (D-CAB)", "m": "BM9/220K"}, {"p": "F8269XTOD00", "n": "BODY CLEVER SIDE STEP", "m": "BM1/220K"}, {"p": "F8221CTODC0", "n": "BODY CENTER SPORT BAR TOYOTA ROCCO DBC 2020", "m": "BM2/120K"}, {"p": "F8224CTODC0", "n": "BODY BOX RAIL SPORT BAR LH TOYOTA ROCCO DBC 2020", "m": "BM2/120K"}, {"p": "F8225CTODC0", "n": "BODY BOX RAIL SPORT BAR RH TOYOTA ROCCO DBC 2020", "m": "BM2/120K"}, {"p": "F8272AISDC0", "n": "SPOILER CANOPY 3 ISUZU D-MAX DBC 2020 ", "m": "BM2/120K"}, {"p": "F8272ATODC0", "n": "BODY SPOILER VENTURE CANOPY", "m": "BM2/120K"}, {"p": "F8222CTODC0", "n": "BODY SIDE SPORT BAR LH TOYOTA ROCCO DBC 2020", "m": "BM3/220K"}, {"p": "F8223CTODC0", "n": "BODY SIDE SPORT BAR RH TOYOTA ROCCO DBC 2020 ", "m": "BM3/220K"}, {"p": "F8272ISDC0", "n": "BODY SPOILER MAXTOP 3 ISUZU D-MAX DBC 2020 ", "m": "BM5/120K"}, {"p": "F8246ISDC0", "n": "COVER  FRONT SPORT BAR 01 LH", "m": "IJ02/420T"}, {"p": "F8247ISDC0", "n": "COVER  FRONT SPORT BAR 01 RH", "m": "IJ02/420T"}, {"p": "F8211001", "n": "COIN BOX COMPLETE SET (1 CTN /70 P.)  (LAJ)", "m": "IJ01/110T"}, {"p": "F8244ISDC0", "n": "COVER  CENTER SPORT BAR 01 LH", "m": "IJ02/420T"}, {"p": "F8245ISDC0", "n": "COVER  CENTER SPORT BAR 01 RH", "m": "IJ02/420T"}, {"p": "F8248ISDC0", "n": "COVER SIDE SPORT BAR 01 LH", "m": "IJ02/420T"}, {"p": "F8249ISDC0", "n": "COVER SIDE SPORT BAR 01 RH", "m": "IJ02/420T"}, {"p": "F8244TODC0", "n": "COVER CENTER SPORT BAR 01 LH TOYOTA 640A DBC 2016 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8245TODC0", "n": "COVER CENTER SPORT BAR 01 RH TOYOTA 640A DBC 2016 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8246TODC0", "n": "COVER FRONT SPORT BAR 01 LH TOYOTA 640A DBC 2016 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8247TODC0", "n": "COVER FRONT SPORT BAR 01 RH TOYOTA 640A DBC 2016 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8215TOD001", "n": "CHROME PLATE MAXBUMPER GUARD TOYOTA (640A) DBC 2015 ก่อนชุบ", "m": "IJ02/420T"}, {"p": "F8210T00", "n": "BODY FRONT DOOR POCKET TOYOTA LC 70", "m": "IJ02/420T"}, {"p": "F8212RLTOXC0", "n": "BODY SIDE MOLDING REAR LH TOYOTA FJ CRUISER ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8212RRTOXC0", "n": "BODY SIDE MOLDING REAR RH TOYOTA FJ CRUISER ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8212RLTOD001", "n": "BODY SIDE MOLDING REAR LH TOYOTA HILUX DC 2018YM ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8212RRTOD001", "n": "BODY SIDE MOLDING REAR RH TOYOTA HILUX DC 2018YM ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8212FLTOD001", "n": "BODY SIDE MOLDING FRONT LH TOYOTA HILUX DC 2018YM ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8212FRTOD001", "n": "BODY SIDE MOLDING FRONT RH TOYOTA HILUX DC 2018YM ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8215TOP001", "n": "CHROME PLATE FRONT BUMPER PROTECTOR PRADO 18YM ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8244TODCA", "n": "BODY COVER CENTER LH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8245TODCA", "n": "BODY COVER CENTER RH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8248TODCA", "n": "BODY COVER SIDE 01 LH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8249TODCA", "n": "BODY COVER SIDE 01 RH SPORT BAR A-DECK TOYOTA HILUX 2015 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8268TOD00", "n": "BODY COVER SIDE 02 SPORT BAR A-DECK TOYOTA HILUX 2015", "m": "IJ01/110T"}, {"p": "F8268MGD00", "n": "COVER BRACKET CLAMP LOCK SK82 MG TEXTURE", "m": "IJ01/110T"}, {"p": "F8246ISDAC0", "n": "BODY FRONT COVER LH SAIL PLANE RG01 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8247ISDAC0", "n": "BODY FRONT COVER RH SAIL PLANE RG01 #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8277BTOGC0", "n": "COVER OUTER DECK BAR LH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8278BTOGC0", "n": "COVER OUTER DECK BAR RH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8246BTOGC0", "n": "COVER SIDE DECK BAR 01 LH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8247BTOGC0", "n": "COVER SIDE DECK BAR 01 RH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8244BTOGC0", "n": "COVER CENTER DECK BAR LH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8245BTOGC0", "n": "COVER CENTER DECK BAR RH #ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8279TOD00", "n": "Tail Gate", "m": "IJ03/850T"}, {"p": "F8271LHOCC0", "n": "BODY REAR UNDER SPOILER LH HONDA CITY 2TG 2020 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8271RHOCC0", "n": "BODY REAR UNDER SPOILER RH HONDA CITY 2TG 2020 ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8234LTOL00", "n": "BODY SIDE MOLDING REAR LH LC300 2022YM", "m": "IJ02/420T"}, {"p": "F8234RTOL00", "n": "BODY SIDE MOLDING REAR RH LC300 2022YM", "m": "IJ02/420T"}, {"p": "F8233LTOL00", "n": "BODY SIDE MOLDING FRONT LH LC300 2022YM", "m": "IJ03/850T"}, {"p": "F8233RTOL00", "n": "BODY SIDE MOLDING FRONT RH LC300 2022YM", "m": "IJ03/850T"}, {"p": "F8211TOX00", "n": "BODY CONSOLE BOX SEPARATOR TOYOTA HILUX 23YM", "m": "IJ02/420T"}, {"p": "F8213RLTOC001", "n": "BODY SIDE MOLDING REAR LH TOYOTA CAMRY 22YM", "m": "IJ02/420T"}, {"p": "F8213RRTOC001", "n": "BODY SIDE MOLDING REAR RH TOYOTA CAMRY 22YM", "m": "IJ02/420T"}, {"p": "F8213FLTOC001", "n": "BODY SIDE MOLDING FRONT LH TOYOTA CAMRY 22YM", "m": "IJ03/850T"}, {"p": "F8213FRTOC001", "n": "BODY SIDE MOLDING FRONT RH TOYOTA CAMRY 22YM", "m": "IJ03/850T"}, {"p": "F8272TOYAC0", "n": "BODY TRUNK SPOILER YARIS 23YM (INJECTION)", "m": "IJ03/850T"}, {"p": "F8281LTOL001", "n": "FOG LAMP GARNISH CHROME LC300 23YM LH # INJECTION", "m": "IJ02/420T"}, {"p": "F8281RTOL001", "n": "FOG LAMP GARNISH CHROME LC300 23YM RH # INJECTION", "m": "IJ02/420T"}, {"p": "F8252LTOL001", "n": "VDP1-022-1-00 PM813-60010 REAR BUMPER GARNISH CHROME LC300 23YM CENNTER LH # INJECTION", "m": "IJ01/110T"}, {"p": "F8252RTOL001", "n": "VDP1-021-1-00 PM813-60020 REAR BUMPER GARNISH CHROME LC300 23YM CENTER RH # INJECTION", "m": "IJ01/110T"}, {"p": "F8253LTOL001", "n": " REAR BUMPER GARNISH CHROME LC300 23YM SIDE LH # INJECTION", "m": "IJ02/420T"}, {"p": "F8254RTOL001", "n": " REAR BUMPER GARNISH CHROME LC300 23YM SIDE RH # INJECTION", "m": "IJ02/420T"}, {"p": "F8274F5ERLMIPC0", "n": "BODY REAR BUMPER MOLDING-LH ก่อนทำสี", "m": "IJ01/110T"}, {"p": "F8274F5ERRMIPC0", "n": "BODY REAR BUMPER MOLDING-RH ก่อนทำสี", "m": "IJ01/110T"}, {"p": "F8271LHOCAC0", "n": "BODY KIT RR UNDER SPOILER LH 3TX (INJECTION)", "m": "IJ03/850T"}, {"p": "F8271RHOCAC0", "n": "BODY KIT RR UNDER SPOILER RH 3TX (INJECTION)", "m": "IJ03/850T"}, {"p": "F8267ISPC0", "n": "BODY FRONT SPOILER MU-X RF35 ก่อนทำสี", "m": "IJ04/2500T"}, {"p": "F8271ISPC0", "n": "BODY REAR SPOILER MU-X RF35 ก่อนทำสี", "m": "IJ04/2500T"}, {"p": "F8267ISPC1", "n": "BODY FRONT SPOILER MU-X RF35 NEW TRIMLINE ก่อนทำสี", "m": "IJ04/2500T"}, {"p": "F8271ISPC1", "n": "BODY REAR SPOILER MU-X RF35 NEW TRIMLINE ก่อนทำสี", "m": "IJ04/2500T"}, {"p": "F8267ISGC0", "n": "BODY FRONT SKIRT HI LANDER RT93 ISUZU ก่อนทำสี", "m": "IJ04/2500T"}, {"p": "F8274F5AFLMIPC0", "n": "BODY FRONT BUMPER MOLDING-LH ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8274F5AFRMIPC0", "n": "BODY FRONT BUMPER MOLDING-RH ก่อนทำสี", "m": "IJ02/420T"}, {"p": "F8234LH001", "n": "BODY  SIDE DOOR GARNISH  DBC  REAR  LH", "m": "IJ02/420T"}, {"p": "F8234RH001", "n": "BODY SIDE DOOR GARNISH  DBC REAR RH", "m": "IJ02/420T"}, {"p": "F8274F5BFLMIPC0", "n": "BODY FRONT FENDER MOLDING-LH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8274F5BFRMIPC0", "n": "BODY FRONT FENDER MOLDING-RH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8274F5CRLMIPC0", "n": "BODY REAR DOOR MOLDING-LH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8274F5CRRMIPC0", "n": "BODY REAR DOOR MOLDING-RH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8274F5DRLMIPC0", "n": "BODY REAR QTR MOLDING-LH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8274F5DRRMIPC0", "n": "BODY REAR QTR MOLDING-RH ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8215TOL001", "n": "CHROME PLATE FRONT BUMPER GUARD TOYOTA LC PICK UP YM15 ก่อนชุบ", "m": "IJ03/850T"}, {"p": "F8233LH001", "n": "BODY SIDE DOOR GARNISH  DBC FRONT LH", "m": "IJ03/850T"}, {"p": "F8233RH001", "n": "BODY SIDE DOOR GARNISH  DBC FRONT RH", "m": "IJ03/850T"}, {"p": "F8212FLTOXC0", "n": "BODY SIDE MOLDING FRONT LH TOYOTA FJ CRUISER ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8212FRTOXC0", "n": "BODY SIDE MOLDING FRONT RH TOYOTA FJ CRUISER ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8271LTOCC0", "n": "BODY REAR SKIRT LH TOYOTA CHR ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8271RTOCC0", "n": "BODY REAR SKIRT RH TOYOTA CHR ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8267LTOCC0", "n": "BODY FRONT SKIRT LH  TOYOTA CHR 2018  ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8267RTOCC0", "n": "BODY FRONT SKIRT RH  TOYOTA CHR 2018  ก่อนทำสี", "m": "IJ03/850T"}, {"p": "F8267SLISGC0", "n": "BODY FRONT BUMPER GUARD EU SIDE LH ISUZU R88 16MY", "m": "IJ03/850T"}, {"p": "F8267SRISGC0", "n": "BODY FRONT BUMPER GUARD EU SIDE RH ISUZU R88 16MYทำสี", "m": "IJ03/850T"}, {"p": "F8267CTISGC0", "n": "BODY FRONT BUMPER GUARD EU CENTER ISUZU R88 16MYทำสี", "m": "IJ03/850T"}, {"p": "F8252ISXC0", "n": "UNDER SPOILER RT50 REAR CENTER (INJECTION PD6) BEFORE PAINT", "m": "IJ04/2500T"}, {"p": "F8233LMIDC0", "n": "BODY SIDE DOOR GARNISH DC FRONT LH", "m": "IJ03/850T"}, {"p": "F8233RMIDC0", "n": "BODY SIDE DOOR GARNISH DC FRONT RH", "m": "IJ03/850T"}, {"p": "F8234LMIDC0", "n": "BODY SIDE DOOR GARNISH DC REAR LH", "m": "IJ03/850T"}, {"p": "F8234RMIDC0", "n": "BODY SIDE DOOR GARNISH DC REAR RH", "m": "IJ03/850T"}, {"p": "F8267LHOCC0", "n": "BODY FRONT UNDER SPOILER LH 3TX (INJECTION)", "m": "IJ03/850T"}, {"p": "F8267RHOCC0", "n": "BODY FRONT UNDER SPOILER RH 3TX (INJECTION)", "m": "IJ03/850T"}];
+var CHECKLIST=[
+ {key:'mold',title:'1. แม่พิมพ์ (Mold)',items:[
+  {no:'1.1',name:'ตรวจสอบสภาพแม่พิมพ์ (รอยร้าว, สึกหรอ)'},{no:'1.2',name:'การทำความสะอาดแม่พิมพ์'},
+  {no:'1.3',name:'ตรวจสอบระบบหล่อเย็น (Cooling System)'},{no:'1.4',name:'ตรวจระบบกระทุ้งชิ้นงาน (Ejector)'},
+  {no:'1.5',name:'การทดลองฉีด (Mold Trial)'},{no:'1.6',name:'จำนวน Cavity ที่พร้อมใช้งาน'}]},
+ {key:'material',title:'2. วัสดุ (Material)',items:[
+  {no:'2.1',name:'วัตถุดิบหลัก (เม็ดพลาสติก)'},{no:'2.2',name:'ส่วนประกอบย่อย (Sub-components)'},{no:'2.3',name:'Masterbatch / Pigment'}]},
+ {key:'machine',title:'3. เครื่องจักร (Machine)',items:[
+  {no:'3.1',name:'Condition ตาม WI'},{no:'3.2',name:'อุปกรณ์ต่อพ่วง'},{no:'3.3',name:'ความสะอาดพื้นที่ทำงานและเครื่อง'}]},
+ {key:'document',title:'4. เอกสาร (Document)',items:[
+  {no:'4.1',name:'ใบสั่งผลิต (Production Order)'},{no:'4.2',name:'Packing'},{no:'4.3',name:'Skill'},
+  {no:'4.4',name:'Abnormal Part'},{no:'4.5',name:'Work Instruction / SOP'}]},
+ {key:'packing',title:'5. บรรจุภัณฑ์ (Packing)',items:[
+  {no:'5.1',name:'กล่องกระดาษ (Carton Box)'},{no:'5.2',name:'ถาดพลาสติก (Plastic Tray)'},{no:'5.3',name:'ถุงพลาสติก (Plastic Bag)'},
+  {no:'5.4',name:'พาเลท (Pallet)'},{no:'5.5',name:'แผ่นกั้น (Partition)'}]},
+ {key:'label',title:'6. สติ๊กเกอร์/บาร์โค๊ด (Label)',items:[
+  {no:'6.1',name:'ป้ายระบุชิ้นงาน (Part Identification)'},{no:'6.2',name:'ป้ายติดกล่อง (Box Label)'},{no:'6.3',name:'ป้ายติดพาเลท (Pallet Label)'},
+  {no:'6.4',name:'ตรวจสอบข้อมูลบนป้าย (Part No. ฯลฯ)'},{no:'6.5',name:'Sticker'}]}
+];
+var status={}, remarks={}, history=[], role='Operator', curTab=1;
+var OPTS=[['na','– N/A'],['pass','✅ ผ่าน'],['fix','⚠️ รอแก้ไข'],['fail','❌ ไม่ผ่าน']];
+
+function init(){
+  try{ history=JSON.parse(localStorage.getItem('mes_step3_history')||'[]'); }catch(e){}
+  role=localStorage.getItem('mes_role')||'Operator'; document.getElementById('roleSel').value=role;
+  var u=localStorage.getItem('mes_apps_script_url'); if(u){document.getElementById('url').value=u;document.getElementById('cs').textContent='Configured';}
+  document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  fillParts(); renderChecklist(); applyRole(); renderHistory(); showTab(1);
+}
+function canEdit(){ return role!=='Operator'; }
+function changeRole(){ role=document.getElementById('roleSel').value; localStorage.setItem('mes_role',role); applyRole(); }
+function applyRole(){ document.getElementById('ro1').style.display=canEdit()?'none':'block'; document.getElementById('saveBtn').disabled=!canEdit(); document.getElementById('pushBtn').disabled=!canEdit(); }
+function fillParts(){ var o='<option value="">-- เลือก Part --</option>'; PARTS.forEach(function(p){o+='<option value="'+p.p+'">'+p.p+' — '+((p.n||'').substring(0,30))+'</option>';}); document.getElementById('fPart').innerHTML=o; }
+function onPart(){ var v=document.getElementById('fPart').value; var p=PARTS.filter(function(x){return x.p===v;})[0]; document.getElementById('fName').value=p?p.n:''; }
+
+function renderChecklist(){
+  var h='';
+  CHECKLIST.forEach(function(sec){
+    h+='<div class="sec"><div class="sec-h">'+sec.title+'<span id="ss_'+sec.key+'" style="font-size:11px;color:var(--dim)"></span></div>';
+    sec.items.forEach(function(it){
+      var id=it.no;
+      var sel='<select onchange="setStatus(\''+id+'\',this.value)">'+OPTS.map(function(o){return '<option value="'+o[0]+'"'+((status[id]||'na')===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+      h+='<div class="item"><div class="no">'+it.no+'</div><div class="nm">'+it.name+'</div>'+sel+
+        '<div class="rmk"><input placeholder="หมายเหตุ" value="'+(remarks[id]||'')+'" oninput="setRemark(\''+id+'\',this.value)"></div></div>';
+    });
+    h+='</div>';
+  });
+  document.getElementById('checklist').innerHTML=h;
+  updateSecScores();
+}
+function setStatus(id,v){ status[id]=v; updateSecScores(); }
+function setRemark(id,v){ remarks[id]=v; }
+function allItems(){ var a=[]; CHECKLIST.forEach(function(s){s.items.forEach(function(i){a.push(i.no);});}); return a; }
+function tally(){
+  var pass=0,fix=0,fail=0,na=0;
+  allItems().forEach(function(id){ var s=status[id]||'na'; if(s==='pass')pass++; else if(s==='fix')fix++; else if(s==='fail')fail++; else na++; });
+  var graded=pass+fix+fail; var score=graded>0?Math.round(pass/graded*100):0;
+  var overall=(fail===0&&fix===0&&pass>0);
+  return {pass:pass,fix:fix,fail:fail,na:na,score:score,overall:overall};
+}
+function updateSecScores(){
+  CHECKLIST.forEach(function(sec){
+    var p=0,t=0; sec.items.forEach(function(i){ var s=status[i.no]||'na'; if(s!=='na'){t++; if(s==='pass')p++;} });
+    var el=document.getElementById('ss_'+sec.key); if(el) el.textContent=t>0?(p+'/'+t+' ผ่าน'):'ยังไม่ตรวจ';
+  });
+}
+
+function saveForm(){
+  if(!canEdit()){toast('⛔ เฉพาะ Leader ขึ้นไป');return;}
+  var part=document.getElementById('fPart').value; if(!part){toast('เลือก Part');return;}
+  var t=tally();
+  if(!t.overall){ if(!confirm('⚠️ ผลตรวจ = NOT READY (ไม่ผ่าน '+t.fail+' / รอแก้ไข '+t.fix+')\nบันทึกเป็นประวัติได้ แต่ห้ามเริ่มผลิตจนกว่าจะแก้ครบทุกข้อ\nยืนยันบันทึก?')) return; }
+  var rec={ts:new Date().toISOString(),date:document.getElementById('fDate').value,part:part,name:document.getElementById('fName').value,
+    project:document.getElementById('fProj').value,qty:parseInt(document.getElementById('fQty').value||0),
+    preparedBy:document.getElementById('fPrep').value,approvedBy:document.getElementById('fAppr').value,
+    score:t.score,overall:t.overall?'Ready':'Not Ready',pass:t.pass,fix:t.fix,fail:t.fail,
+    details:JSON.stringify({status:status,remarks:remarks})};
+  history.push(rec); localStorage.setItem('mes_step3_history',JSON.stringify(history));
+  renderHistory(); toast('💾 บันทึก Readiness ('+rec.overall+' '+t.score+'%)');
+  // bridge to step 4 (ready parts)
+  try{ var ready=history.filter(function(h){return h.overall==='Ready';}).map(function(h){return h.part;});
+    localStorage.setItem('mes_bridge_step3_to_4',JSON.stringify({readyParts:ready,ts:new Date().toISOString()})); }catch(e){}
+}
+function resetForm(){ status={}; remarks={}; document.getElementById('fProj').value=''; document.getElementById('fQty').value=0; renderChecklist(); toast('🔄 ฟอร์มใหม่'); }
+
+function renderSummary(){
+  var t=tally();
+  document.getElementById('kPass').textContent=t.pass; document.getElementById('kFix').textContent=t.fix;
+  document.getElementById('kFail').textContent=t.fail; document.getElementById('kScore').textContent=t.score+'%';
+  var ov=document.getElementById('overall');
+  ov.className='pill '+(t.overall?'pill-ok':'pill-no'); ov.textContent=t.overall?'✅ READY — พร้อมผลิต':'⛔ NOT READY — ยังไม่พร้อม';
+  var h='';
+  CHECKLIST.forEach(function(sec){
+    var p=0,tt=0; sec.items.forEach(function(i){ var s=status[i.no]||'na'; if(s!=='na'){tt++; if(s==='pass')p++;} });
+    var pct=tt>0?Math.round(p/tt*100):0;
+    h+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px"><span>'+sec.title+'</span><span style="color:var(--dim)">'+(tt>0?(p+'/'+tt+' ('+pct+'%)'):'ยังไม่ตรวจ')+'</span></div><div class="bar"><div style="width:'+pct+'%"></div></div></div>';
+  });
+  document.getElementById('secScores').innerHTML=h;
+}
+function renderHistory(){
+  var h='';
+  history.slice().reverse().forEach(function(r,ri){ var i=history.length-1-ri;
+    h+='<tr><td style="font-size:10px">'+(r.date||'')+'</td><td class="lbl">'+r.part+'</td><td style="font-size:11px">'+(r.project||'-')+'</td><td style="text-align:center">'+(r.qty||0)+'</td><td style="text-align:center">'+r.score+'%</td><td style="text-align:center"><span class="pill '+(r.overall==='Ready'?'pill-ok':'pill-no')+'" style="font-size:10px;padding:2px 8px">'+r.overall+'</span></td><td style="font-size:11px">'+(r.approvedBy||'-')+'</td><td style="text-align:center"><button onclick="delHis('+i+')" style="background:var(--red);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer">ลบ</button></td></tr>';
+  });
+  document.getElementById('hisTable').innerHTML=h||'<tr><td colspan="8" style="text-align:center;color:var(--dim);padding:16px">ยังไม่มีประวัติ</td></tr>';
+}
+function delHis(i){ if(!canEdit()){toast('⛔');return;} if(!confirm('ลบประวัติรายการนี้?')) return; history.splice(i,1); localStorage.setItem('mes_step3_history',JSON.stringify(history)); renderHistory(); }
+
+// CLOUD
+function cloudGET(u){ return fetch(u).then(function(r){return r.json();}); }
+function cloudPOST(u,p){ return fetch(u,{method:'POST',body:JSON.stringify(p)}).then(function(r){return r.json();}); }
+function cres(m,c){ var col=c==='green'?'#10b981':c==='red'?'#ef4444':'#f59e0b'; document.getElementById('cloudResult').innerHTML='<div style="color:'+col+';padding:6px">'+m+'</div>'; }
+function saveUrl(){ var u=document.getElementById('url').value.trim().replace(/[​-‍﻿]/g,'').replace(/\s+/g,''); if(!u){alert('ใส่ URL');return;} localStorage.setItem('mes_apps_script_url',u); document.getElementById('cs').textContent='Configured'; toast('✅ บันทึก URL'); }
+function testCloud(){ var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;} cres('⏳ Testing...','yellow');
+  cloudGET(u+'?action=ping').then(function(d){ cres(d.status==='success'?'✅ Connected':'❌ '+d.message,d.status==='success'?'green':'red'); document.getElementById('cs').textContent=d.status==='success'?'Connected':'Error'; }).catch(function(e){cres('❌ '+e,'red');}); }
+function pushAll(){
+  if(!canEdit()){toast('⛔ เฉพาะ Leader ขึ้นไป');return;}
+  var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;}
+  cres('⏳ Push...','yellow');
+  var payload={type:'SAVE_SHEET',name:'Readiness_Records',headers:['Timestamp','Date','PartNo','PartName','Project','Qty','PreparedBy','ApprovedBy','Score','Overall','Pass','Fix','Fail','Details'],
+    rows:history.map(function(r){return [r.ts,r.date,r.part,r.name,r.project,r.qty,r.preparedBy,r.approvedBy,r.score,r.overall,r.pass,r.fix,r.fail,r.details];})};
+  cloudPOST(u,payload).then(function(d){ cres(d.status==='success'?('✅ Push สำเร็จ '+d.count+' records'):('❌ '+d.message),d.status==='success'?'green':'red'); if(d.status==='success'){localStorage.setItem('mes_step3_last_backup',new Date().toISOString());document.getElementById('ls').textContent=new Date().toLocaleString('th-TH');} }).catch(function(e){cres('❌ '+e,'red');});
+}
+function pullAll(){
+  var u=localStorage.getItem('mes_apps_script_url'); if(!u){cres('❌ Save URL ก่อน','red');return;}
+  cres('⏳ Pull...','yellow');
+  cloudGET(u+'?action=getSheet&name=Readiness_Records').then(function(d){
+    if(d.status==='success'&&d.rows&&d.rows.length){
+      history=d.rows.map(function(r){return {ts:r['Timestamp'],date:r['Date'],part:r['PartNo'],name:r['PartName'],project:r['Project'],qty:Number(r['Qty']||0),preparedBy:r['PreparedBy'],approvedBy:r['ApprovedBy'],score:Number(r['Score']||0),overall:r['Overall'],pass:Number(r['Pass']||0),fix:Number(r['Fix']||0),fail:Number(r['Fail']||0),details:r['Details']};}).filter(function(x){return x.part;});
+      localStorage.setItem('mes_step3_history',JSON.stringify(history)); renderHistory(); cres('✅ Pull '+history.length+' records','green');
+    }else cres('⚠️ ยังไม่มีข้อมูลบน Cloud','yellow');
+  }).catch(function(e){cres('❌ '+e,'red');});
+}
+function exportCSV(){
+  var csv='Date,PartNo,PartName,Project,Qty,PreparedBy,ApprovedBy,Score,Overall\n';
+  history.forEach(function(r){ csv+=[r.date,r.part,'"'+(r.name||'')+'"',r.project||'',r.qty,r.preparedBy||'',r.approvedBy||'',r.score,r.overall].join(',')+'\n'; });
+  dl(new Blob(['﻿'+csv],{type:'text/csv'}),'MES_Step3_Readiness_'+new Date().toISOString().split('T')[0]+'.csv'); toast('📥 CSV');
+}
+function exportJSON(){ dl(new Blob([JSON.stringify(history,null,2)],{type:'application/json'}),'MES_Step3_backup.json'); toast('📥 JSON'); }
+function dl(b,n){ var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
+
+function showTab(n){ curTab=n; document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+  document.getElementById('bPrev').style.display=n>1?'block':'none'; document.getElementById('bNext').style.display=n<4?'block':'none';
+  if(n===2) renderSummary(); if(n===3) renderHistory();
+}
+function nextTab(){ if(curTab<4) showTab(curTab+1); }
+function prevTab(){ if(curTab>1) showTab(curTab-1); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2200); }
+init();
+</script>
+</body>
+</html>

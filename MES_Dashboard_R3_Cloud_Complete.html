@@ -21,7 +21,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 /* ===== NAV TABS ===== */
 .nav{display:flex;overflow-x:auto;gap:4px;padding:8px 10px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:54px;z-index:99}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex:0 0 auto;padding:8px 12px;border:none;border-radius:8px;background:transparent;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .2s}
+.nav-btn{flex:0 0 auto;padding:12px 18px;border:none;border-radius:10px;background:transparent;color:var(--dim);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .2s}
 .nav-btn.active{background:#2d7ff9;color:#fff;font-weight:700}
 .nav-btn:hover{background:rgba(45,127,249,.2)}
 
@@ -92,7 +92,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ===== BOTTOM NAV ===== */
 .bn{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:8px 10px;display:flex;gap:6px;z-index:99}
-.bn-btn{flex:1;padding:12px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}
+.bn-btn{flex:1;padding:18px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;font-family:inherit;font-size:16px}
 .bn-btn:active{transform:scale(.97)}
 
 /* ===== CHARTS ===== */
@@ -126,7 +126,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 </div>
 <div class="topbar-right">
   <div style="font-weight:700;font-size:13px" id="dateNow"></div>
-  <div style="font-size:11px;color:var(--accent2)">Connected: Step 4-5</div>
+  <div style="font-size:11px;color:var(--accent2)">Connected: Cloud (ทุก Step)</div>
 </div>
 </div>
 
@@ -134,9 +134,13 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 <button class="nav-btn active" onclick="showTab(1)">⚠️ Alerts</button>
 <button class="nav-btn" onclick="showTab(2)">💡 Recommendations</button>
 <button class="nav-btn" onclick="showTab(3)">📊 Dashboard</button>
-<button class="nav-btn" onclick="showTab(4)">🏭 Step 0-7 Overview</button>
+<button class="nav-btn" onclick="showTab(4)">🏭 Step 1-7 Overview</button>
 <button class="nav-btn" onclick="showTab(5)">⚙️ Settings</button>
 <button class="nav-btn" onclick="showTab(6)" style="background:rgba(16,185,129,.2);color:#10b981">☁️ Cloud Live</button>
+<button class="nav-btn" onclick="showTab(7)">📅 Daily Report</button>
+<button class="nav-btn" onclick="showTab(8)">❌ Defect</button>
+<button class="nav-btn" onclick="showTab(9)">🏆 Top Defect</button>
+<button class="nav-btn" onclick="showTab(10)">⏱️ Downtime</button>
 </div>
 
 <div class="container">
@@ -209,43 +213,41 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 <div class="tab-content" id="tab4">
 <div class="card">
 <div class="card-title">🏭 7-Step Manufacturing Process Overview</div>
+<div id="stepOverviewLive" style="margin-bottom:10px"></div>
 
 <div style="display:flex;gap:4px;margin-bottom:10px;overflow-x:auto;padding:8px;background:var(--inp);border-radius:8px">
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">0️⃣ Plan</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">1️⃣ Raw In</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">2️⃣ WIP Raw</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">3️⃣ Readiness</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">1️⃣ Plan ✓</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">2️⃣ WIP Raw ✓</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">3️⃣ Readiness ✓</div>
 <div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">4️⃣ Production ✓</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">5️⃣ WIP Max-Min ✓</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">6️⃣ Route</div>
-<div style="flex:0 0 auto;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:700">7️⃣ Rollup</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">5️⃣ WIP FG ✓</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">6️⃣ Route ✓</div>
+<div style="flex:0 0 auto;padding:6px 10px;background:var(--green);color:#fff;border-radius:6px;font-size:11px;font-weight:700">7️⃣ Rollup ✓</div>
 </div>
 
 <div class="grid2">
 <div class="card" style="margin-bottom:0">
-<div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Live Now (Phase 1)</div>
-<div style="font-size:12px;color:var(--text);line-height:1.8">
-<div>📊 Step 4: Production Record</div>
-<div>└─ Hourly production tracking</div>
-<div>└─ Defect logging</div>
-<div>└─ Downtime recording</div>
-<br>
-<div>📦 Step 5: WIP Max-Min</div>
-<div>└─ Stock monitoring</div>
-<div>└─ Auto-bridge from Step 4</div>
-<div>└─ Smart alerts + recommendations</div>
+<div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Live Now (ครบ 7 Step)</div>
+<div style="font-size:12px;color:var(--text);line-height:1.9">
+<div>1️⃣ Production Plan (Auto-Schedule)</div>
+<div>2️⃣ WIP Raw Material + Component/BOM</div>
+<div>3️⃣ Production Readiness (4M)</div>
+<div>4️⃣ Production Record (รายชั่วโมง)</div>
+<div>5️⃣ WIP FG (Max-Min)</div>
+<div>6️⃣ Route Distribution → WHL</div>
+<div>7️⃣ WIP &amp; WHL Rollup → Next Plan</div>
 </div>
 </div>
 
 <div class="card" style="margin-bottom:0">
-<div style="font-weight:700;color:var(--accent2);margin-bottom:8px">🚧 Coming Soon (Phase 2-3)</div>
-<div style="font-size:12px;color:var(--text);line-height:1.8">
-<div>📋 Step 0: Production Planning</div>
-<div>📥 Step 1: Raw Material In</div>
-<div>📦 Step 2: WIP Raw Material</div>
-<div>⚙️ Step 3: Production Readiness</div>
-<div>🚚 Step 6: Route Distribution</div>
-<div>📊 Step 7: WIP & WHL Rollup</div>
+<div style="font-weight:700;color:var(--accent2);margin-bottom:8px">🚧 Coming Soon</div>
+<div style="font-size:12px;color:var(--text);line-height:1.9">
+<div>🔐 Phase 1: Login + Audit Trail</div>
+<div>└─ สิทธิ์ตามตำแหน่ง (RBAC)</div>
+<div>└─ Operator / Leader / Engineer / Supervisor</div>
+<div>└─ บันทึกทุก transaction (ใครทำอะไร)</div>
+<br>
+<div>🤖 อนาคต: เชื่อมเครื่องจักร (IoT) นับยอดอัตโนมัติ</div>
 </div>
 </div>
 </div>
@@ -253,11 +255,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 <div class="card">
 <div style="font-weight:700;color:var(--accent2);margin-bottom:8px">📊 Data Flow Integration</div>
 <div style="font-size:11px;color:var(--dim);line-height:1.8;background:var(--inp);padding:10px;border-radius:8px">
-<div>Step 4 (Production) → Auto-bridge → localStorage</div>
-<div>Step 5 (WIP) ← Auto-read ← localStorage</div>
-<div>Alerts Generated ← Data in localStorage</div>
-<div>Recommendations ← Business Rules + Historical Data</div>
-<div>Dashboard KPIs ← Real-time Calculations</div>
+<div>ทุก Step → Google Sheet (Cloud) ผ่าน Apps Script v5</div>
+<div>Dashboard ← getAll (Production) + getWIP (WIP FG) ← Cloud</div>
+<div>Alerts / Recommendations ← WIP + Production จริง</div>
+<div>KPI ← Real-time Calculations (Cloud-first, fallback localStorage)</div>
 </div>
 </div>
 </div>
@@ -275,11 +276,17 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 </label>
 </div>
 
-<div style="margin-bottom:10px">
-<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:8px;background:var(--inp);border-radius:8px">
-<input type="checkbox" id="autoAlertCheck" checked>
-⚠️ Auto-dismiss Resolved Alerts
+<div style="margin-bottom:10px;padding:8px;background:var(--inp);border-radius:8px">
+<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer">
+<input type="checkbox" id="autoRefreshCheck" checked onchange="toggleAutoRefresh()">
+🔄 Auto-refresh Cloud (ดึงข้อมูลอัตโนมัติ)
 </label>
+<div style="margin-top:6px;display:flex;gap:6px;align-items:center;font-size:12px">
+<span style="color:var(--dim)">รีเฟรชทุก</span>
+<select id="autoRefreshInterval" onchange="changeRefreshInterval()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--inp);color:var(--text);font-family:inherit">
+<option value="1">1 นาที</option><option value="5" selected>5 นาที</option><option value="10">10 นาที</option><option value="15">15 นาที</option><option value="30">30 นาที</option>
+</select>
+</div>
 </div>
 
 <div style="margin-bottom:10px">
@@ -302,10 +309,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 
 <div style="margin-top:10px;padding:10px;background:var(--inp);border-radius:8px;font-size:11px;color:var(--dim);line-height:1.8">
 <div style="font-weight:700;color:var(--accent2);margin-bottom:6px">ℹ️ Information:</div>
-Version: 1.0 (Phase 1 MVP)<br>
-Build Date: 2026-05-17<br>
-Status: <span style="color:var(--green);font-weight:700">Live & Production Ready</span><br>
-Next Update: Phase 2 (Analytics) — Day 15
+Version: 2.0 (Phase 1 — Real Data)<br>
+Build Date: 2026-06-11<br>
+Status: <span style="color:var(--green);font-weight:700">Live & Connected to Step 4/5</span><br>
+Data Sources: mes_r1 (Step 4), mes_step5_wip (Step 5), Cloud API
 </div>
 </div>
 </div>
@@ -315,11 +322,10 @@ Next Update: Phase 2 (Analytics) — Day 15
 <div class="bn">
 <button class="bn-btn" onclick="prevTab()">◀ ย้อนกลับ</button>
 <button class="bn-btn" onclick="nextTab()">ถัดไป ▶</button>
-<button class="bn-btn" onclick="saveSystemState()" style="background:var(--green)">💾 Save Data</button>
 </div>
 
 <!-- ==================== TAB 6: CLOUD LIVE ==================== -->
-<div class="tc" id="tab6"><div class="card">
+<div class="tab-content" id="tab6"><div class="card">
 <div class="card-title">☁️ Cloud Live Dashboard</div>
 <div class="card-sub">Real-time data from all machines via Google Sheets</div>
 
@@ -336,9 +342,9 @@ Next Update: Phase 2 (Analytics) — Day 15
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-<button class="btn" style="background:#2d7ff9;width:100%" onclick="testCloudDash()">🧪 Test</button>
-<button class="btn" style="background:#10b981;width:100%" onclick="saveCloudDash()">💾 Save</button>
-<button class="btn" style="background:#f59e0b;color:#111;width:100%" onclick="refreshCloudDash()">🔄 Refresh</button>
+<button class="btn" style="background:#2d7ff9;width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:10px;color:#fff;cursor:pointer;font-family:inherit" onclick="testCloudDash()">🧪 Test</button>
+<button class="btn" style="background:#10b981;width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:10px;color:#fff;cursor:pointer;font-family:inherit" onclick="saveCloudDash()">💾 Save URL</button>
+<button class="btn" style="background:#f59e0b;color:#111;width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:inherit" onclick="refreshCloudDash()">🔄 Refresh</button>
 </div>
 
 <div id="cloudDashResult" style="margin-bottom:10px"></div>
@@ -348,17 +354,163 @@ Next Update: Phase 2 (Analytics) — Day 15
 </div>
 </div></div>
 
+<!-- ==================== SHARED FILTER BAR ==================== -->
+<style>
+.rpt-filter{background:var(--card);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.rpt-filter .ff{display:flex;flex-direction:column;gap:3px;min-width:120px}
+.rpt-filter label{font-size:10px;color:var(--dim);font-weight:600}
+.rpt-filter select,.rpt-filter input[type=date]{padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--inp);color:var(--text);font-size:12px;font-family:inherit;outline:none}
+.rpt-filter select:focus,.rpt-filter input:focus{border-color:var(--accent)}
+.rpt-btn{padding:7px 14px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff}
+.rpt-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.rpt-tbl th{padding:7px 8px;background:rgba(45,127,249,.15);color:var(--dim);font-size:10px;font-weight:700;text-align:center;position:sticky;top:0}
+.rpt-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:center}
+.rpt-tbl tr:hover{background:rgba(45,127,249,.05)}
+.rpt-tbl .lbl{text-align:left;color:var(--accent2);font-weight:600;font-size:11px}
+.kpi-sm{background:var(--inp);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.kpi-sm .v{font-size:22px;font-weight:900}.kpi-sm .l{font-size:10px;color:var(--dim)}
+.chart-wrap{position:relative;height:220px;margin-bottom:8px}
+.src-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.src-cloud{background:rgba(16,185,129,.2);color:#10b981}.src-local{background:rgba(245,158,11,.2);color:#f59e0b}
+</style>
+
+<!-- ==================== TAB 7: DAILY REPORT ==================== -->
+<div class="tab-content" id="tab7">
+<div class="card">
+<div class="card-title">📅 Daily Report — สรุปการผลิตรายวัน
+<span class="src-badge src-cloud" id="rpt7src">Cloud</span>
+</div>
+
+<div class="rpt-filter">
+  <div class="ff"><label>📅 From</label><input type="date" id="r7from"></div>
+  <div class="ff"><label>📅 To</label><input type="date" id="r7to"></div>
+  <div class="ff"><label>🏭 Machine</label><select id="r7mc"><option value="">ทั้งหมด</option></select></div>
+  <div class="ff"><label>🔄 Shift</label><select id="r7sh"><option value="">ทั้งหมด</option><option>A</option><option>B</option></select></div>
+  <div class="ff"><label>‎</label><button class="rpt-btn" style="background:#2d7ff9" onclick="loadReport7()">🔍 แสดงผล</button></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+<div class="kpi-sm"><div class="l">📦 Total Actual</div><div class="v" id="r7kpi1" style="color:#5b9cff">0</div></div>
+<div class="kpi-sm"><div class="l">✅ Good</div><div class="v" id="r7kpi2" style="color:#10b981">0</div></div>
+<div class="kpi-sm"><div class="l">❌ Defect</div><div class="v" id="r7kpi3" style="color:#ef4444">0</div></div>
+<div class="kpi-sm"><div class="l">🎯 Yield%</div><div class="v" id="r7kpi4" style="color:#f59e0b">—</div></div>
+</div>
+
+<div class="chart-wrap"><canvas id="r7chart"></canvas></div>
+
+<div style="overflow-x:auto">
+<table class="rpt-tbl">
+<thead><tr><th>วันที่</th><th>Shift</th><th>Machine</th><th>Model</th><th>Mold</th><th>Actual</th><th>Good LH</th><th>Good RH</th><th>Defect</th><th>Yield%</th><th>OEE%</th></tr></thead>
+<tbody id="r7tbody"><tr><td colspan="11" style="color:var(--dim);padding:20px">กด "โหลดจาก Cloud" หรือ "แสดงผล" เพื่อดูข้อมูล</td></tr></tbody>
+</table>
+</div>
+<div id="r7status" style="font-size:11px;color:var(--dim);margin-top:6px"></div>
+</div></div>
+
+<!-- ==================== TAB 8: DEFECT ==================== -->
+<div class="tab-content" id="tab8">
+<div class="card">
+<div class="card-title">❌ Defect Report — รายงานของเสีย
+<span class="src-badge src-local" id="rpt8src">Local+Cloud</span>
+</div>
+
+<div class="rpt-filter">
+  <div class="ff"><label>📅 From</label><input type="date" id="r8from"></div>
+  <div class="ff"><label>📅 To</label><input type="date" id="r8to"></div>
+  <div class="ff"><label>🏭 Machine</label><select id="r8mc"><option value="">ทั้งหมด</option></select></div>
+  <div class="ff"><label>🔄 Shift</label><select id="r8sh"><option value="">ทั้งหมด</option><option>A</option><option>B</option></select></div>
+  <div class="ff"><label>‎</label><button class="rpt-btn" style="background:#2d7ff9" onclick="loadReport8()">🔍 แสดงผล</button></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+<div class="kpi-sm"><div class="l">❌ Total Defect</div><div class="v" id="r8kpi1" style="color:#ef4444">0</div></div>
+<div class="kpi-sm"><div class="l">📊 Defect%</div><div class="v" id="r8kpi2" style="color:#f59e0b">—</div></div>
+<div class="kpi-sm"><div class="l">⚠️ Top Cause</div><div class="v" id="r8kpi3" style="color:#f97316;font-size:13px">—</div></div>
+</div>
+
+<div class="chart-wrap"><canvas id="r8chart"></canvas></div>
+
+<div style="overflow-x:auto">
+<table class="rpt-tbl">
+<thead><tr><th>Defect Code</th><th>ชื่อ</th><th>Side</th><th>Count (pcs)</th><th>% of Defect</th><th>% of Total</th></tr></thead>
+<tbody id="r8tbody"><tr><td colspan="6" style="color:var(--dim);padding:20px">กด "แสดงผล" เพื่อดูข้อมูล (ใช้ข้อมูลจาก localStorage)</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- ==================== TAB 9: TOP DEFECT ==================== -->
+<div class="tab-content" id="tab9">
+<div class="card">
+<div class="card-title">🏆 Top Defect — อันดับของเสียตาม Model/Part</div>
+
+<div class="rpt-filter">
+  <div class="ff"><label>📅 From</label><input type="date" id="r9from"></div>
+  <div class="ff"><label>📅 To</label><input type="date" id="r9to"></div>
+  <div class="ff"><label>🚗 Model</label><select id="r9model"><option value="">ทั้งหมด</option></select></div>
+  <div class="ff"><label>⚙️ Process</label><select id="r9proc"><option value="">ทั้งหมด</option><option>Blow Mold</option><option>Injection</option></select></div>
+  <div class="ff"><label>‎</label><button class="rpt-btn" style="background:#2d7ff9" onclick="loadReport9()">🔍 แสดงผล</button></div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div><div style="font-size:12px;font-weight:700;color:var(--dim);margin-bottom:6px">Defect by Symptom</div><div class="chart-wrap"><canvas id="r9chart"></canvas></div></div>
+<div><div style="font-size:12px;font-weight:700;color:var(--dim);margin-bottom:6px">Defect by Model</div><div class="chart-wrap"><canvas id="r9chart2"></canvas></div></div>
+</div>
+
+<div style="overflow-x:auto">
+<table class="rpt-tbl">
+<thead><tr><th>Model</th><th>Part Name</th><th>Mold</th><th>Total (pcs)</th><th>Defect (pcs)</th><th>Defect%</th><th>Top Cause</th></tr></thead>
+<tbody id="r9tbody"><tr><td colspan="7" style="color:var(--dim);padding:20px">กด "แสดงผล" เพื่อดูข้อมูล</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
+<!-- ==================== TAB 10: DOWNTIME ==================== -->
+<div class="tab-content" id="tab10">
+<div class="card">
+<div class="card-title">⏱️ Downtime — รายงาน Availability</div>
+
+<div class="rpt-filter">
+  <div class="ff"><label>📅 From</label><input type="date" id="r10from"></div>
+  <div class="ff"><label>📅 To</label><input type="date" id="r10to"></div>
+  <div class="ff"><label>🏭 Machine</label><select id="r10mc"><option value="">ทั้งหมด</option></select></div>
+  <div class="ff"><label>🔄 Shift</label><select id="r10sh"><option value="">ทั้งหมด</option><option>A</option><option>B</option></select></div>
+  <div class="ff"><label>‎</label><button class="rpt-btn" style="background:#2d7ff9" onclick="loadReport10()">🔍 แสดงผล</button></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+<div class="kpi-sm"><div class="l">⏱️ Total DT (min)</div><div class="v" id="r10kpi1" style="color:#ef4444">0</div></div>
+<div class="kpi-sm"><div class="l">📊 Availability%</div><div class="v" id="r10kpi2" style="color:#10b981">—</div></div>
+<div class="kpi-sm"><div class="l">🔧 DT Events</div><div class="v" id="r10kpi3" style="color:#f59e0b">0</div></div>
+<div class="kpi-sm"><div class="l">⚡ Top DT Cause</div><div class="v" id="r10kpi4" style="color:#f97316;font-size:13px">—</div></div>
+</div>
+
+<div class="chart-wrap"><canvas id="r10chart"></canvas></div>
+
+<div style="overflow-x:auto">
+<table class="rpt-tbl">
+<thead><tr><th>วันที่</th><th>Shift</th><th>Machine</th><th>DT Code</th><th>สาเหตุ</th><th>นาที</th><th>Category</th></tr></thead>
+<tbody id="r10tbody"><tr><td colspan="7" style="color:var(--dim);padding:20px">กด "แสดงผล" เพื่อดูข้อมูล (ใช้ข้อมูลจาก localStorage)</td></tr></tbody>
+</table>
+</div>
+</div></div>
+
 <script>
-// ==================== INITIALIZE ====================
+// ==================== REAL DATA DASHBOARD v2.0 — No Mock Data ====================
 let curTab=1;
 let alerts=[];
 let recommendations=[];
-let wipData={};
-let prodHistory=[];
+let wipData={};       // from mes_step5_wip (Step 5)
+let prodRecords=[];   // from mes_r1 (Step 4)
+let rptCloudData=[];  // from Cloud fetch
+const TOTAL_TABS=10;
+
+// Sensitivity multiplier for alert thresholds
+let alertSensitivityVal=1.0;
 
 const ALERT_RULES={
   WIP_LOW:{name:'WIP Below Min',severity:'critical',icon:'📦'},
   WIP_HIGH:{name:'WIP Above Max',severity:'warning',icon:'📦'},
+  WIP_CRIT:{name:'WIP Critical',severity:'critical',icon:'🔴'},
   DEFECT_HIGH:{name:'Defect Rate High',severity:'critical',icon:'❌'},
   YIELD_LOW:{name:'Yield Low',severity:'warning',icon:'⚠️'},
   MOLD_MAINT:{name:'Mold Maintenance Due',severity:'info',icon:'🔧'},
@@ -367,86 +519,121 @@ const ALERT_RULES={
   DOWNTIME:{name:'Equipment Downtime',severity:'critical',icon:'⚡'}
 };
 
-const REC_RULES=[
-  {condition:'WIP_F8277_LOW',action:'Produce F8277BTOGC0 (500 pcs, BM-002)',priority:'urgent'},
-  {condition:'DEFECT_HIGH_IJ04',action:'Inspect Mold IJ04 for wear',priority:'high'},
-  {condition:'SHIFT_IMBALANCE',action:'Rebalance shift A & B manpower',priority:'normal'},
-  {condition:'YIELD_DROP',action:'Review material batch for contamination',priority:'high'},
-  {condition:'MOLD_CHANGEOVER',action:'Optimize production sequence (reduce mold changes)',priority:'normal'}
-];
-
+// ==================== INIT ====================
 function init(){
   document.getElementById('dateNow').textContent=new Date().toLocaleDateString('th-TH',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
   loadFromStorage();
-  generateMockData();
+  generateAlertsFromData();
+  generateRecommendationsFromData();
   renderAlerts();
   renderRecommendations();
   renderDashboard();
   initCharts();
+  initCloudDash();
+  autoFetchCloud();
+  autoFetchWIP();
+  autoFetchSteps();
+  initDateFilters();
+  populateMachineFilters([]);
+  renderStepOverview();
+  startAutoRefresh();
 }
 
+// ==================== LOAD REAL DATA ====================
 function loadFromStorage(){
-  try{alerts=JSON.parse(localStorage.getItem('mes_alerts')||'[]');}catch(e){}
-  try{recommendations=JSON.parse(localStorage.getItem('mes_recs')||'[]');}catch(e){}
-  try{wipData=JSON.parse(localStorage.getItem('mes_wip')||'{}');}catch(e){}
-  try{prodHistory=JSON.parse(localStorage.getItem('mes_prod')||'[]');}catch(e){}
+  // Read Step 5 WIP data
+  try{ wipData=JSON.parse(localStorage.getItem('mes_step5_wip')||'{}'); }catch(e){ wipData={}; }
+  // Read Step 4 production records
+  try{ prodRecords=JSON.parse(localStorage.getItem('mes_r1')||'[]'); }catch(e){ prodRecords=[]; }
+  // Load sensitivity
+  try{ var sv=localStorage.getItem('mes_alert_sensitivity'); if(sv) alertSensitivityVal=parseFloat(sv)||1.0; }catch(e){}
+  var slider=document.getElementById('alertSensitivity');
+  if(slider){ slider.value=alertSensitivityVal; }
+  var lbl=document.getElementById('sensitivityLabel');
+  if(lbl) lbl.textContent=alertSensitivityVal.toFixed(1)+'x';
+  var ns=localStorage.getItem('notif_sound'); var nc=document.getElementById('notifSoundCheck'); if(nc&&ns!==null) nc.checked=(ns==='1');
 }
 
-function saveSystemState(){
-  localStorage.setItem('mes_alerts',JSON.stringify(alerts));
-  localStorage.setItem('mes_recs',JSON.stringify(recommendations));
-  localStorage.setItem('mes_wip',JSON.stringify(wipData));
-  localStorage.setItem('mes_prod',JSON.stringify(prodHistory));
-  toast('💾 Data saved successfully');
+// ==================== WIP STATUS (same logic as Step 5) ====================
+function getPartStatus(part){
+  var d=wipData[part];
+  if(!d)return{status:'none',color:'#666',label:'—'};
+  var c=d.current||0, min=d.min||0, max=d.max||0;
+  var adjMin=min*alertSensitivityVal, adjMax=max>0?max/alertSensitivityVal:0;
+  if(c<min*0.5)return{status:'crit',color:'var(--red)',label:'🔴 Critical'};
+  if(c<adjMin)return{status:'low',color:'var(--yellow)',label:'🟡 Low'};
+  if(max>0&&c>adjMax)return{status:'high',color:'var(--accent)',label:'🔵 High'};
+  return{status:'ok',color:'var(--green)',label:'🟢 OK'};
 }
 
-function generateMockData(){
-  // Mock WIP data
-  wipData={
-    'F8277BTOGC0':{min:100,max:1000,current:85,status:'critical'},
-    'F8278BTOGC0':{min:100,max:1000,current:1200,status:'high'},
-    'F8257ISPAC0':{min:80,max:600,current:320,status:'ok'},
-    'F8258ISPAC0':{min:80,max:600,current:45,status:'warning'},
-    'S8299BLFOR01':{min:150,max:800,current:650,status:'ok'}
-  };
-
-  // Generate alerts
-  alerts=[
-    {id:1,type:'WIP_LOW',severity:'critical',part:'F8277BTOGC0',current:85,min:100,message:'WIP F8277BTOGC0 below minimum (85/100)',ts:new Date()},
-    {id:2,type:'WIP_HIGH',severity:'warning',part:'F8278BTOGC0',current:1200,max:1000,message:'WIP F8278BTOGC0 exceeds max (1200/1000)',ts:new Date()},
-    {id:3,type:'YIELD_LOW',severity:'warning',part:'S8299BRFOR01',yield:78,message:'Yield low on Machine BM3 (78% vs target 85%)',ts:new Date()},
-    {id:4,type:'MOLD_MAINT',severity:'info',part:'BM-002-R-RT50',message:'Mold BM-002 maintenance due (500K cycles)',ts:new Date()}
-  ];
-
-  // Generate recommendations
-  recommendations=[
-    {id:1,action:'Produce F8277BTOGC0 (500 pcs) on IJ01 → BM-002',priority:'urgent',reason:'WIP critical low'},
-    {id:2,action:'Reduce BM3 production of F8278BTOGC0 (high stock)',priority:'high',reason:'WIP exceeds max'},
-    {id:3,action:'Inspect BM-002 Mold (wear check)',priority:'high',reason:'Upcoming maintenance'},
-    {id:4,action:'Review Shift A manpower (unbalanced)',priority:'normal',reason:'ManHour efficiency < 85%'}
-  ];
-
-  // Production history
-  prodHistory=[
-    {date:'2026-05-17',shift:'A',output:2340,defects:45,yield:98.1},
-    {date:'2026-05-16',shift:'B',output:2150,defects:38,yield:98.2},
-    {date:'2026-05-16',shift:'A',output:2280,defects:42,yield:98.3},
-    {date:'2026-05-15',shift:'B',output:2100,defects:40,yield:98.0},
-    {date:'2026-05-15',shift:'A',output:2320,defects:48,yield:97.9},
-    {date:'2026-05-14',shift:'B',output:2200,defects:35,yield:98.4},
-    {date:'2026-05-14',shift:'A',output:2310,defects:46,yield:98.1}
-  ];
+// ==================== GENERATE ALERTS FROM REAL DATA ====================
+function generateAlertsFromData(){
+  alerts=[]; var id=1; var now=new Date();
+  Object.keys(wipData).forEach(function(p){
+    var d=wipData[p]; var st=getPartStatus(p);
+    if(st.status==='crit'){ alerts.push({id:id++,type:'WIP_CRIT',severity:'critical',part:p,message:'WIP '+p+' critical low ('+(d.current||0)+'/'+(d.min||0)+')',ts:now}); }
+    else if(st.status==='low'){ alerts.push({id:id++,type:'WIP_LOW',severity:'warning',part:p,message:'WIP '+p+' below minimum ('+(d.current||0)+'/'+(d.min||0)+')',ts:now}); }
+    else if(st.status==='high'){ alerts.push({id:id++,type:'WIP_HIGH',severity:'warning',part:p,message:'WIP '+p+' exceeds max ('+(d.current||0)+'/'+(d.max||0)+')',ts:now}); }
+  });
+  var recent=getRecentUnified(7); var byMachine={};
+  recent.forEach(function(r){ var mc=r.mc; if(!mc)return; if(!byMachine[mc])byMachine[mc]={good:0,total:0,defect:0}; byMachine[mc].good+=(r.good||0); byMachine[mc].total+=(r.total||0); byMachine[mc].defect+=(r.defect||0); });
+  Object.keys(byMachine).forEach(function(mc){
+    var m=byMachine[mc];
+    if(m.total>0){
+      var yld=(m.good/m.total*100);
+      if(yld<85){ alerts.push({id:id++,type:'YIELD_LOW',severity:'warning',part:mc,message:'Yield low on '+mc+' ('+yld.toFixed(1)+'% vs target 85%) - 7 days',ts:now}); }
+      var defRate=(m.defect/m.total*100);
+      if(defRate>5){ alerts.push({id:id++,type:'DEFECT_HIGH',severity:'critical',part:mc,message:'Defect rate high on '+mc+' ('+defRate.toFixed(1)+'%) - 7 days',ts:now}); }
+    }
+  });
+  recent.forEach(function(r){
+    if(r.mp && r.mp.std>0 && r.mp.act>0){
+      var eff=(r.mp.act/r.mp.std*100);
+      if(eff<85){ alerts.push({id:id++,type:'MANPOWER_SHORT',severity:'warning',part:(r.date||'?')+' Shift '+(r.shift||'?'),message:'Manpower efficiency '+eff.toFixed(0)+'% on '+(r.date||'?')+' Shift '+(r.shift||'?'),ts:now}); }
+    }
+  });
 }
 
+// ==================== GENERATE RECOMMENDATIONS FROM REAL DATA ====================
+function generateRecommendationsFromData(){
+  recommendations=[]; var id=1; var crits=[],lows=[],highs=[];
+  Object.keys(wipData).forEach(function(p){ var st=getPartStatus(p); var d=wipData[p];
+    if(st.status==='crit')crits.push({p:p,d:d}); else if(st.status==='low')lows.push({p:p,d:d}); else if(st.status==='high')highs.push({p:p,d:d}); });
+  crits.forEach(function(x){ var need=(x.d.max||0)-(x.d.current||0); recommendations.push({id:id++,action:'ผลิต '+x.p+' ('+need+' pcs) - Stock วิกฤต',priority:'urgent',reason:'WIP critical: '+(x.d.current||0)+'/'+(x.d.min||0)}); });
+  lows.forEach(function(x){ var need=(x.d.max||0)-(x.d.current||0); recommendations.push({id:id++,action:'วางแผนผลิต '+x.p+' (เติม '+need+' pcs)',priority:'high',reason:'WIP low: '+(x.d.current||0)+'/'+(x.d.min||0)}); });
+  highs.forEach(function(x){ var over=(x.d.current||0)-(x.d.max||0); recommendations.push({id:id++,action:'ชะลอผลิต '+x.p+' (เกิน '+over+' pcs)',priority:'normal',reason:'WIP exceeds max: '+(x.d.current||0)+'/'+(x.d.max||0)}); });
+  var recent=getRecentUnified(7); var byMachine={};
+  recent.forEach(function(r){ var mc=r.mc; if(!mc)return; if(!byMachine[mc])byMachine[mc]={good:0,total:0}; byMachine[mc].good+=(r.good||0); byMachine[mc].total+=(r.total||0); });
+  Object.keys(byMachine).forEach(function(mc){ var m=byMachine[mc]; if(m.total>0){ var yld=(m.good/m.total*100); if(yld<90){ recommendations.push({id:id++,action:'ตรวจสอบ '+mc+' - Yield ต่ำ '+yld.toFixed(1)+'%',priority:'high',reason:'Yield below 90% (7-day avg)'}); } } });
+}
+
+function getRecentRecords(days){
+  var cutoff=new Date();
+  cutoff.setDate(cutoff.getDate()-days);
+  var cutStr=cutoff.toISOString().split('T')[0];
+  return prodRecords.filter(function(r){
+    var d=r.h?r.h.d:'';
+    return d>=cutStr;
+  });
+}
+
+// ==================== RENDER ALERTS ====================
 function renderAlerts(){
   var html='';
   if(alerts.length===0){
-    html='<div class="alert-box ok"><div class="alert-title">✅ All Clear!</div><div class="alert-detail">No active alerts. Keep monitoring production.</div></div>';
+    var hasWip=Object.keys(wipData).length>0;
+    var hasRec=prodRecords.length>0;
+    if(!hasWip && !hasRec){
+      html='<div class="alert-box info"><div class="alert-title">📋 ยังไม่มีข้อมูล</div><div class="alert-detail">ระบบจะแสดง Alert อัตโนมัติเมื่อมีข้อมูลจาก Step 4 (Production) และ Step 5 (WIP)<br><br>📦 WIP Parts ที่ตั้งค่า: <b>'+Object.keys(wipData).length+'</b><br>📊 Production Records: <b>'+prodRecords.length+'</b></div></div>';
+    }else{
+      html='<div class="alert-box ok"><div class="alert-title">✅ All Clear!</div><div class="alert-detail">ไม่มี Alert — Stock ปกติ, Yield ดี<br>📦 WIP Parts: '+Object.keys(wipData).length+' | 📊 Records: '+prodRecords.length+'</div></div>';
+    }
   }else{
     alerts.forEach(function(a){
+      var rule=ALERT_RULES[a.type]||{name:a.type,icon:'⚠️'};
       var cls=a.severity==='critical'?'crit':a.severity==='warning'?'warn':'info';
       html+='<div class="alert-box '+cls+'">'+
-        '<div class="alert-title">'+ALERT_RULES[a.type].icon+' '+ALERT_RULES[a.type].name+'</div>'+
+        '<div class="alert-title">'+rule.icon+' '+rule.name+'</div>'+
         '<div class="alert-detail">'+a.message+'<br><span style="font-size:10px;color:var(--dim)">'+new Date(a.ts).toLocaleTimeString('th-TH')+'</span></div>'+
         '<div class="alert-action">'+
         '<button class="alert-btn alert-btn-ok" onclick="acknowledgeAlert('+a.id+')">✓ ACK</button>'+
@@ -457,10 +644,11 @@ function renderAlerts(){
   document.getElementById('alertsList').innerHTML=html;
 }
 
+// ==================== RENDER RECOMMENDATIONS ====================
 function renderRecommendations(){
   var html='';
   if(recommendations.length===0){
-    html='<div class="rec-item normal"><div class="rec-text">📋 No recommendations at this time.</div></div>';
+    html='<div class="rec-item normal"><div class="rec-text">📋 ไม่มีคำแนะนำ — ข้อมูลปกติ หรือยังไม่มีข้อมูลจาก Step 4/5</div></div>';
   }else{
     recommendations.forEach(function(r){
       var cls=r.priority==='urgent'?'urgent':r.priority==='high'?'high':'normal';
@@ -473,188 +661,583 @@ function renderRecommendations(){
   document.getElementById('recQueue').innerHTML=html;
 }
 
+// ==================== RENDER DASHBOARD KPIs ====================
 function renderDashboard(){
-  var totalProduced=prodHistory.reduce((a,b)=>a+b.output,0);
-  var totalDefects=prodHistory.reduce((a,b)=>a+b.defects,0);
-  var avgYield=(prodHistory.reduce((a,b)=>a+b.yield,0)/prodHistory.length).toFixed(1);
+  var recent=getRecentUnified(7);
+  var totalProduced=0,totalGood=0,totalDefects=0;
+  recent.forEach(function(r){ totalProduced+=(r.total||0); totalGood+=(r.good||0); totalDefects+=(r.defect||0); });
+  var avgYield=totalProduced>0?(totalGood/totalProduced*100).toFixed(1):'—';
   var wipCount=Object.keys(wipData).length;
-  var wipCritical=Object.values(wipData).filter(w=>w.status==='critical').length;
-  var wipWarning=Object.values(wipData).filter(w=>w.status==='warning').length;
-
-  var kpiHtml=''+
-    '<div class="kpi kpi-info"><div class="kpi-label">📊 Total Produced</div><div class="kpi-value">'+totalProduced+'</div><div class="kpi-sub">pcs (7 days)</div></div>'+
-    '<div class="kpi kpi-warn"><div class="kpi-label">❌ Defects</div><div class="kpi-value">'+totalDefects+'</div><div class="kpi-sub">pcs ('+((totalDefects/totalProduced)*100).toFixed(1)+'%)</div></div>'+
-    '<div class="kpi kpi-ok"><div class="kpi-label">🎯 Avg Yield</div><div class="kpi-value">'+avgYield+'%</div><div class="kpi-sub">Target: 93%</div></div>'+
-    '<div class="kpi kpi-info"><div class="kpi-label">📦 WIP Parts</div><div class="kpi-value">'+wipCount+'</div><div class="kpi-sub">'+wipCritical+' critical, '+wipWarning+' warning</div></div>';
-
+  var wipCritical=Object.keys(wipData).filter(function(p){return getPartStatus(p).status==='crit';}).length;
+  var src=rptCloudData.length>0?'Cloud':(prodRecords.length>0?'Local':'No Data');
+  var kpiHtml=
+    '<div class="kpi kpi-info"><div class="kpi-label">Total Produced</div><div class="kpi-value">'+totalProduced.toLocaleString()+'</div><div class="kpi-sub">pcs (7 days, '+recent.length+' rec · '+src+')</div></div>'+
+    '<div class="kpi '+(totalDefects>0?'kpi-warn':'kpi-ok')+'"><div class="kpi-label">Defects</div><div class="kpi-value">'+totalDefects.toLocaleString()+'</div><div class="kpi-sub">pcs</div></div>'+
+    '<div class="kpi '+(avgYield!=='—'&&parseFloat(avgYield)>=93?'kpi-ok':'kpi-warn')+'"><div class="kpi-label">Avg Yield</div><div class="kpi-value">'+(avgYield==='—'?'—':avgYield+'%')+'</div><div class="kpi-sub">Target: 93%</div></div>'+
+    '<div class="kpi '+(wipCritical>0?'kpi-crit':'kpi-info')+'"><div class="kpi-label">WIP Parts</div><div class="kpi-value">'+wipCount+'</div><div class="kpi-sub">'+wipCritical+' critical</div></div>';
   document.getElementById('kpiCards').innerHTML=kpiHtml;
 }
 
+// ==================== CHARTS ====================
+var prodChartObj=null, wipChartObj=null, defectChartObj=null;
+
 function initCharts(){
-  // Production trend
-  var dates=prodHistory.map(p=>p.date);
-  var outputs=prodHistory.map(p=>p.output);
-  var ctx1=document.getElementById('prodChart').getContext('2d');
-  new Chart(ctx1,{type:'line',data:{labels:dates,datasets:[{label:'Output (pcs)',data:outputs,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.1)',tension:.3,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-
-  // WIP status
-  var wipParts=Object.keys(wipData);
-  var wipLevels=wipParts.map(p=>wipData[p].current);
-  var ctx2=document.getElementById('wipChart').getContext('2d');
-  new Chart(ctx2,{type:'bar',data:{labels:wipParts.map(p=>p.substring(0,7)),datasets:[{label:'Current',data:wipLevels,backgroundColor:wipParts.map(p=>wipData[p].status==='critical'?'#ef4444':wipData[p].status==='warning'?'#f59e0b':'#10b981')}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-
-  // Defect distribution
-  var ctx3=document.getElementById('defectChart').getContext('2d');
-  new Chart(ctx3,{type:'doughnut',data:{labels:['Good','Defect'],datasets:[{data:[98.1,1.9],backgroundColor:['#10b981','#ef4444']}]},options:{responsive:true,maintainAspectRatio:false}});
+  try{
+    var recent=getRecentUnified(7);
+    var byDate={};
+    recent.forEach(function(r){ var d=r.date||'?'; if(!byDate[d])byDate[d]=0; byDate[d]+=(r.total||0); });
+    var dates=Object.keys(byDate).sort();
+    var outputs=dates.map(function(d){return byDate[d];});
+    var ctx1=document.getElementById('prodChart');
+    if(ctx1){ if(prodChartObj)prodChartObj.destroy();
+      if(dates.length>0){ prodChartObj=new Chart(ctx1.getContext('2d'),{type:'line',data:{labels:dates,datasets:[{label:'Output',data:outputs,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.1)',tension:.3,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}); }
+    }
+    var wipParts=Object.keys(wipData).filter(function(p){return (wipData[p].current||0)>0||(wipData[p].min||0)>0;});
+    wipParts.sort(function(a,b){return (wipData[b].current||0)-(wipData[a].current||0);});
+    wipParts=wipParts.slice(0,10);
+    var ctx2=document.getElementById('wipChart');
+    if(ctx2){ if(wipChartObj)wipChartObj.destroy();
+      if(wipParts.length>0){ wipChartObj=new Chart(ctx2.getContext('2d'),{type:'bar',data:{labels:wipParts.map(function(p){return p.substring(0,10);}),datasets:[
+        {label:'Current',data:wipParts.map(function(p){return wipData[p].current||0;}),backgroundColor:wipParts.map(function(p){var s=getPartStatus(p);return s.status==='crit'?'#ef4444':s.status==='low'?'#f59e0b':s.status==='high'?'#3b82f6':'#10b981';})},
+        {label:'Min',data:wipParts.map(function(p){return wipData[p].min||0;}),type:'line',borderColor:'#ef4444',borderDash:[5,3],pointRadius:0,fill:false,borderWidth:1}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10}}}}}}); }
+    }
+    var totalGood=0,totalDef=0;
+    recent.forEach(function(r){ totalGood+=(r.good||0); totalDef+=(r.defect||0); });
+    var ctx3=document.getElementById('defectChart');
+    if(ctx3){ if(defectChartObj)defectChartObj.destroy();
+      if(totalGood+totalDef>0){ defectChartObj=new Chart(ctx3.getContext('2d'),{type:'doughnut',data:{labels:['Good','Defect'],datasets:[{data:[totalGood,totalDef],backgroundColor:['#10b981','#ef4444']}]},options:{responsive:true,maintainAspectRatio:false}}); }
+    }
+  }catch(e){console.log('Chart init error:',e);}
 }
 
-function acknowledgeAlert(id){
-  alerts=alerts.filter(a=>a.id!==id);
-  toast('✅ Alert acknowledged');
-  renderAlerts();
-}
+// ==================== ALERT ACTIONS ====================
+function acknowledgeAlert(id){ alerts=alerts.filter(function(a){return a.id!==id;}); toast('Alert acknowledged'); renderAlerts(); }
+function dismissAlert(id){ alerts=alerts.filter(function(a){return a.id!==id;}); renderAlerts(); }
+function executeRec(id){ recommendations=recommendations.filter(function(r){return r.id!==id;}); toast('Done'); renderRecommendations(); }
 
-function dismissAlert(id){
-  alerts=alerts.filter(a=>a.id!==id);
-  renderAlerts();
-}
-
-function executeRec(id){
-  recommendations=recommendations.filter(r=>r.id!==id);
-  toast('✅ Recommendation marked as done');
-  renderRecommendations();
-}
-
-function showTab(n){
-  curTab=n;
-  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
-  document.getElementById('tab'+n).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',i===n-1));
-}
-
-function nextTab(){if(curTab<5)showTab(curTab+1);}
-function prevTab(){if(curTab>1)showTab(curTab-1);}
-
-function toast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
-
+// ==================== SETTINGS ====================
 function updateAlertSensitivity(){
   var v=document.getElementById('alertSensitivity').value;
-  document.getElementById('sensitivityLabel').textContent=parseFloat(v).toFixed(1)+'x';
+  alertSensitivityVal=parseFloat(v)||1.0;
+  document.getElementById('sensitivityLabel').textContent=alertSensitivityVal.toFixed(1)+'x';
+  localStorage.setItem('mes_alert_sensitivity',alertSensitivityVal.toString());
+  generateAlertsFromData();
+  generateRecommendationsFromData();
+  renderAlerts();
+  renderRecommendations();
 }
-
-function toggleNotificationSound(){
-  var enabled=document.getElementById('notifSoundCheck').checked;
-  localStorage.setItem('notif_sound',enabled?'1':'0');
-}
+function toggleNotificationSound(){ localStorage.setItem('notif_sound',document.getElementById('notifSoundCheck').checked?'1':'0'); }
 
 function exportAllData(){
-  var csv='Alert,Severity,Message,Timestamp\n';
-  alerts.forEach(a=>csv+='"'+a.type+'","'+a.severity+'","'+a.message+'","'+new Date(a.ts).toISOString()+'"\n');
-  var blob=new Blob([csv],{type:'text/csv'});
+  var csv='Source,Date,Shift,Machine,Model,Mold,Total,Good,Defect,Yield%\n';
+  prodRecords.forEach(function(r){
+    var h=r.h||{}, t=r.tot||{};
+    csv+='"Step4","'+(h.d||'')+'","'+(h.sh||'')+'","'+(h.mc||'')+'","'+(h.mo||'')+'","'+(h.mold||'')+'",'+
+      (t.total||0)+','+(t.good||0)+','+(t.defect||0)+','+(t.yield||0)+'\n';
+  });
+  csv+='\nWIP_Part,Min,Current,Max,Status\n';
+  Object.keys(wipData).forEach(function(p){
+    var d=wipData[p]; var st=getPartStatus(p);
+    csv+='"'+p+'",'+(d.min||0)+','+(d.current||0)+','+(d.max||0)+',"'+st.label+'"\n';
+  });
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;a.download='MES_Alerts_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  var el=document.createElement('a');
+  el.href=url; el.download='MES_Dashboard_Export_'+new Date().toISOString().split('T')[0]+'.csv'; el.click();
   URL.revokeObjectURL(url);
-  toast('📥 Data exported');
+  toast('Data exported');
 }
-
 function clearAllData(){
-  if(!confirm('Clear all data? (Cannot undo)'))return;
-  alerts=[];recommendations=[];wipData={};prodHistory=[];
-  localStorage.clear();
+  if(!confirm('ล้างข้อมูลทั้งหมด? (จะล้าง Production + WIP + Cloud config)'))return;
+  localStorage.removeItem('mes_r1');
+  localStorage.removeItem('mes_step5_wip');
+  localStorage.removeItem('mes_step5_mov');
+  localStorage.removeItem('mes_bridge_step4_to_5');
+  localStorage.removeItem('mes_apps_script_url');
+  localStorage.removeItem('mes_alert_sensitivity');
   location.reload();
 }
 
-// ==================== CLOUD DASHBOARD FUNCTIONS (iPad Compatible) ====================
-function cloudGET(url, callback, errback){
-  try{
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.timeout = 20000;
-    xhr.onreadystatechange = function(){
-      if(xhr.readyState === 4){
-        if(xhr.status >= 200 && xhr.status < 400){
-          try{ callback(JSON.parse(xhr.responseText)); }
-          catch(e){ errback('Parse error: ' + e.message); }
-        }else{ errback('HTTP ' + xhr.status); }
-      }
-    };
-    xhr.ontimeout = function(){ errback('Timeout (20s) - ลองใหม่อีกครั้ง'); };
-    xhr.onerror = function(){ errback('Network error - ตรวจสอบ internet'); };
-    xhr.send();
-  }catch(e){ errback(e.message); }
-}
+// ==================== CLOUD LIVE ====================
 function initCloudDash(){
   var url=localStorage.getItem('mes_apps_script_url');
-  if(url){var el=document.getElementById('appsScriptURLDash');if(el)el.value=url;}
+  if(url){ var el=document.getElementById('appsScriptURLDash'); if(el) el.value=url; }
 }
 function saveCloudDash(){
-  var url=document.getElementById('appsScriptURLDash').value.trim();
-  url = url.replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g,'');
-  if(!url){alert('กรุณาใส่ URL');return;}
+  var url=document.getElementById('appsScriptURLDash').value.trim().replace(/[​-‍﻿]/g,'').replace(/\s+/g,'');
+  if(!url){ alert('Enter URL'); return; }
   localStorage.setItem('mes_apps_script_url',url);
-  document.getElementById('appsScriptURLDash').value=url;
-  toast('✅ Cloud config saved!');
+  toast('Cloud config saved!');
 }
 function testCloudDash(){
   var url=localStorage.getItem('mes_apps_script_url');
-  if(!url){document.getElementById('cloudDashResult').innerHTML='<div style="color:#ef4444;font-size:12px">❌ Save URL first</div>';return;}
-  document.getElementById('cloudDashResult').innerHTML='<div style="color:#f59e0b;font-size:12px">⏳ Testing...</div>';
+  if(!url){ document.getElementById('cloudDashResult').innerHTML='<div style="color:#ef4444;font-size:12px">Save URL first</div>'; return; }
+  document.getElementById('cloudDashResult').innerHTML='<div style="color:#f59e0b;font-size:12px">Testing...</div>';
   cloudGET(url+'?action=getRecent&limit=1', function(d){
-    if(d.status==='success'){
-      document.getElementById('cloudDashResult').innerHTML='<div style="color:#10b981;font-size:12px;padding:8px;background:rgba(16,185,129,.1);border-radius:6px">✅ Connected! Records: '+d.count+'</div>';
-      document.getElementById('cloudStatusD').textContent='✅ Connected';
-    }else{
-      document.getElementById('cloudDashResult').innerHTML='<div style="color:#ef4444;font-size:12px">❌ '+d.message+'</div>';
+    var ok=d.status==='success';
+    document.getElementById('cloudDashResult').innerHTML='<div style="color:'+(ok?'#10b981':'#ef4444')+';font-size:12px;padding:8px;background:rgba('+(ok?'16,185,129':'239,68,68')+',.1);border-radius:6px">'+(ok?'Connected! Records: '+d.count:'Error: '+d.message)+'</div>';
+    if(ok){
+      document.getElementById('cloudStatusD').textContent='Connected';
+      document.getElementById('cloudRecordCount').textContent=d.count;
     }
-  }, function(err){document.getElementById('cloudDashResult').innerHTML='<div style="color:#ef4444;font-size:12px;padding:8px;background:rgba(239,68,68,.1);border-radius:6px">❌ '+err+'</div>';});
+  }, function(err){ document.getElementById('cloudDashResult').innerHTML='<div style="color:#ef4444;font-size:12px">'+err+'</div>'; });
 }
-function refreshCloudDash(){
+
+function autoFetchCloud(){
   var url=localStorage.getItem('mes_apps_script_url');
-  if(!url){alert('Save URL first');return;}
-  document.getElementById('cloudMachineCards').innerHTML='<div style="color:#f59e0b;text-align:center;padding:20px;font-size:12px">⏳ Loading data from all machines...</div>';
+  if(!url) return;
+  document.getElementById('cloudStatusD').textContent='Connecting...';
   cloudGET(url+'?action=getAll', function(d){
     if(d.status==='success'){
+      rptCloudData=normalizeCloudData(d.records||d.data||[]);
       document.getElementById('cloudRecordCount').textContent=d.count;
       document.getElementById('lastRefreshD').textContent=new Date().toLocaleString('th-TH');
-      renderCloudMachines(d.data);
+      document.getElementById('cloudStatusD').textContent='Connected';
+      populateMachineFilters(rptCloudData);
+      renderCloudMachines(rptCloudData);
+      afterCloudData();
     }else{
-      document.getElementById('cloudMachineCards').innerHTML='<div style="color:#ef4444;text-align:center;padding:20px;font-size:12px">❌ '+d.message+'</div>';
+      document.getElementById('cloudStatusD').textContent='Error';
     }
-  }, function(err){document.getElementById('cloudMachineCards').innerHTML='<div style="color:#ef4444;text-align:center;padding:20px;font-size:12px">❌ '+err+'</div>';});
+  }, function(err){
+    document.getElementById('cloudStatusD').textContent='Offline';
+    console.log('Cloud auto-fetch failed:',err);
+  });
 }
+
+function refreshCloudDash(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){ alert('Save URL first'); return; }
+  document.getElementById('cloudMachineCards').innerHTML='<div style="color:#f59e0b;text-align:center;padding:20px;font-size:12px">Loading...</div>';
+  cloudGET(url+'?action=getAll', function(d){
+    if(d.status==='success'){
+      rptCloudData=normalizeCloudData(d.records||d.data||[]);
+      document.getElementById('cloudRecordCount').textContent=d.count;
+      document.getElementById('lastRefreshD').textContent=new Date().toLocaleString('th-TH');
+      document.getElementById('cloudStatusD').textContent='Connected';
+      populateMachineFilters(rptCloudData);
+      renderCloudMachines(rptCloudData);
+      afterCloudData();
+    }else{
+      document.getElementById('cloudMachineCards').innerHTML='<div style="color:#ef4444;text-align:center;padding:20px;font-size:12px">Error: '+d.message+'</div>';
+    }
+  }, function(err){ document.getElementById('cloudMachineCards').innerHTML='<div style="color:#ef4444;text-align:center;padding:20px;font-size:12px">'+err+'</div>'; });
+}
+
 function renderCloudMachines(records){
-  if(!records||records.length===0){document.getElementById('cloudMachineCards').innerHTML='<div style="color:var(--dim);text-align:center;padding:20px;font-size:12px">No data from machines yet</div>';return;}
+  if(!records||records.length===0){ document.getElementById('cloudMachineCards').innerHTML='<div style="color:var(--dim);text-align:center;padding:20px;font-size:12px">No data</div>'; return; }
   var machines={};
-  records.forEach(function(r){var mid=r.machineID||'Unknown';if(!machines[mid])machines[mid]=[];machines[mid].push(r);});
-  var html='';
+  records.forEach(function(r){ var mid=r.machineID||'Unknown'; if(!machines[mid]) machines[mid]=[]; machines[mid].push(r); });
+  var html='<div style="color:var(--green);font-size:12px;margin-bottom:8px">Connected Records: '+records.length+'</div>';
   Object.keys(machines).sort().forEach(function(mid){
-    var recs=machines[mid];
-    var last=recs[recs.length-1];
+    var recs=machines[mid]; var last=recs[recs.length-1];
     var totalActual=recs.reduce(function(s,r){return s+(parseInt(r.actual)||0);},0);
     var totalGood=recs.reduce(function(s,r){return s+(parseInt(r.goodLH)||0)+(parseInt(r.goodRH)||0);},0);
-    var yield_=totalActual>0?((totalGood/totalActual)*100).toFixed(1):'0';
-    var yColor=Number(yield_)>=93?'#10b981':Number(yield_)>=90?'#f59e0b':'#ef4444';
+    var yld=totalActual>0?((totalGood/totalActual)*100).toFixed(1):'0';
+    var yc=Number(yld)>=93?'#10b981':Number(yld)>=90?'#f59e0b':'#ef4444';
     html+='<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">';
-    html+='<div style="font-weight:700;color:#60a5fa;margin-bottom:6px">🏭 '+mid+'</div>';
+    html+='<div style="font-weight:700;color:#60a5fa;margin-bottom:6px">'+mid+'</div>';
     html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">';
-    html+='<div style="background:var(--bg);padding:6px;border-radius:4px"><div style="color:var(--dim);font-size:10px">Machine</div><div style="font-weight:700;color:#60a5fa">'+(last.machine||'—')+'</div></div>';
+    html+='<div style="background:var(--bg);padding:6px;border-radius:4px"><div style="color:var(--dim);font-size:10px">Machine</div><div style="font-weight:700;color:#60a5fa">'+(last.machine||mid)+'</div></div>';
     html+='<div style="background:var(--bg);padding:6px;border-radius:4px"><div style="color:var(--dim);font-size:10px">Output</div><div style="font-weight:700;color:#10b981">'+totalActual+' pcs</div></div>';
-    html+='<div style="background:var(--bg);padding:6px;border-radius:4px"><div style="color:var(--dim);font-size:10px">Yield</div><div style="font-weight:700;color:'+yColor+'">'+yield_+'%</div></div>';
-    html+='</div>';
-    html+='<div style="font-size:10px;color:var(--dim);margin-top:6px">📊 '+recs.length+' records | Last: '+new Date(last.timestamp).toLocaleTimeString('th-TH')+'</div>';
-    html+='</div>';
+    html+='<div style="background:var(--bg);padding:6px;border-radius:4px"><div style="color:var(--dim);font-size:10px">Yield</div><div style="font-weight:700;color:'+yc+'">'+yld+'%</div></div>';
+    html+='</div><div style="font-size:10px;color:var(--dim);margin-top:6px">'+recs.length+' records</div></div>';
   });
   document.getElementById('cloudMachineCards').innerHTML=html;
 }
 
+// ==================== TAB NAVIGATION ====================
+function showTab(n){
+  curTab=n;
+  for(var i=1;i<=TOTAL_TABS;i++){
+    var el=document.getElementById('tab'+i);
+    if(el) el.classList.remove('active');
+  }
+  var cur=document.getElementById('tab'+n);
+  if(cur) cur.classList.add('active');
+  var btns=document.querySelectorAll('.nav-btn');
+  btns.forEach(function(b,idx){
+    if(idx===n-1) b.classList.add('active'); else b.classList.remove('active');
+  });
+}
+function prevTab(){ if(curTab>1) showTab(curTab-1); }
+function nextTab(){ if(curTab<TOTAL_TABS) showTab(curTab+1); }
+
+// ==================== UTILITIES ====================
+function toast(msg){
+  var t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },2000);
+}
+
+function cloudGET(url, onSuccess, onError){
+  fetch(url).then(function(r){ return r.json(); }).then(onSuccess).catch(function(e){ onError(String(e)); });
+}
+
+function initDateFilters(){
+  var today=new Date().toISOString().split('T')[0];
+  var week=new Date(Date.now()-7*86400000).toISOString().split('T')[0];
+  ['r7from','r8from','r9from','r10from'].forEach(function(id){
+    var el=document.getElementById(id); if(el&&!el.value) el.value=week;
+  });
+  ['r7to','r8to','r9to','r10to'].forEach(function(id){
+    var el=document.getElementById(id); if(el&&!el.value) el.value=today;
+  });
+}
+
+function populateMachineFilters(data){
+  var mcs={}, models={};
+  (data||[]).forEach(function(r){ if(r.machineID)mcs[r.machineID]=1; else if(r.machine)mcs[r.machine]=1; if(r.model)models[r.model]=1; });
+  prodRecords.forEach(function(r){ var h=r.h||{}; if(h.mc)mcs[h.mc]=1; if(h.mo)models[h.mo]=1; });
+  var keys=Object.keys(mcs).sort();
+  ['r7mc','r8mc','r10mc'].forEach(function(id){ var sel=document.getElementById(id); if(!sel)return; var cur=sel.value; sel.innerHTML='<option value="">ทั้งหมด</option>'+keys.map(function(k){return '<option>'+k+'</option>';}).join(''); sel.value=cur; });
+  var mk=Object.keys(models).sort();
+  var msel=document.getElementById('r9model');
+  if(msel){ var cv=msel.value; msel.innerHTML='<option value="">ทั้งหมด</option>'+mk.map(function(k){return '<option>'+k+'</option>';}).join(''); msel.value=cv; }
+}
+
+function filterRecords(records,fromId,toId,mcId,shId){
+  var f=document.getElementById(fromId), t=document.getElementById(toId);
+  var m=mcId?document.getElementById(mcId):null;
+  var s=shId?document.getElementById(shId):null;
+  var fv=f?f.value:'', tv=t?t.value:'', mv=m?m.value:'', sv=s?s.value:'';
+  return records.filter(function(r){
+    if(fv && r.date && r.date<fv) return false;
+    if(tv && r.date && r.date>tv) return false;
+    if(mv && r.machineID!==mv) return false;
+    if(sv && r.shift!==sv) return false;
+    return true;
+  });
+}
+
+// ==================== REPORT TAB 7: DAILY REPORT ====================
+var r7chart=null,r8chart=null,r9chart=null,r9chart2=null,r10chart=null;
+
+function getReportData(){
+  if(rptCloudData.length>0) return rptCloudData;
+  return prodRecords.map(function(r){
+    var h=r.h||{}, t=r.tot||{};
+    return {
+      date:h.d||'',shift:h.sh||'',machineID:h.mc||'',machine:h.mc||'',
+      model:h.mo||'',mold:h.mold||'',actual:t.total||0,
+      goodLH:t.gl||0,goodRH:t.gr||0,defect:t.defect||0,oee:t.yield||'—'
+    };
+  });
+}
+
+function fetchCloudReport(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url){ alert('กรุณาตั้งค่า URL ใน Tab "Cloud Live" ก่อน'); return; }
+  var st=document.getElementById('r7status'); if(st) st.textContent='⏳ กำลังโหลดจาก Cloud...';
+  cloudGET(url+'?action=getAll', function(d){
+    if(d.status==='success'){
+      rptCloudData=normalizeCloudData(d.records||d.data||[]);
+      populateMachineFilters(rptCloudData);
+      if(st) st.textContent='✅ โหลดสำเร็จ — '+rptCloudData.length+' records';
+      loadReport7();
+      afterCloudData();
+    }else{
+      if(st) st.textContent='❌ Error: '+d.message;
+    }
+  }, function(err){ if(st) st.textContent='❌ '+err; });
+}
+
+function loadReport7(){
+  var data=getReportData();
+  var f=filterRecords(data,'r7from','r7to','r7mc','r7sh');
+  var totalAct=f.reduce(function(s,r){return s+(parseInt(r.actual)||0);},0);
+  var totalGood=f.reduce(function(s,r){return s+(parseInt(r.goodLH)||0)+(parseInt(r.goodRH)||0);},0);
+  var totalDef=f.reduce(function(s,r){return s+(parseInt(r.defect)||0);},0);
+  var yld=totalAct>0?((totalGood/totalAct)*100).toFixed(1):'—';
+  document.getElementById('r7kpi1').textContent=totalAct.toLocaleString();
+  document.getElementById('r7kpi2').textContent=totalGood.toLocaleString();
+  document.getElementById('r7kpi3').textContent=totalDef.toLocaleString();
+  document.getElementById('r7kpi4').textContent=yld+(yld==='—'?'':'%');
+  var srcEl=document.getElementById('rpt7src');
+  if(srcEl){
+    if(rptCloudData.length>0){srcEl.textContent='Cloud';srcEl.className='src-badge src-cloud';}
+    else if(prodRecords.length>0){srcEl.textContent='Local';srcEl.className='src-badge src-local';}
+    else{srcEl.textContent='No Data';srcEl.className='src-badge';}
+  }
+  var byDate={};
+  f.forEach(function(r){var d=r.date||'?';if(!byDate[d])byDate[d]={good:0,def:0};byDate[d].good+=(parseInt(r.goodLH)||0)+(parseInt(r.goodRH)||0);byDate[d].def+=(parseInt(r.defect)||0);});
+  var labels=Object.keys(byDate).sort();
+  var goods=labels.map(function(k){return byDate[k].good;});
+  var defs=labels.map(function(k){return byDate[k].def;});
+  var ctx=document.getElementById('r7chart');
+  if(ctx){
+    if(r7chart)r7chart.destroy();
+    if(labels.length>0){r7chart=new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:labels,datasets:[{label:'Good',data:goods,backgroundColor:'#10b981'},{label:'Defect',data:defs,backgroundColor:'#ef4444'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}});}
+  }
+  var html=f.length?'':'<tr><td colspan="11" style="color:var(--dim);padding:20px">ไม่มีข้อมูลตาม filter</td></tr>';
+  f.slice(0,200).forEach(function(r){
+    var g=(parseInt(r.goodLH)||0)+(parseInt(r.goodRH)||0);var act=parseInt(r.actual)||0;var y=act>0?((g/act)*100).toFixed(1):'--';
+    html+='<tr><td>'+(r.date||'-')+'</td><td>'+(r.shift||'-')+'</td><td>'+(r.machineID||r.machine||'-')+'</td><td>'+(r.model||'-')+'</td><td>'+(r.mold||'-')+'</td><td>'+act+'</td><td>'+(r.goodLH||0)+'</td><td>'+(r.goodRH||0)+'</td><td>'+(r.defect||0)+'</td><td>'+y+'%</td><td>'+(r.oee||'-')+'</td></tr>';
+  });
+  document.getElementById('r7tbody').innerHTML=html;
+}
+
+function loadReport8(){
+  var defects=[];
+  if(rptCloudData.length>0){
+    rptCloudData.forEach(function(r){
+      var parsed=null; try{ if(r.rawData&&typeof r.rawData==='string'&&r.rawData.charAt(0)==='{') parsed=JSON.parse(r.rawData); }catch(e){}
+      if(parsed&&parsed.defects&&parsed.defects.length>0){
+        parsed.defects.forEach(function(d){ defects.push({date:r.date,shift:r.shift,machineID:r.machineID,code:d.c||d.code||d.defectCode||'UNK',name:d.name||d.defectName||'-',side:d.s||d.side||'-',count:parseInt(d.q)||parseInt(d.count)||parseInt(d.qty)||1}); });
+      }else if(parseInt(r.defect)>0){
+        defects.push({date:r.date,shift:r.shift,machineID:r.machineID,code:'UNCAT',name:'Uncategorized',side:'—',count:parseInt(r.defect)||0});
+      }
+    });
+  }else{
+    try{prodRecords.forEach(function(rec){var h=rec.h||{};if(rec.defects&&rec.defects.length>0){rec.defects.forEach(function(d){defects.push({date:h.d,shift:h.sh,machineID:h.mc,code:d.c||d.code||d.defectCode||'UNK',name:d.name||d.defectName||'-',side:d.s||d.side||'-',count:parseInt(d.q)||parseInt(d.count)||parseInt(d.qty)||1});});}else if(rec.tot&&rec.tot.defect>0){defects.push({date:h.d,shift:h.sh,machineID:h.mc,code:'UNCAT',name:'Uncategorized',side:'—',count:rec.tot.defect});}});}catch(e){}
+  }
+  var f=filterRecords(defects,'r8from','r8to','r8mc','r8sh');
+  var byCode={};
+  f.forEach(function(d){var k=d.code||'UNK';if(!byCode[k])byCode[k]={count:0,name:d.name||'-',side:d.side||'-'};byCode[k].count+=(d.count||1);});
+  var total=f.reduce(function(s,d){return s+(d.count||1);},0);
+  document.getElementById('r8kpi1').textContent=total.toLocaleString();
+  var totalProd=0;
+  if(rptCloudData.length>0){rptCloudData.forEach(function(r){totalProd+=(parseInt(r.actual)||0);});}else{prodRecords.forEach(function(r){totalProd+=(r.tot?r.tot.total:0);});}
+  document.getElementById('r8kpi2').textContent=totalProd>0?((total/totalProd)*100).toFixed(2)+'%':'—';
+  var arr=Object.keys(byCode).map(function(k){return{code:k,name:byCode[k].name,side:byCode[k].side,count:byCode[k].count};}).sort(function(a,b){return b.count-a.count;});
+  document.getElementById('r8kpi3').textContent=arr.length?arr[0].code:'—';
+  var top10=arr.slice(0,10);
+  var ctx=document.getElementById('r8chart');
+  if(ctx){if(r8chart)r8chart.destroy();if(top10.length>0){r8chart=new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:top10.map(function(d){return d.code;}),datasets:[{label:'Count',data:top10.map(function(d){return d.count;}),backgroundColor:'#ef4444'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});}}
+  var html=arr.length?'':'<tr><td colspan="6" style="color:var(--dim);padding:20px">ไม่มีข้อมูล Defect</td></tr>';
+  arr.forEach(function(d){var pct=total>0?((d.count/total)*100).toFixed(1):'0';var pctT=totalProd>0?((d.count/totalProd)*100).toFixed(2):'—';html+='<tr><td>'+d.code+'</td><td>'+d.name+'</td><td>'+d.side+'</td><td>'+d.count+'</td><td>'+pct+'%</td><td>'+pctT+'%</td></tr>';});
+  document.getElementById('r8tbody').innerHTML=html;
+}
+
+function loadReport9(){
+  var data=getReportData();
+  var fv=document.getElementById('r9from').value,tv=document.getElementById('r9to').value;
+  var mv=document.getElementById('r9model').value,pv=document.getElementById('r9proc').value;
+  var f=data.filter(function(r){if(fv&&r.date&&r.date<fv)return false;if(tv&&r.date&&r.date>tv)return false;if(mv&&r.model!==mv)return false;if(pv&&r.process!==pv)return false;return true;});
+  var byModel={};
+  f.forEach(function(r){var k=r.model||'?';if(!byModel[k])byModel[k]={total:0,def:0,part:r.partName||r.part||'-',mold:r.mold||'-'};byModel[k].total+=(parseInt(r.actual)||0);byModel[k].def+=(parseInt(r.defect)||0);});
+  var arr=Object.keys(byModel).map(function(k){var v=byModel[k];return{model:k,part:v.part,mold:v.mold,total:v.total,def:v.def,pct:v.total>0?((v.def/v.total)*100).toFixed(2):'0'};}).sort(function(a,b){return b.def-a.def;});
+  var ctx1=document.getElementById('r9chart');
+  if(ctx1){if(r9chart)r9chart.destroy();var top=arr.slice(0,5);if(top.length>0){r9chart=new Chart(ctx1.getContext('2d'),{type:'pie',data:{labels:top.map(function(d){return d.model;}),datasets:[{data:top.map(function(d){return d.def;}),backgroundColor:['#ef4444','#f59e0b','#3b82f6','#10b981','#a855f7']}]},options:{responsive:true,maintainAspectRatio:false}});}}
+  var ctx2=document.getElementById('r9chart2');
+  if(ctx2){if(r9chart2)r9chart2.destroy();if(arr.length>0){r9chart2=new Chart(ctx2.getContext('2d'),{type:'bar',data:{labels:arr.slice(0,10).map(function(d){return d.model;}),datasets:[{label:'Defect%',data:arr.slice(0,10).map(function(d){return parseFloat(d.pct);}),backgroundColor:'#f59e0b'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});}}
+  var html=arr.length?'':'<tr><td colspan="7" style="color:var(--dim);padding:20px">ไม่มีข้อมูล</td></tr>';
+  arr.forEach(function(d){html+='<tr><td>'+d.model+'</td><td>'+d.part+'</td><td>'+d.mold+'</td><td>'+d.total+'</td><td>'+d.def+'</td><td>'+d.pct+'%</td><td>—</td></tr>';});
+  document.getElementById('r9tbody').innerHTML=html;
+}
+
+function loadReport10(){
+  var dts=[];
+  if(rptCloudData.length>0){
+    rptCloudData.forEach(function(r){
+      var parsed=null; try{ if(r.rawData&&typeof r.rawData==='string'&&r.rawData.charAt(0)==='{') parsed=JSON.parse(r.rawData); }catch(e){}
+      if(parsed&&parsed.downtimes&&parsed.downtimes.length>0){
+        parsed.downtimes.forEach(function(d){ dts.push({date:r.date,shift:r.shift,machineID:r.machineID,code:d.c||d.code||d.dtCode||'UNK',reason:d.reason||d.cause||d.d||'-',minutes:parseInt(d.m)||parseInt(d.minutes)||parseInt(d.min)||0,category:d.category||d.cat||'-'}); });
+      }
+    });
+  }else{
+    try{prodRecords.forEach(function(rec){var h=rec.h||{};if(rec.downtimes&&rec.downtimes.length>0){rec.downtimes.forEach(function(d){dts.push({date:h.d,shift:h.sh,machineID:h.mc,code:d.c||d.code||d.dtCode||'UNK',reason:d.reason||d.cause||d.d||'-',minutes:parseInt(d.m)||parseInt(d.minutes)||parseInt(d.min)||0,category:d.category||d.cat||'-'});});}});}catch(e){}
+  }
+  var f=filterRecords(dts,'r10from','r10to','r10mc','r10sh');
+  var totalMin=f.reduce(function(s,d){return s+(d.minutes||0);},0);
+  var byCode={};
+  f.forEach(function(d){var k=d.code||'UNK';if(!byCode[k])byCode[k]={min:0,name:d.reason||'-',cat:d.category||'-'};byCode[k].min+=(d.minutes||0);});
+  var arr=Object.keys(byCode).map(function(k){return{code:k,name:byCode[k].name,cat:byCode[k].cat,min:byCode[k].min};}).sort(function(a,b){return b.min-a.min;});
+  document.getElementById('r10kpi1').textContent=totalMin;
+  var plannedMin=480*Math.max(1,f.length);
+  var avail=plannedMin>0?(((plannedMin-totalMin)/plannedMin)*100).toFixed(1):'—';
+  document.getElementById('r10kpi2').textContent=avail+(avail==='—'?'':'%');
+  document.getElementById('r10kpi3').textContent=f.length;
+  document.getElementById('r10kpi4').textContent=arr.length?arr[0].code:'—';
+  var ctx=document.getElementById('r10chart');
+  if(ctx){if(r10chart)r10chart.destroy();var top=arr.slice(0,10);if(top.length>0){r10chart=new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:top.map(function(d){return d.code;}),datasets:[{label:'นาที',data:top.map(function(d){return d.min;}),backgroundColor:'#f97316'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});}}
+  var html=f.length?'':'<tr><td colspan="7" style="color:var(--dim);padding:20px">ไม่มีข้อมูล Downtime</td></tr>';
+  f.slice(0,200).forEach(function(d){html+='<tr><td>'+(d.date||'-')+'</td><td>'+(d.shift||'-')+'</td><td>'+(d.machineID||'-')+'</td><td>'+(d.code||'-')+'</td><td>'+(d.reason||'-')+'</td><td>'+(d.minutes||0)+'</td><td>'+(d.category||'-')+'</td></tr>';});
+  document.getElementById('r10tbody').innerHTML=html;
+}
+
+// ==================== UNIFIED DATA HELPERS (cloud + local) ====================
+function normalizeCloudData(arr){
+  if(!arr||!arr.length) return [];
+  return arr.map(function(r){
+    var o={}; for(var k in r){ if(Object.prototype.hasOwnProperty.call(r,k)) o[k]=r[k]; }
+    if(o.date===undefined||o.date==='')           o.date=r.date||r.Date||'';
+    if(o.shift===undefined||o.shift==='')          o.shift=r.shift||r.Shift||'';
+    if(o.machineID===undefined||o.machineID==='')  o.machineID=r.machineID||r['Machine ID']||'';
+    if(o.machine===undefined||o.machine==='')      o.machine=r.machine||r.Machine||'';
+    if(o.model===undefined||o.model==='')          o.model=r.model||r.Model||'';
+    if(o.mold===undefined||o.mold==='')            o.mold=r.mold||r.Mold||'';
+    if(o.actual===undefined)   o.actual=(r.actual!==undefined?r.actual:(r.Actual!==undefined?r.Actual:0));
+    if(o.goodLH===undefined)   o.goodLH=(r.goodLH!==undefined?r.goodLH:(r['Good LH']!==undefined?r['Good LH']:0));
+    if(o.goodRH===undefined)   o.goodRH=(r.goodRH!==undefined?r.goodRH:(r['Good RH']!==undefined?r['Good RH']:0));
+    if(o.defect===undefined)   o.defect=(r.defect!==undefined?r.defect:(r.Defect!==undefined?r.Defect:0));
+    if(o.oee===undefined||o.oee==='')   o.oee=r.oee||r['Yield %']||r.yield||'—';
+    if(o.rawData===undefined||o.rawData==='')   o.rawData=r.rawData||r['Raw Data']||'';
+    return o;
+  });
+}
+
+function getProductionRecords(){
+  if(rptCloudData.length>0){
+    return rptCloudData.map(function(r){
+      var glh=parseInt(r.goodLH)||0, grh=parseInt(r.goodRH)||0, good=glh+grh;
+      var actual=parseInt(r.actual)||0, defect=parseInt(r.defect)||0;
+      var total=actual>0?actual:(good+defect);
+      return {date:(r.date||''),shift:(r.shift||''),mc:(r.machineID||r.machine||''),model:(r.model||''),mold:(r.mold||''),
+              good:good,defect:defect,total:total,goodLH:glh,goodRH:grh,mp:null,rawData:r.rawData||'',_src:'cloud'};
+    });
+  }
+  return prodRecords.map(function(r){
+    var h=r.h||{},t=r.tot||{};
+    return {date:(h.d||''),shift:(h.sh||''),mc:(h.mc||''),model:(h.mo||''),mold:(h.mold||''),
+            good:(t.good||0),defect:(t.defect||0),total:(t.total||0),goodLH:(t.gl||0),goodRH:(t.gr||0),
+            mp:r.mp||null,rawData:r,_src:'local'};
+  });
+}
+
+function getRecentUnified(days){
+  var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
+  var cutStr=cutoff.toISOString().split('T')[0];
+  return getProductionRecords().filter(function(r){return (r.date||'')>=cutStr;});
+}
+
+function afterCloudData(){
+  generateAlertsFromData(); generateRecommendationsFromData();
+  renderAlerts(); renderRecommendations(); renderDashboard(); initCharts(); renderStepOverview();
+}
+
+// ==================== WIP from Cloud (action=getWIP) ====================
+function autoFetchWIP(){
+  var url=localStorage.getItem('mes_apps_script_url');
+  if(!url) return;
+  cloudGET(url+'?action=getWIP', function(d){
+    var arr=(d&&(d.wip||d.data))||[];
+    if(d&&d.status==='success'&&arr.length>0){
+      var obj={};
+      arr.forEach(function(w){ if(w.part) obj[w.part]={current:Number(w.current)||0,min:Number(w.min)||0,max:Number(w.max)||0,leadTime:Number(w.leadTime)||0,safety:Number(w.safety)||0,lastUpdate:w.lastUpdate||''}; });
+      if(Object.keys(obj).length>0){
+        wipData=obj;
+        generateAlertsFromData(); generateRecommendationsFromData();
+        renderAlerts(); renderRecommendations(); renderDashboard(); initCharts(); renderStepOverview();
+      }
+    }
+  }, function(err){ console.log('WIP cloud fetch failed (using localStorage):',err); });
+}
+
+// ==================== STEP 2/3/6/7 from Cloud (all-step hub) ====================
+var step2RM=[], step2Rcpt=[], step2Iss=[], step3Rdy=[], step6Route=[], step7Plan=[];
+function getStepSheet(name, cb){
+  var url=localStorage.getItem('mes_apps_script_url'); if(!url){ cb([]); return; }
+  cloudGET(url+'?action=getSheet&name='+name, function(d){ cb((d&&(d.rows||d.data))||[]); }, function(){ cb([]); });
+}
+function autoFetchSteps(){
+  var url=localStorage.getItem('mes_apps_script_url'); if(!url) return;
+  getStepSheet('RawMat_Master', function(r){ step2RM=r; renderStepOverview(); });
+  getStepSheet('RawMat_Receipt', function(r){ step2Rcpt=r; renderStepOverview(); });
+  getStepSheet('RawMat_Issue', function(r){ step2Iss=r; renderStepOverview(); });
+  getStepSheet('Readiness_Records', function(r){ step3Rdy=r; renderStepOverview(); });
+  cloudGET(url+'?action=getRoute', function(d){ step6Route=(d&&(d.route||d.data))||[]; renderStepOverview(); }, function(){});
+  cloudGET(url+'?action=getPlan', function(d){ step7Plan=(d&&(d.plan||d.data))||[]; renderStepOverview(); }, function(){});
+}
+
+// ==================== TAB 4: STEP OVERVIEW (real-time) ====================
+function renderStepOverview(){
+  var el=document.getElementById('stepOverviewLive'); if(!el) return;
+  var today=new Date().toISOString().split('T')[0];
+  var all=getProductionRecords();
+  var todayRecs=all.filter(function(r){return r.date===today;});
+  var tToday=0,gToday=0,dToday=0;
+  todayRecs.forEach(function(r){ tToday+=(r.total||0); gToday+=(r.good||0); dToday+=(r.defect||0); });
+  var yToday=tToday>0?(gToday/tToday*100).toFixed(1):'—';
+  var rec7=getRecentUnified(7); var t7=0,g7=0;
+  rec7.forEach(function(r){ t7+=(r.total||0); g7+=(r.good||0); });
+  var y7=t7>0?(g7/t7*100).toFixed(1):'—';
+  var machines={}; rec7.forEach(function(r){ if(r.mc)machines[r.mc]=1; });
+  var wipKeys=Object.keys(wipData);
+  var wipCrit=wipKeys.filter(function(p){return getPartStatus(p).status==='crit';}).length;
+  var wipLow=wipKeys.filter(function(p){return getPartStatus(p).status==='low';}).length;
+  var wipHigh=wipKeys.filter(function(p){return getPartStatus(p).status==='high';}).length;
+  var src=rptCloudData.length>0?'☁️ Cloud':(prodRecords.length>0?'💾 Local':'— ยังไม่มีข้อมูล');
+  function box(col,l,v,s){ return '<div class="kpi-sm" style="border-left:4px solid '+col+'"><div class="l">'+l+'</div><div class="v" style="color:'+col+';font-size:18px">'+v+'</div><div class="l">'+(s||'')+'</div></div>'; }
+  var html='<div style="font-size:11px;color:var(--dim);margin-bottom:6px">แหล่งข้อมูล: <b>'+src+'</b> · อัปเดต '+new Date().toLocaleTimeString('th-TH')+'</div>';
+  html+='<div style="font-weight:700;color:var(--green);margin:6px 0">4️⃣ Production - วันนี้ ('+today+')</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">'+
+    box('#5b9cff','📦 Output',tToday.toLocaleString(),'pcs')+
+    box('#10b981','✅ Good',gToday.toLocaleString(),'pcs')+
+    box('#ef4444','❌ Defect',dToday.toLocaleString(),'pcs')+
+    box('#f59e0b','🎯 Yield',(yToday==='—'?'—':yToday+'%'),todayRecs.length+' rec')+'</div>';
+  html+='<div style="font-weight:700;color:var(--accent2);margin:6px 0">📊 7 วันล่าสุด</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">'+
+    box('#5b9cff','📦 Output 7d',t7.toLocaleString(),'pcs')+
+    box('#f59e0b','🎯 Yield 7d',(y7==='—'?'—':y7+'%'),rec7.length+' rec')+
+    box('#60a5fa','🏭 Machines',Object.keys(machines).length,'active')+'</div>';
+  html+='<div style="font-weight:700;color:var(--green);margin:6px 0">5️⃣ WIP Max-Min</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+
+    box('#60a5fa','📦 Parts',wipKeys.length,'total')+
+    box('#ef4444','🔴 Critical',wipCrit,'parts')+
+    box('#f59e0b','🟡 Low',wipLow,'parts')+
+    box('#3b82f6','🔵 High',wipHigh,'parts')+'</div>';
+  // ===== Step 2/3/6/7 (Cloud all-step hub) =====
+  var rmOpen={},rmMin={};
+  step2RM.forEach(function(r){var id=r['Code'];if(id){rmOpen[id]=Number(r['Opening']||0);rmMin[id]=Number(r['Min']||0);}});
+  var bal={}; Object.keys(rmOpen).forEach(function(id){bal[id]=rmOpen[id];});
+  step2Rcpt.forEach(function(r){var id=r['Item'];if(id){if(!bal.hasOwnProperty(id))bal[id]=0;bal[id]+=Number(r['Qty']||0);}});
+  step2Iss.forEach(function(r){var id=r['Item'];if(id){if(!bal.hasOwnProperty(id))bal[id]=0;bal[id]-=Number(r['Qty']||0);}});
+  var rmItems=Object.keys(bal).length;
+  var rmLow=Object.keys(bal).filter(function(id){return rmMin[id]>0&&bal[id]<rmMin[id];}).length;
+  var rcptToday=step2Rcpt.filter(function(r){return String(r['Date']||'').substring(0,10)===today;}).reduce(function(s,r){return s+Number(r['Qty']||0);},0);
+  html+='<div style="font-weight:700;color:#14b8a6;margin:8px 0 6px">2\uFE0F\u20E3 WIP Raw Material</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">'+
+    box('#14b8a6','\uD83D\uDCE6 รายการ',rmItems,'items')+box('#ef4444','\uD83D\uDD34 ต่ำกว่า Min',rmLow,'items')+box('#10b981','\uD83D\uDCE5 รับวันนี้',rcptToday.toLocaleString(),'')+'</div>';
+  var rdyReady=step3Rdy.filter(function(r){return r['Overall']==='Ready';}).length;
+  var rdyNot=step3Rdy.filter(function(r){return r['Overall']==='Not Ready';}).length;
+  html+='<div style="font-weight:700;color:#8b5cf6;margin:8px 0 6px">3\uFE0F\u20E3 Readiness (4M)</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">'+
+    box('#8b5cf6','\uD83D\uDCCB ฟอร์ม',step3Rdy.length,'total')+box('#10b981','\u2705 Ready',rdyReady,'')+box('#ef4444','\u26D4 Not Ready',rdyNot,'')+'</div>';
+  var whlMap={}; step6Route.forEach(function(r){var p=r['Part'];if(p)whlMap[p]=Number(r['WHLQty']||0);});
+  var whlTotal=Object.keys(whlMap).reduce(function(s,p){return s+whlMap[p];},0);
+  html+='<div style="font-weight:700;color:#a855f7;margin:8px 0 6px">6\uFE0F\u20E3 Route \u2192 WHL</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">'+
+    box('#a855f7','\uD83D\uDCE6 WHL รวม',whlTotal.toLocaleString(),'pcs')+box('#c4b5fd','\uD83D\uDE9A Parts',Object.keys(whlMap).length,'')+'</div>';
+  var maxTs=''; step7Plan.forEach(function(r){var t=String(r['Timestamp']||'');if(t>maxTs)maxTs=t;});
+  var planLatest=step7Plan.filter(function(r){return String(r['Timestamp']||'')===maxTs;});
+  var planTotal=planLatest.reduce(function(s,r){return s+Number(r['NextPlan']||0);},0);
+  var planParts=planLatest.filter(function(r){return Number(r['NextPlan']||0)>0;}).length;
+  html+='<div style="font-weight:700;color:#6366f1;margin:8px 0 6px">7\uFE0F\u20E3 Next Plan</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+
+    box('#6366f1','\uD83D\uDCCA ต้องผลิตรวม',planTotal.toLocaleString(),'pcs')+box('#a5b4fc','\uD83D\uDCCB Parts',planParts,'')+'</div>';
+  el.innerHTML=html;
+}
+
+// ==================== AUTO-REFRESH (Settings) ====================
+var _autoRefreshTimer=null;
+function startAutoRefresh(){
+  if(_autoRefreshTimer){ clearInterval(_autoRefreshTimer); _autoRefreshTimer=null; }
+  var on=localStorage.getItem('mes_auto_refresh')!=='0';
+  var chk=document.getElementById('autoRefreshCheck'); if(chk) chk.checked=on;
+  var mins=parseFloat(localStorage.getItem('mes_auto_refresh_min'))||5;
+  var sel=document.getElementById('autoRefreshInterval'); if(sel) sel.value=String(mins);
+  if(on && localStorage.getItem('mes_apps_script_url')){
+    _autoRefreshTimer=setInterval(function(){ autoFetchCloud(); autoFetchWIP(); autoFetchSteps(); }, mins*60000);
+  }
+}
+function toggleAutoRefresh(){
+  var chk=document.getElementById('autoRefreshCheck');
+  localStorage.setItem('mes_auto_refresh', chk&&chk.checked?'1':'0');
+  startAutoRefresh();
+  toast(chk&&chk.checked?'Auto-refresh ON':'Auto-refresh OFF');
+}
+function changeRefreshInterval(){
+  var sel=document.getElementById('autoRefreshInterval');
+  if(sel) localStorage.setItem('mes_auto_refresh_min',sel.value);
+  startAutoRefresh();
+}
+
+// ==================== STARTUP ====================
 init();
-initCloudDash();
+showTab(1);
 </script>
 </body>
 </html>
